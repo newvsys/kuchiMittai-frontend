@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { API_BASE } from "@/lib/env";
 
 export interface Category {
   id: number;
@@ -30,8 +31,7 @@ export const useCategoryStore = create<CategoryState>()(
 
         set({ loading: true, error: null });
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
-          const res = await fetch(`${baseUrl}/api/products/categories`);
+          const res = await fetch(`${API_BASE}/api/products/categories`);
           if (!res.ok) throw new Error("Failed to fetch categories");
           const data: Category[] = await res.json();
           set({ categories: Array.isArray(data) ? data : [], fetched: true });

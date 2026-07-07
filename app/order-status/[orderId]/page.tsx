@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import apiClient from "@/lib/api";
 import Link from "next/link";
+import { API_BASE } from "@/lib/env";
 
 const showToast = async (msg: string, type: "success" | "error" = "error") => {
   const { default: toast } = await import("react-hot-toast");
@@ -73,7 +74,6 @@ const OrderStatusPage = () => {
           if (awb) {
             setTrackLoading(true);
             try {
-              const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
               const tRes = await fetch(`${API_BASE}/api/shipping/track-shipment/${awb}`, { signal: controller.signal });
               if (!controller.signal.aborted && tRes.ok) {
                 const tData = await tRes.json();

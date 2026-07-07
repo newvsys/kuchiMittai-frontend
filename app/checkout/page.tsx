@@ -476,7 +476,7 @@ const CheckoutPage = () => {
     setAddressPopupErrors({});
 
     try {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/shopping";
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
       const { userId, ...payload } = customer as any;
       const res = await fetch(`${API_BASE_URL}/user/update-customer`, {
         method: "POST",

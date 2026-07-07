@@ -10,6 +10,7 @@ import { FaSquareXTwitter } from "react-icons/fa6";
 import { FaSquarePinterest } from "react-icons/fa6";
 import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 import { sanitize } from "@/lib/sanitize";
+import { API_BASE, API_BASE_PLAIN } from "@/lib/env";
 
 interface ImageItem {
   imageID: string;
@@ -50,8 +51,8 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
   // Per-variant caches: prevent re-fetching images/inventory when switching back to a visited variant
   const imagesCacheRef = useRef<Map<number, ImageItem[]>>(new Map());
   const inventoryCacheRef = useRef<Map<number, number | null>>(new Map());
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://app:8080/shopping";
-  const REVIEW_API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/shopping").replace(/\/shopping$/, "");
+  const API_BASE_URL = API_BASE;
+  const REVIEW_API_BASE = API_BASE_PLAIN;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -130,7 +131,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
       return;
     }
     const controller = new AbortController();
-    const invBase = (process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080").replace(/\/shopping$/, "");
+    const invBase = API_BASE_PLAIN;
     const invTimer = setTimeout(() => {
       fetch(`${invBase}/api/inventory/variant/${product.id}`, { signal: controller.signal })
         .then(r => r.ok ? r.json() : null)
@@ -423,7 +424,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
                           }
                           // Fetch images for the selected variant
                           try {
-                            const imagesRes = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080"}/api/products/productImage/${variant.id}`);
+                            const imagesRes = await fetch(`${API_BASE}/api/products/productImage/${variant.id}`);
                             let imagesData = await imagesRes.json();
                             if (!Array.isArray(imagesData)) imagesData = [];
                             // Sort so main image (isMainImage === "Y") comes first

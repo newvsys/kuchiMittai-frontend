@@ -5,6 +5,7 @@ import SearchMaxPriceInitializer from "@/components/SearchMaxPriceInitializer";
 import SearchPagination from "@/components/SearchPagination";
 import React from "react";
 import { sanitize } from "@/lib/sanitize";
+import { API_BASE } from "@/lib/env";
 
 interface Props {
   searchParams: { [key: string]: string | string[] | undefined };
@@ -47,8 +48,7 @@ const SearchPage = async ({ searchParams }: Props) => {
       `&limit=${encodeURIComponent("12")}` +
       categoryIds.map((id) => `&categoryId=${encodeURIComponent(id)}`).join("");
 
-    const API_BASE_URL =
-      process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+    const API_BASE_URL = API_BASE;
     const url = `${API_BASE_URL}/api/products/search?${queryString}`;
     const res = await fetch(url, { next: { revalidate: 60 } });
    
@@ -92,7 +92,7 @@ const SearchPage = async ({ searchParams }: Props) => {
   // Fetch rating summaries for all products in parallel
   // Use same server-side API_BASE_URL (Docker-internal) as the products fetch
   if (products.length > 0) {
-    const REVIEW_API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+    const REVIEW_API_BASE = API_BASE;
 
     // Deduplicate by reviewId — variants of the same product share the same base review
     const productsWithId = products.filter((p: any) => p?.id != null);

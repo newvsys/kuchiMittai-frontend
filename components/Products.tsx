@@ -17,6 +17,7 @@ import ProductItem from "./ProductItem";
 import SearchPagination from "./SearchPagination";
 import apiClient from "@/lib/api";
 import { useShopMetaStore } from "@/app/_zustand/shopMetaStore";
+import { API_BASE } from "@/lib/env";
 
 const Products = ({ params, searchParams }: { params: { slug?: string[] }, searchParams: { [key: string]: string | string[] | undefined } }) => {
   const [products, setProducts] = useState<any[]>([]);
@@ -30,7 +31,7 @@ const Products = ({ params, searchParams }: { params: { slug?: string[] }, searc
       setLoading(true);
       setError(null);
       try {
-        const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+        const API_BASE_URL = API_BASE;
         const category = params?.slug?.[0] || "all";
         const query = `outOfStock=${searchParams?.outOfStock || false}` +
           `&inStock=${searchParams?.inStock || false}` +
