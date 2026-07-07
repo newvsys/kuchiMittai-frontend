@@ -1,0 +1,77 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  font-size: 16px;
+}
+
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+
+.range{
+    --range-shdw: #3B82F6;
+}
+
+/* Dual range slider thumbs */
+.dual-range {
+  -webkit-appearance: none;
+  appearance: none;
+}
+.dual-range::-webkit-slider-thumb {
+  pointer-events: all;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #3B82F6;
+  cursor: grab;
+  -webkit-appearance: none;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  position: relative;
+}
+.dual-range::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  background: #1d4ed8;
+}
+.dual-range::-moz-range-thumb {
+  pointer-events: all;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #3B82F6;
+  cursor: grab;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.dual-range::-moz-range-thumb:active {
+  cursor: grabbing;
+  background: #1d4ed8;
+}
+.dual-range::-webkit-slider-runnable-track {
+  background: transparent;
+}
+.dual-range::-moz-range-track {
+  background: transparent;
+}
+
+.checkbox:checked, .checkbox[checked="true"], .checkbox[aria-checked="true"] {
+    background-repeat: no-repeat;
+    animation: checkmark var(--animation-input, 0.2s) ease-out;
+    background-color: #3B82F6;
+    background-image: linear-gradient(-45deg, transparent 65%, #3B82F6 65.99%),
+      linear-gradient(45deg, transparent 75%, #3B82F6 75.99%),
+      linear-gradient(-45deg, #3B82F6 40%, transparent 40.99%),
+      linear-gradient(
+        45deg,
+        #3B82F6 30%,
+        white 30.99%,
+        white 40%,
+        transparent 40.99%
+      ),
+      linear-gradient(-45deg, white 50%, #3B82F6 50.99%);
+}
