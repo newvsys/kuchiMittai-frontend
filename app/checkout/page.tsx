@@ -314,6 +314,7 @@ const CheckoutPage = () => {
       try {
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
         const res = await fetch(`${API_BASE_URL}/user/get-customer-details?userId=${userId}`);
+        if (!res.ok) {
           console.error("Failed to fetch customer details");
           return;
         }
