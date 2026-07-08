@@ -1,3 +1,20 @@
+declare namespace React {
+  namespace JSX {
+    interface IntrinsicElements {
+      marquee: React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & {
+          scrollamount?: number | string;
+          direction?: string;
+          behavior?: string;
+          scrolldelay?: number | string;
+          loop?: number | string;
+        },
+        HTMLElement
+      >;
+    }
+  }
+}
+
 interface Product {
   id: string;
   slug: string;
