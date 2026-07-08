@@ -223,7 +223,7 @@ const InventoryPage = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.responseMessage || "Failed to fetch inventory");
       setRecords(data.inventories || []);
-      if ((data.inventories || []).length === 0) toast("No inventory records found.");
+      if ((data.inventories || []).length === 0) showToast("No inventory records found.");
     } catch (err: any) {
       showError(err.message || "Error fetching inventory");
     } finally {
