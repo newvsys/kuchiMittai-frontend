@@ -32,12 +32,14 @@ const CategoryMenu = ({ initialCategories = [] }: { initialCategories?: Category
       <Heading title="Featured Categories" />
       {isLoading ? (
         <div>Loading...</div>
-      ) : error && categoryMenuList.length === 0 ? (
-        <div className="text-red-500">{error}</div>
       ) : (
         <>
           <div className="max-w-screen-2xl mx-auto py-10 gap-x-5 px-16 max-md:px-10 gap-y-5 grid grid-cols-5 max-lg:grid-cols-3 max-md:grid-cols-2 max-[450px]:grid-cols-1 justify-items-center">
-            {paged.map((item, idx) => (
+            {paged.length === 0 ? (
+              <div className="col-span-5 flex flex-col items-center justify-center py-16 text-center">
+                <p className="text-gray-500 text-lg">New products will be available shortly.</p>
+              </div>
+            ) : paged.map((item, idx) => (
               <CategoryItem
                 title={item.title.replace(/%20/g, ' ')}
                 key={item.id}
