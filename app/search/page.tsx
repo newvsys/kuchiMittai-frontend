@@ -8,7 +8,7 @@ import { sanitize } from "@/lib/sanitize";
 import { API_BASE } from "@/lib/env";
 
 interface Props {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 interface RatingSummary {
