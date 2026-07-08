@@ -20,7 +20,7 @@ const NotificationsPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   // Notification feature removed
-  const notifications = [];
+  const notifications: any[] = [];
   const total = 0;
   const page = 1;
   const totalPages = 1;
