@@ -83,7 +83,7 @@ export const authOptions = {
     error: '/login', // Redirect to login page on auth errors
   },
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as const,
     maxAge: 15 * 60, // 15 minutes in seconds
     updateAge: 5 * 60, // Update session every 5 minutes
   },
