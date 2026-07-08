@@ -21,11 +21,11 @@ const NotificationsPage = () => {
   const router = useRouter();
   // Notification feature removed
   const notifications: any[] = [];
-  const total = 0;
-  const page = 1;
-  const totalPages = 1;
-  const loading = false;
-  const error = '';
+  const total: number = 0;
+  const page: number = 1;
+  const totalPages: number = 1;
+  const loading: boolean = false;
+  const error: string = '';
   const selectedIds: string[] = [];
   const filters: { search?: string; type?: string; isRead?: boolean } = {};
   const fetchNotifications = (..._args: any[]) => {};
