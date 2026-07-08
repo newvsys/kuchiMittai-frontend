@@ -118,10 +118,10 @@ const ProfilePage = () => {
       if (!next[idx]) return prev;
 
       const entry = { ...next[idx] };
-      if (field === "recipientName") entry.recipientName = false;
-      if (field === "addressLine1") entry.addressLine1 = false;
-      if (field === "contactNumber") entry.contactNumber = false;
-      if (field === "postalCode") entry.postalCode = false;
+      if (field === "recipientName") entry.recipientName = '';
+      if (field === "addressLine1") entry.addressLine1 = '';
+      if (field === "contactNumber") entry.contactNumber = '';
+      if (field === "postalCode") entry.postalCode = '';
 
       next[idx] = entry;
       return next;
