@@ -20,14 +20,12 @@ interface ImageItem {
 }
 
 interface SingleProductPageProps {
-  params: { productSlug: string };
+  params: Promise<{ productSlug: string }>;
 }
 
 
 const SingleProductPage = ({ params }: SingleProductPageProps) => {
-  // Unwrap params if it's a Promise (Next.js 14+ migration)
-  // @ts-ignore
-  const unwrappedParams = typeof params?.then === 'function' ? React.use(params) : params;
+  const unwrappedParams = React.use(params);
   const [baseProduct, setBaseProduct] = useState<any>(null); // always the original product
   const [product, setProduct] = useState<any>(null); // currently selected product/variant
   const [images, setImages] = useState<ImageItem[]>([]);

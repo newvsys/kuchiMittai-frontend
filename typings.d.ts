@@ -25,10 +25,10 @@ interface Merchant {
 }
 
 interface SingleProductPageProps {
-  params: {
+  params: Promise<{
     id: string;
     productSlug: string;
-  };
+  }>;
 }
 
 type ProductInWishlist = {
