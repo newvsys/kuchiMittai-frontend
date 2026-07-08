@@ -1,4 +1,3 @@
-import { NextAuthOptions } from "next-auth";
 import { Account, User as AuthUser } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -7,7 +6,7 @@ import bcrypt from "bcryptjs";
 // import prisma from "@/utils/db";
 import { nanoid } from "nanoid";
 
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   // Configure one or more authentication providers
   
   providers: [
