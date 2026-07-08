@@ -26,8 +26,8 @@ const NotificationsPage = () => {
   const totalPages = 1;
   const loading = false;
   const error = '';
-  const selectedIds = [];
-  const filters = {};
+  const selectedIds: string[] = [];
+  const filters: { search?: string; type?: string; isRead?: boolean } = {};
   const fetchNotifications = () => {};
   const markSelectedAsRead = () => {};
   const deleteSelectedNotifications = () => {};
