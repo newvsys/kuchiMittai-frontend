@@ -23,6 +23,7 @@ interface Product {
   slug: string;
   title: string;
   price: number;
+  mrp?: number;
   rating: number;
   description: string;
   mainImage: string;
