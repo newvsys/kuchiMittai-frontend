@@ -437,7 +437,7 @@ const AdminShippingManagementPage = () => {
         setOrderNumber(on.trim());
         setForm({ ...emptyForm });
         setMode("create");
-        toast("No shipping record found. Fill in the form to create one.", { icon: "â„¹ï¸" });
+        showToast("No shipping record found. Fill in the form to create one.");
       } else if (!res.ok) {
         throw new Error(data.responseMessage || `Request failed (${res.status})`);
       } else {
