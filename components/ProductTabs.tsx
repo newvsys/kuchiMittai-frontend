@@ -78,11 +78,11 @@ const ProductTabs = ({ product, baseProduct }: { product: Product; baseProduct?:
         )}
 
         {currentProductTab === 2 && (baseProduct?.productId ?? baseProduct?.id ?? product?.productId ?? product?.id) && (
-          <ProductReviews productId={(baseProduct?.productId ?? baseProduct?.id ?? product?.productId ?? product?.id) as number} />
+          <ProductReviews productId={Number(baseProduct?.productId ?? baseProduct?.id ?? product?.productId ?? product?.id)} />
         )}
 
         {currentProductTab === 3 && (baseProduct?.id ?? product?.id) && (
-          <ProductQnA productId={(baseProduct?.productId ?? baseProduct?.id ?? product?.productId ?? product?.id) as number} />
+          <ProductQnA productId={Number(baseProduct?.productId ?? baseProduct?.id ?? product?.productId ?? product?.id)} />
         )}
       </div>
     </div>
