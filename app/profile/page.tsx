@@ -297,8 +297,8 @@ const ProfilePage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customer) return;
-    // Remove userId from payload
-    const { userId, ...rest } = customer;
+    // Remove customerId from payload
+    const { customerId, ...rest } = customer;
     let updatedCustomer = { ...rest };
     // If addresses is empty but the user has filled the first address fields, add it
     if (!updatedCustomer.addresses || updatedCustomer.addresses.length === 0) {
