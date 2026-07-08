@@ -20,6 +20,7 @@ declare namespace React {
 
 interface Product {
   id: string;
+  productId?: string;
   slug: string;
   title: string;
   price: number;
@@ -31,6 +32,7 @@ interface Product {
   categoryId: string;
   category: {name: string}?;
   inStock: number;
+  attributes?: { id?: string; attributeName: string; attributeValue?: string; [key: string]: any }[];
 }
 
 interface Merchant {
