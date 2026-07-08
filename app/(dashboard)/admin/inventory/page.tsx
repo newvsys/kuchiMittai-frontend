@@ -106,7 +106,7 @@ const InventoryPage = () => {
       return;
     }
     try {
-      const res = await fetch(`${BASE_URL}/products/productsVariant/${productId}`);
+      const res = await fetch(`${API_BASE}/products/productsVariant/${productId}`);
       const data = await res.json();
       const list: ProductVariant[] = Array.isArray(data) ? data : [];
       target === "filter" ? setFilterVariants(list) : setLoadVariants(list);
@@ -151,7 +151,7 @@ const InventoryPage = () => {
   // â”€â”€ fetch label configs when labels tab opens
   useEffect(() => {
     if (tab !== "labels") return;
-    fetch(`${BASE_URL}/products/labels/config`)
+    fetch(`${API_BASE}/products/labels/config`)
       .then(r => r.json())
       .then(data => {
         const active = (Array.isArray(data) ? data : []).filter((c: any) => c.status === "ACTIVE");
@@ -180,7 +180,7 @@ const InventoryPage = () => {
       const params = new URLSearchParams({ page: String(page), limit: "20" });
       if (filter.batchNo.trim()) params.set("batchNo", filter.batchNo.trim());
       else if (filter.barcode.trim()) params.set("barcode", filter.barcode.trim());
-      const res = await fetch(`${BASE_URL}/products/labels/jobs?${params}`);
+      const res = await fetch(`${API_BASE}/products/labels/jobs?${params}`);
       const data = await res.json();
       const jobs = Array.isArray(data) ? data : [];
       setLabelJobs(jobs);
@@ -856,7 +856,7 @@ const InventoryPage = () => {
                   if (labelMode === "batch") body.batchNo = labelBatchNo.trim();
                   else body.barcodes = labelBarcodes.trim();
                   if (labelConfigId) body.labelConfigId = Number(labelConfigId);
-                  const res = await fetch(`${BASE_URL}/products/labels/print`, {
+                  const res = await fetch(`${API_BASE}/products/labels/print`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(body),
@@ -882,7 +882,7 @@ const InventoryPage = () => {
                     className="text-xs text-blue-500 hover:underline"
                     onClick={async () => {
                       try {
-                        const r = await fetch(`${BASE_URL}/products/labels/config`);
+                        const r = await fetch(`${API_BASE}/products/labels/config`);
                         const d = await r.json();
                         const active = (Array.isArray(d) ? d : []).filter((c: any) => c.status === "ACTIVE");
                         setLabelConfigs(active);
@@ -998,7 +998,7 @@ const InventoryPage = () => {
                     <p className="text-xs text-gray-600"><span className="font-semibold">{labelResult.labelCount}</span> label{labelResult.labelCount !== 1 ? "s" : ""} generated</p>
                     <div className="flex gap-2 flex-wrap">
                       <a
-                        href={labelResult.pdfUrl?.startsWith('/') ? `${BASE_URL}${labelResult.pdfUrl}` : labelResult.pdfUrl!}
+                        href={labelResult.pdfUrl?.startsWith('/') ? `${API_BASE}${labelResult.pdfUrl}` : labelResult.pdfUrl!}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 px-4 py-2 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-700 font-medium"
@@ -1006,7 +1006,7 @@ const InventoryPage = () => {
                         ðŸ“„ Open PDF
                       </a>
                       <a
-                        href={labelResult.pdfUrl?.startsWith('/') ? `${BASE_URL}${labelResult.pdfUrl}` : labelResult.pdfUrl!}
+                        href={labelResult.pdfUrl?.startsWith('/') ? `${API_BASE}${labelResult.pdfUrl}` : labelResult.pdfUrl!}
                         download
                         className="inline-flex items-center gap-1 px-4 py-2 bg-gray-100 border border-gray-300 text-gray-700 text-xs rounded-lg hover:bg-gray-200 font-medium"
                       >
@@ -1123,7 +1123,7 @@ const InventoryPage = () => {
                               {/* Download â€” only if PDF still exists */}
                               {job.pdfFileExists && job.pdfUrl && (
                                 <a
-                                  href={job.pdfUrl?.startsWith('/') ? `${BASE_URL}${job.pdfUrl}` : job.pdfUrl}
+                                  href={job.pdfUrl?.startsWith('/') ? `${API_BASE}${job.pdfUrl}` : job.pdfUrl}
                                   download
                                   className="px-2 py-1 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded text-xs font-medium hover:bg-indigo-100"
                                 >
@@ -1133,7 +1133,7 @@ const InventoryPage = () => {
                               {/* Open PDF in new tab */}
                               {job.pdfFileExists && job.pdfUrl && (
                                 <a
-                                  href={job.pdfUrl?.startsWith('/') ? `${BASE_URL}${job.pdfUrl}` : job.pdfUrl}
+                                  href={job.pdfUrl?.startsWith('/') ? `${API_BASE}${job.pdfUrl}` : job.pdfUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="px-2 py-1 bg-gray-50 border border-gray-200 text-gray-700 rounded text-xs font-medium hover:bg-gray-100"
@@ -1150,7 +1150,7 @@ const InventoryPage = () => {
                                   setReprinting(job.jobId);
                                   try {
                                     const r = await fetch(
-                                      `${BASE_URL}/products/labels/jobs/${job.jobId}/reprint`,
+                                      `${API_BASE}/products/labels/jobs/${job.jobId}/reprint`,
                                       { method: "POST" },
                                     );
                                     const d = await r.json();
