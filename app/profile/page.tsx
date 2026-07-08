@@ -9,7 +9,7 @@ const showToast = async (msg: string, type: "success" | "error" = "success") => 
 };
 
 interface CustomerAddress {
-  addressId: number;
+  addressId: number | null;
   addressType: string;
   recipientName: string;
   addressLine1: string;
@@ -137,7 +137,7 @@ const ProfilePage = () => {
     // Clear previous validation highlights when starting to add a new address
     setAddressErrors([]);
     const emptyAddress: CustomerAddress = {
-      addressId: 0 as any,
+      addressId: null,
       addressType: "Shipping",
       recipientName: "",
       addressLine1: "",
