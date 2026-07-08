@@ -37,6 +37,7 @@
     "crypto-js": "^4.2.0"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@types/dompurify": "^3.0.5",
     "@types/node": "^24.3.3",
     "@types/react": "^18.3.24",

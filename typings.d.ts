@@ -1,3 +1,6 @@
+declare module 'crypto-js/sha256';
+declare module 'crypto-js/enc-hex';
+
 declare namespace React {
   namespace JSX {
     interface IntrinsicElements {
