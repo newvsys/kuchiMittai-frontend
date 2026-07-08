@@ -304,15 +304,15 @@ const ProfilePage = () => {
     if (!updatedCustomer.addresses || updatedCustomer.addresses.length === 0) {
       // Try to get values from the first address form fields (if present in DOM)
       const form = e.target as HTMLFormElement;
-      const recipientName = form.querySelector('input[placeholder="Recipient Name"]')?.value || "";
-      const addressLine1 = form.querySelector('input[placeholder="Address Line 1"]')?.value || "";
-      const addressLine2 = form.querySelector('input[placeholder="Address Line 2"]')?.value || "";
-      const landMark = form.querySelector('input[placeholder="Landmark"]')?.value || "";
-      const city = form.querySelector('input[placeholder="City"]')?.value || "";
-      const state = form.querySelector('input[placeholder="State"]')?.value || "";
+      const recipientName = form.querySelector<HTMLInputElement>('input[placeholder="Recipient Name"]')?.value || "";
+      const addressLine1 = form.querySelector<HTMLInputElement>('input[placeholder="Address Line 1"]')?.value || "";
+      const addressLine2 = form.querySelector<HTMLInputElement>('input[placeholder="Address Line 2"]')?.value || "";
+      const landMark = form.querySelector<HTMLInputElement>('input[placeholder="Landmark"]')?.value || "";
+      const city = form.querySelector<HTMLInputElement>('input[placeholder="City"]')?.value || "";
+      const state = form.querySelector<HTMLInputElement>('input[placeholder="State"]')?.value || "";
       const country = "India";
-      const postalCode = form.querySelector('input[placeholder="Postal Code"]')?.value || "";
-      const contactNumber = form.querySelector('input[placeholder="Contact Number"]')?.value || "";
+      const postalCode = form.querySelector<HTMLInputElement>('input[placeholder="Postal Code"]')?.value || "";
+      const contactNumber = form.querySelector<HTMLInputElement>('input[placeholder="Contact Number"]')?.value || "";
       if (
         recipientName || addressLine1 || addressLine2 || landMark || city || state || country || postalCode || contactNumber
       ) {
