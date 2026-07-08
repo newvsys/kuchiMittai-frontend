@@ -28,13 +28,13 @@ const NotificationsPage = () => {
   const error = '';
   const selectedIds: string[] = [];
   const filters: { search?: string; type?: string; isRead?: boolean } = {};
-  const fetchNotifications = () => {};
-  const markSelectedAsRead = () => {};
-  const deleteSelectedNotifications = () => {};
-  const updateFilters = () => {};
-  const loadMore = () => {};
-  const markNotificationAsRead = () => {};
-  const deleteNotificationById = () => {};
+  const fetchNotifications = (..._args: any[]) => {};
+  const markSelectedAsRead = (..._args: any[]) => {};
+  const deleteSelectedNotifications = (..._args: any[]) => {};
+  const updateFilters = (..._args: any[]) => {};
+  const loadMore = (..._args: any[]) => {};
+  const markNotificationAsRead = (..._args: any[]) => {};
+  const deleteNotificationById = (..._args: any[]) => {};
 
   const { toggleSelection, selectAll, clearSelection } = useNotificationStore();
 
