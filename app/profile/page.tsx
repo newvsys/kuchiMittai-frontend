@@ -159,8 +159,8 @@ const ProfilePage = () => {
     setEditingAddressIndex(0);
   };
 
-  const removeAddress = async (addressId: number) => {
-    if (!customer || isSaving) return;
+  const removeAddress = async (addressId: number | null) => {
+    if (!customer || isSaving || addressId === null) return;
 
     const filteredAddresses = customer.addresses.filter(addr => addr.addressId !== addressId);
     if (filteredAddresses.length === customer.addresses.length) {
@@ -821,7 +821,7 @@ const ProfilePage = () => {
                               onClick={() => {
                                 if (!customer) return;
                                 const current = customer.addresses[idx];
-                                if (current && current.addressId === 0) {
+                                if (current && current.addressId === null) {
                                   const updatedAddresses = customer.addresses.filter((_, i) => i !== idx);
                                   setCustomer({ ...customer, addresses: updatedAddresses });
                                   setOriginalAddresses(prev => prev.filter((_, i) => i !== idx));
