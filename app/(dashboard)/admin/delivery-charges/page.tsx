@@ -273,7 +273,7 @@ export default function DeliveryChargesPage() {
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full">
             <h3 className="text-base font-semibold mb-2">Deactivate Rule</h3>
-            <p className="text-sm text-gray-600 mb-5">Are you sure you want to deactivate <span className="font-semibold">"{deleteConfirm.name}"</span>? It will no longer apply at checkout.</p>
+            <p className="text-sm text-gray-600 mb-5">Are you sure you want to deactivate <span className="font-semibold">&quot;{deleteConfirm.name}&quot;</span>? It will no longer apply at checkout.</p>
             <div className="flex justify-end gap-3">
               <button onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm border rounded text-gray-600 hover:bg-gray-50">Cancel</button>
               <button onClick={handleDelete} className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700">Deactivate</button>

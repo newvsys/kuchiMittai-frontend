@@ -382,7 +382,7 @@ const LoginPage = () => {
                     </button>
 
                     <p className="text-sm text-center text-gray-500 pt-1">
-                      Don't have an account?{" "}
+                      Don&apos;t have an account?{" "}
                       <Link href={`/register${callbackUrl !== "/" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`} className="font-semibold text-blue-600 hover:underline">
                         Create account
                       </Link>
@@ -488,7 +488,7 @@ const LoginPage = () => {
                 )}
 
                 <p className="text-sm text-center text-gray-500 pt-1">
-                  Don't have an account?{" "}
+                  Don&apos;t have an account?{" "}
                   <Link href={`/register${callbackUrl !== "/" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`} className="font-semibold text-blue-600 hover:underline">
                     Create account
                   </Link>

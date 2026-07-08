@@ -254,7 +254,7 @@ const LabelConfigPage = () => {
                           {c.description && <p className="text-xs text-gray-400 mt-0.5">{c.description}</p>}
                         </td>
                         <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                          {c.labelWidthInches}" Ã— {c.labelHeightInches}"
+                          {c.labelWidthInches}&quot; × {c.labelHeightInches}&quot;
                         </td>
                         <td className="px-4 py-3 text-center text-gray-700 text-sm font-medium">
                           {c.columnsPerRow ?? 1}
@@ -477,7 +477,7 @@ const LabelConfigPage = () => {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
             <h3 className="text-base font-semibold text-gray-800 mb-2">Delete Configuration</h3>
             <p className="text-sm text-gray-600 mb-5">
-              Delete <span className="font-semibold">"{deleteConfirm.name}"</span>? This marks it as INACTIVE and it cannot be used for new print jobs.
+              Delete <span className="font-semibold">&quot;{deleteConfirm.name}&quot;</span>? This marks it as INACTIVE and it cannot be used for new print jobs.
             </p>
             <div className="flex justify-end gap-3">
               <button type="button" onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm border rounded-lg text-gray-600 hover:bg-gray-50">Cancel</button>
