@@ -12,7 +12,6 @@
 
 import React, { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import SingleReview from "./SingleReview";
 import { formatCategoryName } from "@/utils/categoryFormating";
 import { sanitize, sanitizeHtml } from "@/lib/sanitize";
 import ProductReviews from "./ProductReviews";
