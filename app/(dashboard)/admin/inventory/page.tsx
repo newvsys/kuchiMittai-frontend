@@ -84,11 +84,11 @@ const InventoryPage = () => {
   // â”€â”€ fetch master data on mount
   useEffect(() => {
     const t = setTimeout(() => {
-      fetch(`${BASE_URL}/api/Get-All-Warehouses`)
+      fetch(`${API_BASE}/api/Get-All-Warehouses`)
         .then(r => r.json())
         .then(data => setWarehouses(Array.isArray(data) ? data : []))
         .catch(() => {});
-      fetch(`${BASE_URL}/products/product`)
+      fetch(`${API_BASE}/products/product`)
         .then(r => r.json())
         .then(data => setProducts(Array.isArray(data) ? data : []))
         .catch(() => {});
