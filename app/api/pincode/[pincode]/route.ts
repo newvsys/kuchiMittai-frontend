@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { pincode: string } }
+  { params }: { params: Promise<{ pincode: string }> }
 ) {
-  const { pincode } = params;
+  const { pincode } = await params;
   if (!/^\d{6}$/.test(pincode)) {
     return NextResponse.json({ error: "Invalid pincode" }, { status: 400 });
   }
