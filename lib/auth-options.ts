@@ -36,7 +36,7 @@ export const authOptions = {
           return {
             id: credentials.id,
             email: credentials.email,
-            role: credentials.role,
+            role: (credentials.role || "user").toLowerCase(),
           };
         }
 
@@ -60,8 +60,8 @@ export const authOptions = {
       const maxAge = 15 * 60; // 15 minutes
       
       if (tokenAge > maxAge) {
-        // Token expired, return empty object to force re-authentication
-        return {};
+        // Token expired — return null to clear the session and force re-auth
+        return null as any;
       }
       
       return token;

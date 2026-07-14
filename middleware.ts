@@ -6,19 +6,17 @@ export default withAuth(
     // Check for admin routes
     if (req.nextUrl.pathname.startsWith("/admin")) {
       if (req.nextauth.token?.role !== "admin") {
+        // Redirect to home (not login) to avoid redirect loops
         return NextResponse.redirect(new URL("/", req.url));
       }
     }
   },
   {
     callbacks: {
-      authorized: ({ token, req }) => {
-        // Admin routes require admin token
-        if (req.nextUrl.pathname.startsWith("/admin")) {
-          return !!token && token.role === "admin";
-        }
-        return true;
-      },
+      // Only check that the user is authenticated here.
+      // Role-based access is enforced above in the middleware function
+      // (redirects to / instead of /login, breaking any redirect loop).
+      authorized: ({ token }) => !!token,
     },
   }
 );

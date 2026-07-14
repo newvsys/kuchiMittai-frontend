@@ -97,7 +97,7 @@ const LoginPage = () => {
       if (res.ok) {
         loginstatus = "success";
         id = data.id;
-        role = data.role || data?.user?.role || data?.data?.role || "user";
+        role = (data.role || data?.user?.role || data?.data?.role || "user").toLowerCase();
       } else {
         loginstatus = "failed";
       }
