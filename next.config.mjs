@@ -1,5 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    async rewrites() {
+      // Proxy all /api/* requests that don't match a Next.js API route to the
+      // Spring Boot backend. Uses the server-side API_BASE_URL so the browser
+      // never needs to know the backend address → eliminates CORS entirely.
+      const apiBase = (process.env.API_BASE_URL ?? 'http://localhost:8080/api').replace(/\/$/, '');
+      return {
+        // "fallback" rewrites run only when no page/API route matched first,
+        // so /api/auth/[...nextauth] and /api/pincode still go to Next.js.
+        fallback: [
+          {
+            source: '/api/:path*',
+            destination: `${apiBase}/:path*`,
+          },
+        ],
+      };
+    },
     images: {
         remotePatterns: [
           {
