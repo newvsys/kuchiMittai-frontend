@@ -10,8 +10,6 @@ const CategoryNavBar = () => {
     fetchCategories();
   }, [fetchCategories]);
 
-  if (categories.length === 0) return null;
-
   return (
     <nav className="bg-blue-500 w-full shadow-md">
       <div className="max-w-screen-2xl mx-auto px-16 max-md:px-6 flex items-center gap-x-1 overflow-x-auto scrollbar-hide py-1.5">

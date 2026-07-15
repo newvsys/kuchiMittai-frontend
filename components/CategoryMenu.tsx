@@ -28,15 +28,15 @@ const CategoryMenu = ({ initialCategories = [] }: { initialCategories?: Category
   const paged = categoryMenuList.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
-    <div className="min-h-screen">
-      <Heading title="Featured Categories" />
+    <div>
+      {categoryMenuList.length > 0 && <Heading title="Featured Categories" />}
       {isLoading ? (
         <div>Loading...</div>
       ) : (
         <>
-          <div className="max-w-screen-2xl mx-auto py-10 gap-x-5 px-16 max-md:px-10 gap-y-5 grid grid-cols-5 max-lg:grid-cols-3 max-md:grid-cols-2 max-[450px]:grid-cols-1 justify-items-center">
+          <div className="max-w-screen-2xl mx-auto py-6 px-4 sm:px-6 lg:px-10 gap-x-4 gap-y-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 justify-items-center">
             {paged.length === 0 ? (
-              <div className="col-span-5 flex flex-col items-center justify-center py-16 text-center">
+              <div className="col-span-2 sm:col-span-3 md:col-span-4 lg:col-span-5 flex flex-col items-center justify-center py-12 text-center">
                 <p className="text-gray-500 text-lg">New products will be available shortly.</p>
               </div>
             ) : paged.map((item, idx) => (
@@ -45,11 +45,11 @@ const CategoryMenu = ({ initialCategories = [] }: { initialCategories?: Category
                 key={item.id}
                 href={`/search?categoryId=${item.id}&price=10000&minPrice=0`}
               >
-                <div className="w-24 h-24 relative overflow-hidden rounded-lg">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 relative overflow-hidden rounded-lg">
                   <Image
                     src={item.src.startsWith('/') ? item.src : `/${item.src}`}
                     fill
-                    sizes="96px"
+                    sizes="(max-width: 640px) 64px, (max-width: 768px) 80px, 96px"
                     className="object-cover"
                     alt={item.title.replace(/%20/g, ' ')}
                     priority={idx < 5}

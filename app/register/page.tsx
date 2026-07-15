@@ -236,14 +236,14 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-start justify-center pt-10 pb-10 px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-start justify-center pt-6 pb-6 px-4 overflow-y-auto">
+      <div className="w-full max-w-sm">
 
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-200 overflow-hidden">
 
           {/* Card Header */}
-          <div className="bg-blue-500 px-6 py-3 flex items-center justify-center gap-2">
+          <div className="bg-blue-500 px-6 py-2.5 flex items-center justify-center gap-2">
             <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/20 flex-shrink-0">
               <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -252,7 +252,7 @@ const RegisterPage = () => {
             <h1 className="text-base font-bold text-white">Create Account</h1>
           </div>
 
-          <div className="px-8 py-7">
+          <div className="px-6 py-5">
 
             {/* Inline error */}
             {error && (

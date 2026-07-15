@@ -146,12 +146,12 @@ const Filters = () => {
 
   return (
     <div className="rounded-2xl border border-gray-200 overflow-hidden">
-      <div className="bg-blue-500 border-b border-blue-600 px-5 py-3">
-        <h3 className="text-lg font-bold text-white uppercase tracking-wide">Filters</h3>
+      <div className="bg-blue-500 border-b border-blue-600 px-4 py-2.5">
+        <h3 className="text-sm font-bold text-white uppercase tracking-wide">Filters</h3>
       </div>
       <div className="p-4 bg-white">
       <div className="border-t border-gray-100 pt-3 border-t-0 pt-0">
-        <h4 className="text-lg font-semibold text-gray-500 uppercase tracking-wider mb-2">Availability</h4>
+        <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Availability</h4>
         <div className="form-control">
           <label className="cursor-pointer flex items-center gap-2">
             <input
@@ -168,7 +168,7 @@ const Filters = () => {
               }
               className="w-5 h-5 rounded border-gray-300 text-blue-600 cursor-pointer"
             />
-            <span className="text-xl text-gray-700">In stock</span>
+            <span className="text-sm text-gray-700">In stock</span>
           </label>
         </div>
       </div>
@@ -176,7 +176,7 @@ const Filters = () => {
       {categories.length > 0 && (
         <>
           <div className="border-t border-gray-100 mt-3 pt-3">
-            <h4 className="text-lg font-semibold text-gray-500 uppercase tracking-wider mb-2">Categories</h4>
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Categories</h4>
             <div className="flex flex-col gap-1">
             {(showAllCategories ? categories : categories.slice(0, 5)).map((cat) => {
               const label = cat.title.replace(/%20/g, " ");
@@ -197,7 +197,7 @@ const Filters = () => {
                       }}
                       className="w-5 h-5 rounded border-gray-300 text-blue-600 cursor-pointer"
                     />
-                    <span className="text-xl text-gray-700 truncate">{label}</span>
+                    <span className="text-sm text-gray-700 truncate">{label}</span>
                   </label>
                 </div>
               );
@@ -224,7 +224,7 @@ const Filters = () => {
       )}
 
       <div className="border-t border-gray-100 mt-3 pt-3">
-        <h4 className="text-lg font-semibold text-gray-500 uppercase tracking-wider mb-3">Price Range</h4>
+        <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Price Range</h4>
         <div className="pt-2 relative">
           {/* Dual range slider track */}
           <div className="relative w-full h-2 mb-1" style={{ marginTop: "8px" }}>

@@ -138,8 +138,8 @@ const SearchPage = async ({ searchParams }: Props) => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="w-full px-6 max-sm:px-4 py-8">
-        <div className="grid grid-cols-[380px_1fr] gap-6 max-md:grid-cols-1">
+      <div className="w-full px-4 sm:px-6 lg:px-10 py-6">
+        <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-4">
           <>
             <SearchMaxPriceInitializer maxPrice={maxPrice} />
             <aside className="sticky top-4 self-start">
@@ -163,7 +163,7 @@ const SearchPage = async ({ searchParams }: Props) => {
               <SortBy />
             </div>
             <div className="p-4 bg-white">
-            <div className="grid grid-cols-4 gap-4 items-stretch max-lg:grid-cols-3 max-md:grid-cols-2 max-[500px]:grid-cols-1">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
               {products.length > 0 ? (
                 products.map((product: any) => (
                   <ProductItem

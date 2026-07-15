@@ -31,9 +31,9 @@ const CategoryItem = ({ title, children, href, disabled = false, onClick }: Cate
 
   return (
     <Link href={href} onClick={handleClick}>
-      <div className="flex flex-col items-center gap-y-2 bg-white py-5 text-black hover:bg-gray-100 transition-all duration-150">
+      <div className="flex flex-col items-center gap-y-2 bg-white py-3 text-black hover:bg-gray-100 transition-all duration-150">
         {children}
-        <h3 className="font-semibold text-xl">{title}</h3>
+        <h3 className="font-medium text-sm sm:text-base text-center px-1">{title}</h3>
       </div>
     </Link>
   );
