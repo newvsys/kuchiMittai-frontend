@@ -47,7 +47,7 @@ const CategoryMenu = ({ initialCategories = [] }: { initialCategories?: Category
               >
                 <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 relative overflow-hidden rounded-lg">
                   <Image
-                    src={item.src.startsWith('/') ? item.src : `/${item.src}`}
+                    src={item.src.startsWith('http://') || item.src.startsWith('https://') ? item.src : item.src.startsWith('/') ? item.src : `/${item.src}`}
                     fill
                     sizes="(max-width: 640px) 64px, (max-width: 768px) 80px, 96px"
                     className="object-cover"

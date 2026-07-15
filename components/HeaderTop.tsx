@@ -47,7 +47,7 @@ const HeaderTop = () => {
         <ul className="flex items-center gap-x-3 max-[370px]:gap-x-2">
           <li>
             <Link href="/">
-              <img src="/logo.png" width={360} height={125} alt="logo" className="object-contain h-10 sm:h-12 w-auto max-w-[130px] sm:max-w-[180px]" />
+              <img src="/companyLogo/CompanyLogo.png" width={360} height={125} alt="logo" className="object-contain h-10 sm:h-12 w-auto max-w-[130px] sm:max-w-[180px]" />
             </Link>
           </li>
           <li>

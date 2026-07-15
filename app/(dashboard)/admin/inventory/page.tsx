@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useCallback, useEffect } from "react";
 import { showToast, showError } from "@/lib/toast";
 import { DashboardSidebar } from "@/components";
@@ -474,7 +474,7 @@ const InventoryPage = () => {
                   disabled={fetching}
                   className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-60 font-medium"
                 >
-                  {fetching ? "Searchingâ€¦" : "Search"}
+                  {fetching ? "Searching…" : "Search"}
                 </button>
                 <button
                   type="button"
@@ -497,7 +497,7 @@ const InventoryPage = () => {
                   className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 disabled:opacity-60 font-medium ml-auto"
                   title="Recalculates totalQty and availableQty from actual inventory_details rows"
                 >
-                  {refreshingCounts ? "Refreshingâ€¦" : "â†» Refresh Inv Count"}
+                  {refreshingCounts ? "Refreshing…" : "↻ Refresh Inv Count"}
                 </button>
               </div>
             </div>
@@ -716,7 +716,7 @@ const InventoryPage = () => {
                   loadStockPreview ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-200"
                 }`}>
                   {loadStockPreviewLoading ? (
-                    <p className="text-xs text-gray-400">Loading existing stockâ€¦</p>
+                    <p className="text-xs text-gray-400">Loading existing stock…</p>
                   ) : loadStockPreview ? (
                     <>
                       <p className="text-xs font-semibold text-blue-700 mb-2">Current Stock in Selected Warehouse</p>
@@ -755,7 +755,7 @@ const InventoryPage = () => {
 
               <button type="submit" disabled={loadSubmitting}
                 className="w-full py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 font-medium disabled:opacity-60">
-                {loadSubmitting ? "Loadingâ€¦" : "Load Inventory"}
+                {loadSubmitting ? "Loading…" : "Load Inventory"}
               </button>
             </form>
 
@@ -803,7 +803,7 @@ const InventoryPage = () => {
                 onClick={() => handleRemove(removeBarcode)}
                 className="w-full py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 font-medium disabled:opacity-60"
               >
-                {removeSubmitting ? "Removingâ€¦" : "Remove Item"}
+                {removeSubmitting ? "Removing…" : "Remove Item"}
               </button>
             </div>
           </div>
@@ -831,7 +831,7 @@ const InventoryPage = () => {
                 onClick={() => handleRestore(restoreBarcode)}
                 className="w-full py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 font-medium disabled:opacity-60"
               >
-                {restoreSubmitting ? "Restoringâ€¦" : "Restore Item"}
+                {restoreSubmitting ? "Restoring…" : "Restore Item"}
               </button>
             </div>
           </div>
@@ -890,7 +890,7 @@ const InventoryPage = () => {
                         if (def && !labelConfigId) setLabelConfigId(String(def.id));
                       } catch { showError("Failed to load configurations"); }
                     }}
-                  >â†» Refresh</button>
+                  >↻ Refresh</button>
                 </div>
                 <select
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
@@ -905,7 +905,7 @@ const InventoryPage = () => {
                   ))}
                 </select>
                 {labelConfigs.length === 0 && (
-                  <p className="text-xs text-gray-400 mt-1">Click â†» Refresh to load saved configurations, or leave blank to use the system default.</p>
+                  <p className="text-xs text-gray-400 mt-1">Click ↻ Refresh to load saved configurations, or leave blank to use the system default.</p>
                 )}
               </div>
               <div>
@@ -976,7 +976,7 @@ const InventoryPage = () => {
                 disabled={labelSubmitting}
                 className="w-full py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 font-medium disabled:opacity-60"
               >
-                {labelSubmitting ? "Generating PDFâ€¦" : "Generate Label PDF"}
+                {labelSubmitting ? "Generating PDF…" : "Generate Label PDF"}
               </button>
             </form>
 
@@ -1055,7 +1055,7 @@ const InventoryPage = () => {
                     disabled={labelJobsLoading}
                     className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-60 font-medium"
                   >
-                    {labelJobsLoading ? "Loadingâ€¦" : "Search"}
+                    {labelJobsLoading ? "Loading…" : "Search"}
                   </button>
                   <button
                     type="button"
@@ -1073,7 +1073,7 @@ const InventoryPage = () => {
 
             {/* Jobs table */}
             {labelJobsLoading ? (
-              <p className="text-sm text-gray-400 px-1">Loadingâ€¦</p>
+              <p className="text-sm text-gray-400 px-1">Loading…</p>
             ) : labelJobs.length === 0 ? (
               <p className="text-sm text-gray-400 px-1">No label jobs found. Use Search to load history.</p>
             ) : (
@@ -1168,7 +1168,7 @@ const InventoryPage = () => {
                                   }
                                 }}
                               >
-                                {reprinting === job.jobId ? "â†» Printingâ€¦" : "â†» Reprint"}
+                                {reprinting === job.jobId ? "↻ Printing…" : "↻ Reprint"}
                               </button>
                             </div>
                           </td>

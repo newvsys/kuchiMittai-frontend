@@ -1,4 +1,4 @@
-// *********************
+﻿// *********************
 // Role of the component: Bulk upload products page for admin dashboard
 // Name of the component: BulkUpload.tsx
 // Developer: perumal ponnusamy (modified)
@@ -287,7 +287,7 @@ Another Product,149.99,Another Manufacturer,5,https://example.com/image2.jpg,Ano
                   }`}
                 >
                   {uploadResult.success
-                    ? "âœ… Upload Successful!"
+                    ? "✅ Upload Successful!"
                     : "âŒ Upload Failed"}
                 </h3>
                 <p
@@ -368,7 +368,7 @@ Another Product,149.99,Another Manufacturer,5,https://example.com/image2.jpg,Ano
                   <td className="border border-gray-300 px-4 py-2 font-mono">
                     title
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">âœ… Yes</td>
+                  <td className="border border-gray-300 px-4 py-2">✅ Yes</td>
                   <td className="border border-gray-300 px-4 py-2">String</td>
                   <td className="border border-gray-300 px-4 py-2">
                     Product name
@@ -378,7 +378,7 @@ Another Product,149.99,Another Manufacturer,5,https://example.com/image2.jpg,Ano
                   <td className="border border-gray-300 px-4 py-2 font-mono">
                     price
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">âœ… Yes</td>
+                  <td className="border border-gray-300 px-4 py-2">✅ Yes</td>
                   <td className="border border-gray-300 px-4 py-2">Number</td>
                   <td className="border border-gray-300 px-4 py-2">
                     Product price (e.g., 99.99)
@@ -388,7 +388,7 @@ Another Product,149.99,Another Manufacturer,5,https://example.com/image2.jpg,Ano
                   <td className="border border-gray-300 px-4 py-2 font-mono">
                     manufacturer
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">âœ… Yes</td>
+                  <td className="border border-gray-300 px-4 py-2">✅ Yes</td>
                   <td className="border border-gray-300 px-4 py-2">String</td>
                   <td className="border border-gray-300 px-4 py-2">
                     Manufacturer/Brand name
@@ -418,7 +418,7 @@ Another Product,149.99,Another Manufacturer,5,https://example.com/image2.jpg,Ano
                   <td className="border border-gray-300 px-4 py-2 font-mono">
                     description
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">âœ… Yes</td>
+                  <td className="border border-gray-300 px-4 py-2">✅ Yes</td>
                   <td className="border border-gray-300 px-4 py-2">String</td>
                   <td className="border border-gray-300 px-4 py-2">
                     Product description
@@ -428,7 +428,7 @@ Another Product,149.99,Another Manufacturer,5,https://example.com/image2.jpg,Ano
                   <td className="border border-gray-300 px-4 py-2 font-mono">
                     slug
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">âœ… Yes</td>
+                  <td className="border border-gray-300 px-4 py-2">✅ Yes</td>
                   <td className="border border-gray-300 px-4 py-2">String</td>
                   <td className="border border-gray-300 px-4 py-2">
                     URL-friendly identifier
@@ -438,7 +438,7 @@ Another Product,149.99,Another Manufacturer,5,https://example.com/image2.jpg,Ano
                   <td className="border border-gray-300 px-4 py-2 font-mono">
                     categoryId
                   </td>
-                  <td className="border border-gray-300 px-4 py-2">âœ… Yes</td>
+                  <td className="border border-gray-300 px-4 py-2">✅ Yes</td>
                   <td className="border border-gray-300 px-4 py-2">UUID</td>
                   <td className="border border-gray-300 px-4 py-2">
                     Category ID from database

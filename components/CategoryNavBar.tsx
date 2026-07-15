@@ -17,11 +17,10 @@ const CategoryNavBar = () => {
           <>
             <Link
               href="/search?categoryId=0&price=10000&minPrice=0"
-              className="whitespace-nowrap text-sm font-bold px-4 py-2 rounded-lg bg-white text-blue-600 hover:bg-blue-50 transition-colors flex-shrink-0 shadow-sm"
+              className="whitespace-nowrap text-sm font-medium px-3 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition-colors text-white flex-shrink-0"
             >
               All Products
             </Link>
-            <div className="w-px h-5 bg-blue-400 mx-1 flex-shrink-0" />
             {categories.map((cat) => (
               <Link
                 key={cat.id}

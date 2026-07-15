@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { API_BASE } from "@/lib/env";
+import { getImageUrl, getVideoUrl } from "@/lib/cloudinary";
 
 interface Product {
   id: number;
@@ -130,7 +131,7 @@ const DashboardProductTable = () => {
   const [uomList, setUomList] = useState<{ uomCode: string; uomName: string }[]>([]);
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/products/uom`)
+    fetch(`${API_BASE}/products/uom`)
       .then(r => r.ok ? r.json() : [])
       .then(data => setUomList(Array.isArray(data) ? data.map((u: any) => ({ uomCode: u.uomCode, uomName: u.uomName })) : []))
       .catch(() => {});
@@ -138,7 +139,7 @@ const DashboardProductTable = () => {
 
   const fetchProducts = () => {
     setLoading(true);
-    fetch(`${API_BASE}/api/products/product`)
+    fetch(`${API_BASE}/products/product`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch products");
         return res.json();
@@ -171,7 +172,7 @@ const DashboardProductTable = () => {
     if (!form.slug.trim()) { toast.error("Slug is required."); return; }
     setSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE}/api/products/product`, {
+      const res = await fetch(`${API_BASE}/products/product`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -258,7 +259,7 @@ const DashboardProductTable = () => {
       }
       if (!resolvedId) throw new Error("Product ID is missing");
       setVariantProductId(resolvedId);
-      const res = await fetch(`${API_BASE}/api/products/productsVariant/${resolvedId}`);
+      const res = await fetch(`${API_BASE}/products/productsVariant/${resolvedId}`);
       if (!res.ok) throw new Error("Failed to fetch variants");
       const data = await res.json();
       setVariants(Array.isArray(data) ? data : (data.variants ?? []));
@@ -587,7 +588,7 @@ const DashboardProductTable = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto p-6">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold">Product Variants &mdash; <span className="text-blue-700">{variantProductTitle}</span></h3>
+              <h3 className="text-lg font-semibold">Product Variants — <span className="text-blue-700">{variantProductTitle}</span></h3>
               <div className="flex items-center gap-3">
                 <button
                   type="button"
@@ -631,19 +632,10 @@ const DashboardProductTable = () => {
                         <td className="px-3 py-2">
                           {v.productImages && v.productImages.length > 0 ? (
                             <img
-                              src={(() => { const p = v.productImages[0].image; return p.startsWith('http') ? p : p.startsWith('/') ? p : `/${p}`; })()}
+                              src={getImageUrl(v.productImages[0].image)}
                               alt="variant"
                               className="w-12 h-12 object-cover rounded border"
-                              onError={(e) => {
-                                const img = e.target as HTMLImageElement;
-                                const raw = v.productImages[0].image;
-                                const normalized = raw.startsWith('http') ? raw : raw.startsWith('/') ? raw : `/${raw}`;
-                                if (!img.src.startsWith(API_BASE)) {
-                                  img.src = `${API_BASE}${normalized}`;
-                                } else {
-                                  img.src = "/product_placeholder.jpg";
-                                }
-                              }}
+                              onError={(e) => { (e.target as HTMLImageElement).src = "/product_placeholder.jpg"; }}
                             />
                           ) : (
                             <div className="w-12 h-12 bg-gray-100 rounded border flex items-center justify-center text-gray-400 text-xs">No img</div>
@@ -717,7 +709,7 @@ const DashboardProductTable = () => {
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold">View / Edit Product Variant &mdash; <span className="text-indigo-700">{editVariantSkuLabel}</span></h3>
+              <h3 className="text-base font-semibold">View / Edit Product Variant — <span className="text-indigo-700">{editVariantSkuLabel}</span></h3>
               <button type="button" className="text-sm text-gray-500 hover:text-gray-700" onClick={() => setEditVariantDialog(false)}>Close</button>
             </div>
             <form
@@ -754,7 +746,7 @@ const DashboardProductTable = () => {
                       fd.append("mainImageIndex", "-1");
                     }
                   }
-                  const res = await fetch(`${API_BASE}/api/products/productsVariant`, {
+                  const res = await fetch(`${API_BASE}/products/productsVariant`, {
                     method: "PUT",
                     body: fd,
                   });
@@ -776,7 +768,7 @@ const DashboardProductTable = () => {
                   setEditVariantDialog(false);
                   if (variantProductId) {
                     setVariantLoading(true);
-                    const vRes = await fetch(`${API_BASE}/api/products/productsVariant/${variantProductId}`);
+                    const vRes = await fetch(`${API_BASE}/products/productsVariant/${variantProductId}`);
                     const vData = await vRes.json();
                     setVariants(Array.isArray(vData) ? vData : vData.variants || []);
                     setVariantLoading(false);
@@ -827,7 +819,7 @@ const DashboardProductTable = () => {
                   <input type="number" step="0.01" className="border rounded px-3 py-2 w-full text-sm" value={editVariantForm.sellingPrice} onChange={e => setEditVariantForm(f => ({ ...f, sellingPrice: e.target.value }))} placeholder="0.00" />
                 </div>
               </div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide pt-1">Dimensions &amp; Weight</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide pt-1">Dimensions & Weight</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Length (cm)</label>
@@ -858,7 +850,7 @@ const DashboardProductTable = () => {
             <div className="mt-5 border-t pt-4">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-sm font-semibold text-gray-700">Product Images</p>
-                <p className="text-xs text-gray-400">&#9733; Click to set as main image</p>
+                <p className="text-xs text-gray-400">★ Click to set as main image</p>
               </div>
 
               {editVariantImagesLoading ? (
@@ -878,12 +870,12 @@ const DashboardProductTable = () => {
                         }`}
                       >
                         <img
-                          src={(() => { const p = img.image; return p.startsWith('http') ? p : p.startsWith('/') ? p : `/${p}`; })()}
+                          src={getImageUrl(img.image)}
                           alt={img.image}
                           className="w-full h-full object-cover"
                         />
                         {isMain && (
-                          <div className="absolute top-1 left-1 bg-yellow-400 text-yellow-900 text-xs font-bold rounded px-1 leading-tight">&#9733;</div>
+                          <div className="absolute top-1 left-1 bg-yellow-400 text-yellow-900 text-xs font-bold rounded px-1 leading-tight">★</div>
                         )}
                         {/* Delete button */}
                         <button
@@ -931,7 +923,7 @@ const DashboardProductTable = () => {
                       >
                         <img src={previewUrl} alt={f.name} className="w-full h-full object-cover" />
                         {isMain && (
-                          <div className="absolute top-1 left-1 bg-yellow-400 text-yellow-900 text-xs font-bold rounded px-1 leading-tight">&#9733;</div>
+                          <div className="absolute top-1 left-1 bg-yellow-400 text-yellow-900 text-xs font-bold rounded px-1 leading-tight">★</div>
                         )}
                         <div className="absolute top-1 right-1">
                           <button
@@ -1011,7 +1003,7 @@ const DashboardProductTable = () => {
                           } catch (err: any) { toast.error(err.message || "Failed to set main image"); }
                         }}
                       >
-                        &#9733; Set as Main Image
+                        ★ Set as Main Image
                       </button>
                     ) : null;
                   })()}
@@ -1036,7 +1028,7 @@ const DashboardProductTable = () => {
                           } else {
                             fd.append("mainImageIndex", "-1"); // don't change main — keep existing
                           }
-                          const r = await fetch(`${API_BASE}/api/products/productsVariant`, { method: "PUT", body: fd });
+                          const r = await fetch(`${API_BASE}/products/productsVariant`, { method: "PUT", body: fd });
                           if (!r.ok) throw new Error("Upload failed");
                           // If an existing image was selected as main and new images uploaded, set it after
                           if (editVariantSelectedMain.startsWith("existing-")) {
@@ -1074,7 +1066,7 @@ const DashboardProductTable = () => {
                     key={editVariantVideoUrl}
                     controls
                     className="w-full rounded-lg border border-gray-200 max-h-48 bg-black"
-                    src={editVariantVideoUrl.startsWith('http') ? editVariantVideoUrl : `/${editVariantVideoUrl}`}
+                    src={getVideoUrl(editVariantVideoUrl) || ''}
                   />
                   <p className="text-xs text-gray-400 mt-1 truncate">{editVariantVideoUrl}</p>
                 </div>
@@ -1124,7 +1116,7 @@ const DashboardProductTable = () => {
                       if (!editVariantId) return;
                       if (!confirm("Delete the existing video? This cannot be undone.")) return;
                       try {
-                        const r = await fetch(`${API_BASE}/api/products/productsVariant/${editVariantId}/video`, { method: "DELETE" });
+                        const r = await fetch(`${API_BASE}/products/productsVariant/${editVariantId}/video`, { method: "DELETE" });
                         const d = await r.json().catch(() => ({}));
                         if (!r.ok || d.responseStatus === "FAILURE") throw new Error(d.responseMessage || "Failed to delete video");
                         setEditVariantVideoUrl(null);
@@ -1138,7 +1130,7 @@ const DashboardProductTable = () => {
                   </button>
                 )}
                 {editVariantNewVideo && (
-                  <span className="text-xs text-blue-600 self-center">&#10003; Video will be saved when you click <strong>Update Variant</strong></span>
+                  <span className="text-xs text-blue-600 self-center">✓ Video will be saved when you click <strong>Update Variant</strong></span>
                 )}
               </div>
             </div>
@@ -1151,7 +1143,7 @@ const DashboardProductTable = () => {
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold">Add New Variant &mdash; <span className="text-blue-700">{variantProductTitle}</span></h3>
+              <h3 className="text-base font-semibold">Add New Variant — <span className="text-blue-700">{variantProductTitle}</span></h3>
               <button type="button" className="text-sm text-gray-500 hover:text-gray-700" onClick={() => setAddVariantDialog(false)}>Close</button>
             </div>
             <form
@@ -1194,7 +1186,7 @@ const DashboardProductTable = () => {
                   if (addVariantVideo) {
                     formData.append("video", addVariantVideo, addVariantVideo.name);
                   }
-                  const res = await fetch(`${API_BASE}/api/products/productsVariant`, {
+                  const res = await fetch(`${API_BASE}/products/productsVariant`, {
                     method: "POST",
                     body: formData,
                   });
@@ -1205,7 +1197,7 @@ const DashboardProductTable = () => {
                   setAddVariantMainImageIndex(0);
                   setAddVariantVideo(null);
                   setVariantLoading(true);
-                  const vRes = await fetch(`${API_BASE}/api/products/productsVariant/${variantProductId}`);
+                  const vRes = await fetch(`${API_BASE}/products/productsVariant/${variantProductId}`);
                   const vData = await vRes.json();
                   setVariants(Array.isArray(vData) ? vData : vData.variants || []);
                   setVariantLoading(false);
@@ -1252,7 +1244,7 @@ const DashboardProductTable = () => {
                   <input required type="number" step="0.01" min="0" className="border rounded px-3 py-2 w-full text-sm" value={addVariantForm.sellingPrice} onChange={e => setAddVariantForm(f => ({ ...f, sellingPrice: e.target.value }))} placeholder="0.00" />
                 </div>
               </div>
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide pt-1">Dimensions &amp; Weight</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide pt-1">Dimensions & Weight</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Length (cm)</label>
@@ -1314,7 +1306,7 @@ const DashboardProductTable = () => {
                           }`}
                           onClick={() => setAddVariantMainImageIndex(idx)}
                         >
-                          &#9733;
+                          ★
                         </button>
                         {f.name}
                         <button
@@ -1337,11 +1329,11 @@ const DashboardProductTable = () => {
                   </div>
                 )}
                 {addVariantImages.length > 1 && (
-                  <p className="text-xs text-gray-400 mt-1">&#9733; Click the star on an image to set it as the main image.</p>
+                  <p className="text-xs text-gray-400 mt-1">★ Click the star on an image to set it as the main image.</p>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Video <span className="text-gray-400 font-normal">(optional &mdash; .mp4, .mov, .avi, .webm)</span></label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Video <span className="text-gray-400 font-normal">(optional — .mp4, .mov, .avi, .webm)</span></label>
                 <input
                   ref={addVariantVideoInputRef}
                   type="file"
@@ -1382,7 +1374,7 @@ const DashboardProductTable = () => {
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded shadow-xl w-full max-w-sm p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold">{inventoryId ? "Edit" : "Add"} Inventory &mdash; <span className="text-blue-700">{inventorySkuLabel}</span></h3>
+              <h3 className="text-base font-semibold">{inventoryId ? "Edit" : "Add"} Inventory — <span className="text-blue-700">{inventorySkuLabel}</span></h3>
               <button type="button" className="text-sm text-gray-500 hover:text-gray-700" onClick={() => setInventoryDialog(false)}>Close</button>
             </div>
             {inventoryLoading ? (
@@ -1487,7 +1479,7 @@ const DashboardProductTable = () => {
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold">Attributes &mdash; <span className="text-blue-700">{attrDialog.skuCode}</span></h3>
+              <h3 className="text-base font-semibold">Attributes — <span className="text-blue-700">{attrDialog.skuCode}</span></h3>
               <button type="button" className="text-sm text-gray-500 hover:text-gray-700" onClick={() => setAttrDialog(null)}>Close</button>
             </div>
             <div className="flex flex-col gap-4">
@@ -1719,13 +1711,13 @@ const DashboardProductTable = () => {
                   if (!deleteVariantConfirm) return;
                   setDeleteVariantLoading(true);
                   try {
-                    const res = await fetch(`${API_BASE}/api/products/productsVariant/${deleteVariantConfirm.variantId}`, { method: "DELETE" });
+                    const res = await fetch(`${API_BASE}/products/productsVariant/${deleteVariantConfirm.variantId}`, { method: "DELETE" });
                     if (!res.ok && res.status !== 204) throw new Error(`Server error: ${res.status}`);
                     toast.success("Variant deleted successfully!");
                     setDeleteVariantConfirm(null);
                     if (variantProductId) {
                       setVariantLoading(true);
-                      const vRes = await fetch(`${API_BASE}/api/products/productsVariant/${variantProductId}`);
+                      const vRes = await fetch(`${API_BASE}/products/productsVariant/${variantProductId}`);
                       const vData = await vRes.json();
                       setVariants(Array.isArray(vData) ? vData : vData.variants || []);
                       setVariantLoading(false);
