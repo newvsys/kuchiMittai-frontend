@@ -23,6 +23,13 @@ const nextConfig = {
             hostname: 'placehold.co',
             port: ''
           },
+          // Allow Cloudinary-hosted images (category/product images)
+          {
+            protocol: 'https',
+            hostname: 'res.cloudinary.com',
+            port: '',
+            pathname: '/efmugjt7/**',
+          },
           // Allow image URLs from the backend API server
           // The hostname is derived from NEXT_PUBLIC_API_BASE_URL at build time
           ...(process.env.NEXT_PUBLIC_API_BASE_URL
