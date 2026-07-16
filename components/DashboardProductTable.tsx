@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { API_BASE } from "@/lib/env";
-import { getImageUrl, getVideoUrl } from "@/lib/cloudinary";
+
 
 interface Product {
   id: number;
