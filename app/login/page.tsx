@@ -42,7 +42,7 @@ const LoginPage = () => {
     if (sessionStatus === "authenticated") {
       const isAdmin = (session as any)?.user?.role === "admin";
       if (isAdmin) {
-        router.replace("/admin/warehouses");
+        router.replace("/admin/categories");
       } else {
         router.replace(callbackUrl);
       }
@@ -119,7 +119,7 @@ const LoginPage = () => {
       setIsLoading(false);
     } else {
       setError("");
-      const nextRoute = role === "admin" ? "/admin/warehouses" : callbackUrl;
+      const nextRoute = role === "admin" ? "/admin/categories" : callbackUrl;
       router.push(nextRoute);
     }
   };
@@ -191,7 +191,7 @@ const LoginPage = () => {
         setError("Login failed. Please try again.");
         setIsLoading(false);
       } else {
-        const nextRoute = role === "admin" ? "/admin/warehouses" : callbackUrl;
+        const nextRoute = role === "admin" ? "/admin/categories" : callbackUrl;
         router.push(nextRoute);
       }
     } catch {

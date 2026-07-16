@@ -8,7 +8,7 @@ export default async function Home() {
   // Pre-fetch categories server-side — eliminates client-side loading state
   let initialCategories: Category[] = [];
   try {
-    const res = await fetch(`${API_BASE}/products/categories`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${API_BASE}/api/products/categories`, { next: { revalidate: 3600 } });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data)) initialCategories = data;

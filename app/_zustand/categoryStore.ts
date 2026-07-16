@@ -31,7 +31,7 @@ export const useCategoryStore = create<CategoryState>()(
 
         set({ loading: true, error: null });
         try {
-          const res = await fetch(`${API_BASE}/products/categories`);
+          const res = await fetch(`${API_BASE}/api/products/categories`);
           if (!res.ok) throw new Error("Failed to fetch categories");
           const data: Category[] = await res.json();
           set({ categories: Array.isArray(data) ? data : [], fetched: true });

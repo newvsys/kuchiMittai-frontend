@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { DashboardSidebar } from "@/components";
 import React, { useEffect, useRef, useState } from "react";
@@ -589,7 +589,7 @@ const AdminShippingManagementPage = () => {
               <div className="flex gap-2 pt-5">
                 <button type="submit" disabled={pendingLoading}
                   className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-60">
-                  {pendingLoading ? "Searching…" : "Search"}
+                  {pendingLoading ? "Searchingâ€¦" : "Search"}
                 </button>
                 <button type="button" onClick={handleListReset} disabled={pendingLoading}
                   className="px-4 py-1.5 border border-gray-300 text-gray-700 text-sm rounded hover:bg-gray-50 disabled:opacity-60">

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { DashboardSidebar } from "@/components";
 import React, { useEffect, useState } from "react";
@@ -286,7 +286,7 @@ const AdminUOMPage = () => {
               <h3 className="text-lg font-semibold text-gray-800">
                 {formDialog.mode === "add" ? "Add Unit of Measure" : "Edit Unit of Measure"}
               </h3>
-              <button type="button" className="text-gray-400 hover:text-gray-700 text-xl leading-none" onClick={closeForm}>✕</button>
+              <button type="button" className="text-gray-400 hover:text-gray-700 text-xl leading-none" onClick={closeForm}>âœ•</button>
             </div>
 
             {formError && (
@@ -357,7 +357,7 @@ const AdminUOMPage = () => {
                     {UOM_TYPES.map(t => (
                       <option key={t} value={t}>{t}</option>
                     ))}
-                    <option value="__custom__">Custom…</option>
+                    <option value="__custom__">Customâ€¦</option>
                   </select>
                   {!UOM_TYPES.includes(form.uomType) && form.uomType !== "" && (
                     <input
@@ -412,7 +412,7 @@ const AdminUOMPage = () => {
                   onChange={handleChange}
                   maxLength={255}
                   rows={2}
-                  placeholder="Optional description…"
+                  placeholder="Optional descriptionâ€¦"
                   className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
                 />
               </div>
@@ -432,7 +432,7 @@ const AdminUOMPage = () => {
                   className="px-4 py-1.5 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
                 >
                   {formLoading
-                    ? formDialog.mode === "add" ? "Creating…" : "Saving…"
+                    ? formDialog.mode === "add" ? "Creatingâ€¦" : "Savingâ€¦"
                     : formDialog.mode === "add" ? "Create" : "Save Changes"}
                 </button>
               </div>
@@ -467,7 +467,7 @@ const AdminUOMPage = () => {
                 onClick={handleDelete}
                 disabled={deleteLoading}
               >
-                {deleteLoading ? "Deleting…" : "Delete"}
+                {deleteLoading ? "Deletingâ€¦" : "Delete"}
               </button>
             </div>
           </div>

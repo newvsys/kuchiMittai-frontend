@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useEffect, useState } from "react";
 import { showToast, showError } from "@/lib/toast";
 import { DashboardSidebar } from "@/components";
@@ -229,7 +229,7 @@ const LabelConfigPage = () => {
           {/* Table */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
             {loading ? (
-              <p className="text-sm text-gray-400 p-6">Loading…</p>
+              <p className="text-sm text-gray-400 p-6">Loadingâ€¦</p>
             ) : configs.length === 0 ? (
               <p className="text-sm text-gray-400 p-6">No configurations found. Create one to get started.</p>
             ) : (
@@ -282,7 +282,7 @@ const LabelConfigPage = () => {
                               className="text-xs text-gray-400 hover:text-yellow-500 disabled:opacity-50"
                               title="Set as default"
                             >
-                              {settingDefault === c.id ? "…" : "☆ Set"}
+                              {settingDefault === c.id ? "â€¦" : "â˜† Set"}
                             </button>
                           )}
                         </td>
@@ -463,7 +463,7 @@ const LabelConfigPage = () => {
               <div className="flex justify-end gap-3 pt-2 border-t">
                 <button type="button" onClick={() => setDialogOpen(false)} className="px-4 py-2 text-sm border rounded-lg text-gray-600 hover:bg-gray-50">Cancel</button>
                 <button type="submit" disabled={saving} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 font-medium">
-                  {saving ? "Saving…" : editingId ? "Update" : "Create"}
+                  {saving ? "Savingâ€¦" : editingId ? "Update" : "Create"}
                 </button>
               </div>
             </form>
@@ -482,7 +482,7 @@ const LabelConfigPage = () => {
             <div className="flex justify-end gap-3">
               <button type="button" onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm border rounded-lg text-gray-600 hover:bg-gray-50">Cancel</button>
               <button type="button" onClick={handleDelete} disabled={deleting} className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-60 font-medium">
-                {deleting ? "Deleting…" : "Delete"}
+                {deleting ? "Deletingâ€¦" : "Delete"}
               </button>
             </div>
           </div>
