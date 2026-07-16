@@ -46,7 +46,7 @@ const Products = ({ params, searchParams }: { params: { slug?: string[] }, searc
                 : [searchParams.categoryId]
               ).map((id: string) => `&categoryId=${encodeURIComponent(id)}`).join("")
             : "");
-        const url = `${API_BASE_URL}/api/products/shop/${category}?${query}`;
+        const url = `${API_BASE_URL}/products/shop/${category}?${query}`;
         const res = await fetch(url);
         if (!res.ok) {
           throw new Error("Failed to fetch products");

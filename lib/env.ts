@@ -5,7 +5,7 @@
  * ---------------------------------------------------------------------------
  * Production (Vercel)
  *   Leave NEXT_PUBLIC_API_BASE_URL *empty* (or unset) in Vercel project settings.
- *   API calls use relative paths like /api/products/... which are intercepted
+ *   API calls use relative paths like /products/... which are intercepted
  *   by the Next.js rewrite proxy in next.config.mjs and forwarded server-side
  *   to the EC2 backend via API_BASE_URL.  No CORS needed.
  *

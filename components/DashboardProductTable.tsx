@@ -100,7 +100,7 @@ const DashboardProductTable = () => {
   const fetchEditVariantImages = async (variantId: number) => {
     setEditVariantImagesLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/products/productImage/${variantId}`);
+      const res = await fetch(`${API_BASE}/products/productImage/${variantId}`);
       const data = await res.json();
       const imgs = Array.isArray(data) ? data : [];
       setEditVariantImages(imgs);
@@ -130,7 +130,7 @@ const DashboardProductTable = () => {
   const [uomList, setUomList] = useState<{ uomCode: string; uomName: string }[]>([]);
 
   useEffect(() => {
-    fetch(`${API_BASE}/api/products/uom`)
+    fetch(`${API_BASE}/products/uom`)
       .then(r => r.ok ? r.json() : [])
       .then(data => setUomList(Array.isArray(data) ? data.map((u: any) => ({ uomCode: u.uomCode, uomName: u.uomName })) : []))
       .catch(() => {});
@@ -138,7 +138,7 @@ const DashboardProductTable = () => {
 
   const fetchProducts = () => {
     setLoading(true);
-    fetch(`${API_BASE}/api/products/product`)
+    fetch(`${API_BASE}/products/product`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch products");
         return res.json();
@@ -171,7 +171,7 @@ const DashboardProductTable = () => {
     if (!form.slug.trim()) { toast.error("Slug is required."); return; }
     setSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE}/api/products/product`, {
+      const res = await fetch(`${API_BASE}/products/product`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -198,7 +198,7 @@ const DashboardProductTable = () => {
     setEditLoading(true);
     try {
       const [productRes, catsRes] = await Promise.all([
-        fetch(`${API_BASE}/api/products/productSlug/${encodeURIComponent(slug)}`),
+        fetch(`${API_BASE}/products/productSlug/${encodeURIComponent(slug)}`),
         fetch(`${API_BASE}/products/categories`),
       ]);
       if (!productRes.ok) throw new Error("Failed to fetch product");
@@ -229,7 +229,7 @@ const DashboardProductTable = () => {
     if (!deleteConfirm) return;
     setDeleteLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/products/${deleteConfirm.id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE}/products/${deleteConfirm.id}`, { method: "DELETE" });
       if (!res.ok && res.status !== 204) throw new Error(`Server error: ${res.status}`);
       toast.success("Product deleted successfully!");
       setDeleteConfirm(null);
@@ -250,7 +250,7 @@ const DashboardProductTable = () => {
       let resolvedId: number | null = typeof idOrSlug === 'number' ? idOrSlug : null;
       if (!resolvedId && idOrSlug) {
         // id is null — resolve via slug
-        const slugRes = await fetch(`${API_BASE}/api/products/productSlug/${encodeURIComponent(String(idOrSlug))}`);
+        const slugRes = await fetch(`${API_BASE}/products/productSlug/${encodeURIComponent(String(idOrSlug))}`);
         if (!slugRes.ok) throw new Error("Failed to resolve product");
         const slugData = await slugRes.json();
         if (!slugData.id) throw new Error("Product ID not found");
@@ -258,7 +258,7 @@ const DashboardProductTable = () => {
       }
       if (!resolvedId) throw new Error("Product ID is missing");
       setVariantProductId(resolvedId);
-      const res = await fetch(`${API_BASE}/api/products/productsVariant/${resolvedId}`);
+      const res = await fetch(`${API_BASE}/products/productsVariant/${resolvedId}`);
       if (!res.ok) throw new Error("Failed to fetch variants");
       const data = await res.json();
       setVariants(Array.isArray(data) ? data : (data.variants ?? []));
@@ -280,14 +280,14 @@ const DashboardProductTable = () => {
     if (!resolvedId) {
       // Last-resort: re-fetch the real id via slug before submitting
       try {
-        const res = await fetch(`${API_BASE}/api/products/productSlug/${encodeURIComponent(editForm.slug.trim())}`);
+        const res = await fetch(`${API_BASE}/products/productSlug/${encodeURIComponent(editForm.slug.trim())}`);
         if (!res.ok) throw new Error("Could not resolve product ID");
         const data = await res.json();
         if (!data.id) throw new Error("Product ID not found — this product may not be fully set up in the backend.");
         editProductIdRef.current = data.id;
         setEditProductId(data.id);
         setEditSubmitting(true);
-        const putRes = await fetch(`${API_BASE}/api/products/${data.id}`, {
+        const putRes = await fetch(`${API_BASE}/products/${data.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -312,7 +312,7 @@ const DashboardProductTable = () => {
     }
     setEditSubmitting(true);
     try {
-      const res = await fetch(`${API_BASE}/api/products/${resolvedId}`, {
+      const res = await fetch(`${API_BASE}/products/${resolvedId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -754,7 +754,7 @@ const DashboardProductTable = () => {
                       fd.append("mainImageIndex", "-1");
                     }
                   }
-                  const res = await fetch(`${API_BASE}/api/products/productsVariant`, {
+                  const res = await fetch(`${API_BASE}/products/productsVariant`, {
                     method: "PUT",
                     body: fd,
                   });
@@ -764,7 +764,7 @@ const DashboardProductTable = () => {
                     const selId = parseInt(editVariantSelectedMain.replace("existing-", ""));
                     const cur = editVariantImages.find((i: any) => i.id === selId);
                     if (cur && cur.isMainImage !== "Y") {
-                      await fetch(`${API_BASE}/api/products/productImage/${selId}/main`, { method: "PUT" }).catch(() => {});
+                      await fetch(`${API_BASE}/products/productImage/${selId}/main`, { method: "PUT" }).catch(() => {});
                     }
                   }
                   setEditVariantNewImages([]);
@@ -776,7 +776,7 @@ const DashboardProductTable = () => {
                   setEditVariantDialog(false);
                   if (variantProductId) {
                     setVariantLoading(true);
-                    const vRes = await fetch(`${API_BASE}/api/products/productsVariant/${variantProductId}`);
+                    const vRes = await fetch(`${API_BASE}/products/productsVariant/${variantProductId}`);
                     const vData = await vRes.json();
                     setVariants(Array.isArray(vData) ? vData : vData.variants || []);
                     setVariantLoading(false);
@@ -893,7 +893,7 @@ const DashboardProductTable = () => {
                             e.stopPropagation();
                             if (!confirm("Remove this image?")) return;
                             try {
-                              const r = await fetch(`${API_BASE}/api/products/productImage/${img.id}`, { method: "DELETE" });
+                              const r = await fetch(`${API_BASE}/products/productImage/${img.id}`, { method: "DELETE" });
                               if (!r.ok) throw new Error("Failed to delete image");
                               toast.success("Image removed");
                               // Reset selection if the deleted image was selected
@@ -1003,7 +1003,7 @@ const DashboardProductTable = () => {
                         className="px-3 py-1.5 text-xs bg-yellow-500 text-white rounded hover:bg-yellow-600 font-medium"
                         onClick={async () => {
                           try {
-                            const r = await fetch(`${API_BASE}/api/products/productImage/${selId}/main`, { method: "PUT" });
+                            const r = await fetch(`${API_BASE}/products/productImage/${selId}/main`, { method: "PUT" });
                             const d = await r.json();
                             if (!r.ok || d.responseStatus === "FAILURE") throw new Error(d.responseMessage || "Failed");
                             toast.success("Main image updated");
@@ -1036,12 +1036,12 @@ const DashboardProductTable = () => {
                           } else {
                             fd.append("mainImageIndex", "-1"); // don't change main — keep existing
                           }
-                          const r = await fetch(`${API_BASE}/api/products/productsVariant`, { method: "PUT", body: fd });
+                          const r = await fetch(`${API_BASE}/products/productsVariant`, { method: "PUT", body: fd });
                           if (!r.ok) throw new Error("Upload failed");
                           // If an existing image was selected as main and new images uploaded, set it after
                           if (editVariantSelectedMain.startsWith("existing-")) {
                             const selId = parseInt(editVariantSelectedMain.replace("existing-", ""));
-                            await fetch(`${API_BASE}/api/products/productImage/${selId}/main`, { method: "PUT" }).catch(() => {});
+                            await fetch(`${API_BASE}/products/productImage/${selId}/main`, { method: "PUT" }).catch(() => {});
                           }
                           toast.success("Images uploaded successfully");
                           setEditVariantNewImages([]);
@@ -1124,7 +1124,7 @@ const DashboardProductTable = () => {
                       if (!editVariantId) return;
                       if (!confirm("Delete the existing video? This cannot be undone.")) return;
                       try {
-                        const r = await fetch(`${API_BASE}/api/products/productsVariant/${editVariantId}/video`, { method: "DELETE" });
+                        const r = await fetch(`${API_BASE}/products/productsVariant/${editVariantId}/video`, { method: "DELETE" });
                         const d = await r.json().catch(() => ({}));
                         if (!r.ok || d.responseStatus === "FAILURE") throw new Error(d.responseMessage || "Failed to delete video");
                         setEditVariantVideoUrl(null);
@@ -1194,7 +1194,7 @@ const DashboardProductTable = () => {
                   if (addVariantVideo) {
                     formData.append("video", addVariantVideo, addVariantVideo.name);
                   }
-                  const res = await fetch(`${API_BASE}/api/products/productsVariant`, {
+                  const res = await fetch(`${API_BASE}/products/productsVariant`, {
                     method: "POST",
                     body: formData,
                   });
@@ -1205,7 +1205,7 @@ const DashboardProductTable = () => {
                   setAddVariantMainImageIndex(0);
                   setAddVariantVideo(null);
                   setVariantLoading(true);
-                  const vRes = await fetch(`${API_BASE}/api/products/productsVariant/${variantProductId}`);
+                  const vRes = await fetch(`${API_BASE}/products/productsVariant/${variantProductId}`);
                   const vData = await vRes.json();
                   setVariants(Array.isArray(vData) ? vData : vData.variants || []);
                   setVariantLoading(false);
@@ -1402,7 +1402,7 @@ const DashboardProductTable = () => {
                   let res: Response;
                   if (inventoryId) {
                     // Edit mode: PUT with totalQty, availableQty, whid
-                    res = await fetch(`${API_BASE}/api/products/inventory/${inventoryId}`, {
+                    res = await fetch(`${API_BASE}/products/inventory/${inventoryId}`, {
                       method: "PUT",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({
@@ -1413,7 +1413,7 @@ const DashboardProductTable = () => {
                     });
                   } else {
                     // Add mode: POST
-                    res = await fetch(`${API_BASE}/api/products/inventory`, {
+                    res = await fetch(`${API_BASE}/products/inventory`, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({
@@ -1567,7 +1567,7 @@ const DashboardProductTable = () => {
                 try {
                   let res;
                   if (attrEditDialog.mode === 'add') {
-                    res = await fetch(`${API_BASE}/api/products/productAttributes`, {
+                    res = await fetch(`${API_BASE}/products/productAttributes`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
@@ -1577,7 +1577,7 @@ const DashboardProductTable = () => {
                       }),
                     });
                   } else if (attrEditDialog.mode === 'edit' && attrEditDialog.attribute) {
-                    res = await fetch(`${API_BASE}/api/products/productAttributes/${attrEditDialog.attribute.id}`, {
+                    res = await fetch(`${API_BASE}/products/productAttributes/${attrEditDialog.attribute.id}`, {
                       method: 'PUT',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({
@@ -1668,7 +1668,7 @@ const DashboardProductTable = () => {
                 onClick={async () => {
                   setAttrDeleteSubmitting(true);
                   try {
-                    const res = await fetch(`${API_BASE}/api/products/productAttributes/${attrDeleteDialog.attribute.id}`, { method: 'DELETE' });
+                    const res = await fetch(`${API_BASE}/products/productAttributes/${attrDeleteDialog.attribute.id}`, { method: 'DELETE' });
                     if (!res.ok && res.status !== 204) throw new Error(`Server error: ${res.status}`);
                     setAttrDialog(d => d ? { ...d, attributes: d.attributes.filter(a => a.id !== attrDeleteDialog.attribute.id) } : d);
                     setAttrDeleteDialog(null);
@@ -1719,13 +1719,13 @@ const DashboardProductTable = () => {
                   if (!deleteVariantConfirm) return;
                   setDeleteVariantLoading(true);
                   try {
-                    const res = await fetch(`${API_BASE}/api/products/productsVariant/${deleteVariantConfirm.variantId}`, { method: "DELETE" });
+                    const res = await fetch(`${API_BASE}/products/productsVariant/${deleteVariantConfirm.variantId}`, { method: "DELETE" });
                     if (!res.ok && res.status !== 204) throw new Error(`Server error: ${res.status}`);
                     toast.success("Variant deleted successfully!");
                     setDeleteVariantConfirm(null);
                     if (variantProductId) {
                       setVariantLoading(true);
-                      const vRes = await fetch(`${API_BASE}/api/products/productsVariant/${variantProductId}`);
+                      const vRes = await fetch(`${API_BASE}/products/productsVariant/${variantProductId}`);
                       const vData = await vRes.json();
                       setVariants(Array.isArray(vData) ? vData : vData.variants || []);
                       setVariantLoading(false);

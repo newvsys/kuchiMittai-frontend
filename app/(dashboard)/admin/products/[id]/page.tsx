@@ -30,7 +30,7 @@ const DashboardProductDetails = ({ params }: DashboardProductDetailsProps) => {
       method: "DELETE",
     };
     apiClient
-      .delete(`/api/products/${id}`, requestOptions)
+      .delete(`/products/${id}`, requestOptions)
       .then((response) => {
         if (response.status !== 204) {
           if (response.status === 400) {
@@ -64,7 +64,7 @@ const DashboardProductDetails = ({ params }: DashboardProductDetailsProps) => {
     }
 
     try {
-      const response = await apiClient.put(`/api/products/${id}`, product);
+      const response = await apiClient.put(`/products/${id}`, product);
 
       if (response.status === 200) {
         await response.json();
@@ -106,7 +106,7 @@ const DashboardProductDetails = ({ params }: DashboardProductDetailsProps) => {
   // fetching main product data including other product images
   const fetchProductData = async () => {
     apiClient
-      .get(`/api/products/${id}`)
+      .get(`/products/${id}`)
       .then((res) => {
         return res.json();
       })

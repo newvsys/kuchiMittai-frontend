@@ -49,7 +49,7 @@ const SearchPage = async ({ searchParams }: Props) => {
       categoryIds.map((id) => `&categoryId=${encodeURIComponent(id)}`).join("");
 
     const API_BASE_URL = API_BASE;
-    const url = `${API_BASE_URL}/api/products/search?${queryString}`;
+    const url = `${API_BASE_URL}/products/search?${queryString}`;
     const res = await fetch(url, { next: { revalidate: 60 } });
    
     if (!res.ok) {
