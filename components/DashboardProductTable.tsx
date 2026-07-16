@@ -632,7 +632,7 @@ const DashboardProductTable = () => {
                         <td className="px-3 py-2">
                           {v.productImages && v.productImages.length > 0 ? (
                             <img
-                              src={getImageUrl(v.productImages[0].image)}
+                              src={v.productImages[0]?.image || "/product_placeholder.jpg"}
                               alt="variant"
                               className="w-12 h-12 object-cover rounded border"
                               onError={(e) => { (e.target as HTMLImageElement).src = "/product_placeholder.jpg"; }}
@@ -870,8 +870,8 @@ const DashboardProductTable = () => {
                         }`}
                       >
                         <img
-                          src={getImageUrl(img.image)}
-                          alt={img.image}
+                          src={img.image || "/product_placeholder.jpg"}
+                          alt={img.image || "Product image"}
                           className="w-full h-full object-cover"
                         />
                         {isMain && (
@@ -1066,7 +1066,7 @@ const DashboardProductTable = () => {
                     key={editVariantVideoUrl}
                     controls
                     className="w-full rounded-lg border border-gray-200 max-h-48 bg-black"
-                    src={getVideoUrl(editVariantVideoUrl) || ''}
+                    src={editVariantVideoUrl || ''}
                   />
                   <p className="text-xs text-gray-400 mt-1 truncate">{editVariantVideoUrl}</p>
                 </div>
