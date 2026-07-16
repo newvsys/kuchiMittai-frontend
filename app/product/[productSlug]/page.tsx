@@ -422,7 +422,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
                           }
                           // Fetch images for the selected variant
                           try {
-                            const imagesRes = await fetch(`${API_BASE}/api/products/productImage/${variant.id}`);
+                            const imagesRes = await fetch(`${API_BASE}/products/productImage/${variant.id}`);
                             let imagesData = await imagesRes.json();
                             if (!Array.isArray(imagesData)) imagesData = [];
                             // Sort so main image (isMainImage === "Y") comes first
