@@ -49,7 +49,10 @@ const SearchPage = async ({ searchParams }: Props) => {
       categoryIds.map((id) => `&categoryId=${encodeURIComponent(id)}`).join("");
 
     const API_BASE_URL = API_BASE;
+    console.log("API_BASE =", API_BASE);
+    
     const url = `${API_BASE_URL}/products/search?${queryString}`;
+    console.log("URL =", url);
     const res = await fetch(url, { next: { revalidate: 60 } });
    
     if (!res.ok) {
@@ -84,8 +87,9 @@ const SearchPage = async ({ searchParams }: Props) => {
         maxPrice = null;
       }
     }
-  } catch (error) {
-    console.error("Error fetching search results:", error);
+  } catch (error: any) {
+     console.error(error);
+     console.error(error.cause);
     products = [];
   }
 
