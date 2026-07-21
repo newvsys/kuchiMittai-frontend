@@ -5,23 +5,47 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+
     container_name: frontend
+
     working_dir: /app
+
     ports:
       - "3000:3000"
       - "9229:9229"
-    #command: ["node", "--inspect=0.0.0.0:9229", "node_modules/.bin/next", "dev"]  
+
     command: npm run dev
+
     volumes:
-      - .:/app                 # Sync local files for hot reload
-      - /app/node_modules      # Prevent overriding node_modules
+      - .:/app
+      - /app/node_modules
+
     environment:
-      - CHOKIDAR_USEPOLLING=true     # Enables file watching inside Docker
-      - WATCHPACK_POLLING=true       # Improve Next.js HMR detection
-      - DEBUG=*
-      - NEXTAUTH_DEBUG=true
+      # Next.js hot reload settings
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+
+      # Debug settings
+      DEBUG: "*"
+      NEXTAUTH_DEBUG: "true"
+
+      # API configuration
+      # Browser side calls
+      NEXT_PUBLIC_API_BASE_URL: "http://localhost:8080/api"
+
+      # Next.js server-side calls (Docker to Docker)
+      API_BASE_URL: "http://app:8080/api"
+
+      # NextAuth
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXTAUTH_SECRET: "12D16C923BA17672F89B18C1DB22A"
+
+      NODE_ENV: "development"
+
     networks:
       - mynetwork
+
+
 networks:
   mynetwork:
-    external: true      
+    external: true
