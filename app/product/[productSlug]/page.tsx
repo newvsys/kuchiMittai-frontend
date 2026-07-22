@@ -23,6 +23,12 @@ interface SingleProductPageProps {
   params: Promise<{ productSlug: string }>;
 }
 
+// Returns an absolute URL as-is; otherwise prepends "/" for local/relative paths.
+const getMediaUrl = (path?: string | null): string | null => {
+  if (!path) return null;
+  return path.startsWith("http") ? path : `/${path}`;
+};
+
 
 const SingleProductPage = ({ params }: SingleProductPageProps) => {
   const unwrappedParams = React.use(params);
@@ -92,9 +98,9 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
         imagesCacheRef.current.set(activeProduct.id, imagesData);
         setImages(imagesData);
         if (imagesData.length > 0) {
-          setSelectedImage(`/${imagesData[0].image}`);
+          setSelectedImage(getMediaUrl(imagesData[0].image));
         } else if (activeProduct.mainImage) {
-          setSelectedImage(`/${activeProduct.mainImage}`);
+          setSelectedImage(getMediaUrl(activeProduct.mainImage));
         }
 
         // Process ratings
@@ -144,7 +150,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
   }, [product?.id]);
 
   const slideImages = images.length > 0
-    ? images.map((i) => `/${i.image}`)
+    ? images.map((i) => getMediaUrl(i.image) || "/product_placeholder.jpg")
     : [selectedImage || "/product_placeholder.jpg"];
 
   const currentSlideIndex = slideImages.indexOf(selectedImage || "");
@@ -313,11 +319,11 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
               {images.map((imageItem: ImageItem, key: number) => (
                 <div
                   key={imageItem.imageID + key}
-                  className={`w-20 h-20 relative overflow-hidden rounded border-2 cursor-pointer flex-shrink-0 ${selectedImage === `/${imageItem.image}` ? 'border-blue-500' : 'border-transparent'}`}
-                  onClick={() => setSelectedImage(`/${imageItem.image}`)}
+                  className={`w-20 h-20 relative overflow-hidden rounded border-2 cursor-pointer flex-shrink-0 ${selectedImage === getMediaUrl(imageItem.image) ? 'border-blue-500' : 'border-transparent'}`}
+                  onClick={() => setSelectedImage(getMediaUrl(imageItem.image))}
                 >
                   <Image
-                    src={`/${imageItem.image}`}
+                    src={getMediaUrl(imageItem.image) || "/product_placeholder.jpg"}
                     fill
                     sizes="80px"
                     alt="product thumbnail"
@@ -417,7 +423,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
                           if (imagesCacheRef.current.has(variant.id)) {
                             const cached = imagesCacheRef.current.get(variant.id)!;
                             setImages(cached);
-                            setSelectedImage(cached.length > 0 ? `/${cached[0].image}` : variant.mainImage ? `/${variant.mainImage}` : "/product_placeholder.jpg");
+                            setSelectedImage(cached.length > 0 ? getMediaUrl(cached[0].image) : variant.mainImage ? getMediaUrl(variant.mainImage) : "/product_placeholder.jpg");
                             return;
                           }
                           // Fetch images for the selected variant
@@ -431,14 +437,14 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
                             imagesCacheRef.current.set(variant.id, imagesData);
                             setImages(imagesData);
                             if (imagesData.length > 0) {
-                              setSelectedImage(`/${imagesData[0].image}`);
+                              setSelectedImage(getMediaUrl(imagesData[0].image));
                             } else if (variant.mainImage) {
-                              setSelectedImage(`/${variant.mainImage}`);
+                              setSelectedImage(getMediaUrl(variant.mainImage));
                             } else {
                               setSelectedImage("/product_placeholder.jpg");
                             }
                           } catch {
-                            if (variant.mainImage) setSelectedImage(`/${variant.mainImage}`);
+                            if (variant.mainImage) setSelectedImage(getMediaUrl(variant.mainImage));
                             else setSelectedImage("/product_placeholder.jpg");
                             setImages([]);
                           }
@@ -653,7 +659,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
                 {product?.videoUrl ? (
                   <video
                     key={product.videoUrl}
-                    src={`/${product.videoUrl}`}
+                    src={getMediaUrl(product.videoUrl) || undefined}
                     controls
                     className="w-full max-h-[480px] rounded-lg bg-black"
                   />

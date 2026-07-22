@@ -795,7 +795,13 @@ const CheckoutPage = () => {
               {products.map((product) => (
                 <li key={product?.id} className="flex items-center gap-3 py-3">
                   <Image
-                    src={product?.image ? `/${product?.image}` : "/product_placeholder.jpg"}
+                    src={
+                      product?.image
+                        ? product.image.startsWith("http")
+                          ? product.image
+                          : `/${product.image}`
+                        : "/product_placeholder.jpg"
+                    }
                     alt={product?.title}
                     width={56}
                     height={56}

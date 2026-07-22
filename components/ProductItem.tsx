@@ -47,7 +47,13 @@ const ProductItem = ({
       <Link href={`/product/${product.slug}`} onClick={handleClick} className="flex justify-center flex-shrink-0 px-3 pt-3">
         <div className="relative h-40 w-full bg-gray-50 overflow-hidden rounded-xl">
           <Image
-            src={product.mainImage ? `/${product.mainImage}` : "/product_placeholder.jpg"}
+            src={
+              product.mainImage
+                ? product.mainImage.startsWith("http")
+                  ? product.mainImage
+                  : `/${product.mainImage}`
+                : "/product_placeholder.jpg"
+            }
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
