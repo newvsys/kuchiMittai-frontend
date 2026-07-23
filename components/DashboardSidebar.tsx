@@ -39,7 +39,7 @@ const navItems = [
   { href: "/admin/orders",          label: "Orders",           icon: <FaBagShopping /> },
   { href: "/admin/users",           label: "Users",            icon: <FaRegUser /> },
   { href: "/admin/cartons",         label: "Cartons",          icon: <FaBox /> },
-  { href: "/admin/reason-master",   label: "Reason Master",    icon: <MdFormatListBulleted /> },
+  { href: "/admin/api/reason-master",   label: "Reason Master",    icon: <MdFormatListBulleted /> },
   { href: "/admin/refund-process",  label: "Refund Process",   icon: <MdAssignmentReturn /> },
   { href: "/admin/return-requests", label: "Return Request Approval",  icon: <MdOutlineAssignmentReturn /> },
   { href: "/admin/reviews",          label: "Reviews & Ratings",        icon: <MdStar /> },

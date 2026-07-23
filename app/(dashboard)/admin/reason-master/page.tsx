@@ -33,7 +33,7 @@ const TYPE_PREFIX: Record<string, string> = {
 
 const generateUniqueReasonCode = async (type: ReasonType): Promise<string> => {
   const prefix = TYPE_PREFIX[type] ?? type.replace("ORDER-", "");
-  const res = await apiClient.get(`/reasons?type=${encodeURIComponent(type)}`);
+  const res = await apiClient.get(`/api/api/reasons?type=${encodeURIComponent(type)}`);
   const data = res.ok ? await res.json() : { reasons: [] };
   const existingCodes = new Set<string>(
     (data.reasons || []).map((r: { reasonCode: string }) => r.reasonCode)
@@ -77,7 +77,7 @@ const AdminReasonMasterPage = () => {
       if (statusFilter) params.append("status", statusFilter);
       if (typeFilter) params.append("type", typeFilter);
       const query = params.toString();
-      const res = await apiClient.get(`/reasons${query ? `?${query}` : ""}`);
+      const res = await apiClient.get(`/api/reasons${query ? `?${query}` : ""}`);
       if (!res.ok) throw new Error("Failed to fetch reasons");
       const data = await res.json();
       setReasons(data.reasons || []);
@@ -129,7 +129,7 @@ const AdminReasonMasterPage = () => {
           type: form.type,
         });
       } else {
-        res = await apiClient.put(`/api/reason/${formDialog.reasonId}`, {
+        res = await apiClient.put(`/api/api/reason/${formDialog.reasonId}`, {
           reasonDescription: form.reasonDescription.trim(),
           type: form.type,
         });
@@ -154,7 +154,7 @@ const AdminReasonMasterPage = () => {
     if (!deleteDialog.reason) return;
     setDeleteLoading(true);
     try {
-      const res = await apiClient.request(`/api/reason/${deleteDialog.reason.id}`, {
+      const res = await apiClient.request(`/api/api/reason/${deleteDialog.reason.id}`, {
         method: "DELETE",
         body: JSON.stringify({ status: "I" }),
       });
