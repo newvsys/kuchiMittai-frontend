@@ -121,7 +121,7 @@ const OrderHistoryPage = () => {
     try {
       setReturnReasonsLoading(true);
       setReturnReasonsError("");
-      const res = await fetch(`${API_BASE}/api/api/reasons/type/ORDER-RETURN`);
+      const res = await fetch(`${API_BASE}/api/reasons/type/ORDER-RETURN`);
       if (!res.ok) throw new Error("Failed to load return reasons");
       const data = await res.json();
       setReturnReasons(Array.isArray(data) ? data : []);
@@ -172,7 +172,7 @@ const OrderHistoryPage = () => {
     try {
       setCancelReasonsLoading(true);
       setCancelReasonsError("");
-      const res = await fetch(`${API_BASE}/api/api/reasons/type/ORDER-CANCEL`);
+      const res = await fetch(`${API_BASE}/api/reasons/type/ORDER-CANCEL`);
       if (!res.ok) {
         throw new Error("Failed to load cancellation reasons");
       }

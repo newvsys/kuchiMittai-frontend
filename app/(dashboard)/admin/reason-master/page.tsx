@@ -33,7 +33,7 @@ const TYPE_PREFIX: Record<string, string> = {
 
 const generateUniqueReasonCode = async (type: ReasonType): Promise<string> => {
   const prefix = TYPE_PREFIX[type] ?? type.replace("ORDER-", "");
-  const res = await apiClient.get(`/api/api/reasons?type=${encodeURIComponent(type)}`);
+  const res = await apiClient.get(`/api/reasons?type=${encodeURIComponent(type)}`);
   const data = res.ok ? await res.json() : { reasons: [] };
   const existingCodes = new Set<string>(
     (data.reasons || []).map((r: { reasonCode: string }) => r.reasonCode)
