@@ -33,23 +33,24 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
   { href: "/admin/warehouses",      label: "Warehouses",               icon: <MdWarehouse /> },
-  { href: "/admin/categories",      label: "Categories",       icon: <MdCategory /> },
-  { href: "/admin/products",        label: "Products",         icon: <FaTable /> },
-  { href: "/admin/return-policies", label: "Return Policies",  icon: <MdPolicy /> },
-  { href: "/admin/orders",          label: "Orders",           icon: <FaBagShopping /> },
-  { href: "/admin/users",           label: "Users",            icon: <FaRegUser /> },
   { href: "/admin/cartons",         label: "Cartons",          icon: <FaBox /> },
   { href: "/admin/reason-master",   label: "Reason Master",    icon: <MdFormatListBulleted /> },
-  { href: "/admin/refund-process",  label: "Refund Process",   icon: <MdAssignmentReturn /> },
-  { href: "/admin/return-requests", label: "Return Request Approval",  icon: <MdOutlineAssignmentReturn /> },
-  { href: "/admin/reviews",          label: "Reviews & Ratings",        icon: <MdStar /> },
-  { href: "/admin/qa",               label: "Q&A",                      icon: <MdQuestionAnswer /> },
   { href: "/admin/delivery-charges",    label: "Delivery Charges",      icon: <MdLocalShipping /> },
-  { href: "/admin/shipping-management", label: "Shipping Management",   icon: <MdOutlineLocalShipping /> },
-  { href: "/admin/inventory",         label: "Inventory",                icon: <MdInventory /> },
   { href: "/admin/uom",               label: "UOM Master",               icon: <MdStraighten /> },
   { href: "/admin/label-config",      label: "Label Config",             icon: <MdTune /> },
+  { href: "/admin/return-policies", label: "Return Policies",  icon: <MdPolicy /> },
+  { href: "/admin/reviews",          label: "Reviews & Ratings",        icon: <MdStar /> },
+  { href: "/admin/qa",               label: "Q&A",                      icon: <MdQuestionAnswer /> },
   { href: "/admin/flash-messages",    label: "Flash Messages",           icon: <MdCampaign /> },
+  { href: "/admin/categories",      label: "Categories",       icon: <MdCategory /> },
+  { href: "/admin/products",        label: "Products",         icon: <FaTable /> },
+  { href: "/admin/orders",          label: "Orders",           icon: <FaBagShopping /> },
+  { href: "/admin/refund-process",  label: "Refund Process",   icon: <MdAssignmentReturn /> },
+  { href: "/admin/return-requests", label: "Return Request Approval",  icon: <MdOutlineAssignmentReturn /> },
+  { href: "/admin/inventory",         label: "Inventory",                icon: <MdInventory /> },
+  { href: "/admin/shipping-management", label: "Shipping Management",   icon: <MdOutlineLocalShipping /> },
+  { href: "/admin/users",           label: "Users",            icon: <FaRegUser /> },
+  
 ];
 
 const DashboardSidebar = () => {

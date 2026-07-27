@@ -95,7 +95,7 @@ const AdminReturnRequestsPage = () => {
       const params = new URLSearchParams();
       if (orderNum && orderNum.trim()) params.append("orderNumber", orderNum.trim());
       if (status && status.trim()) params.append("status", status.trim());
-      const res = await fetch(`${API_BASE}/api/api/return-requests?${params.toString()}`);
+      const res = await fetch(`${API_BASE}/api/return-requests?${params.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch return requests");
       const data = await res.json();
       setReturns(Array.isArray(data) ? data : []);
@@ -123,7 +123,7 @@ const AdminReturnRequestsPage = () => {
         comments: approvalComment,
         userId: Number((session as any).user.id),
       };
-      const res = await fetch(`${API_BASE}/api/api/return-requests/approve`, {
+      const res = await fetch(`${API_BASE}/api/return-requests/approve`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
