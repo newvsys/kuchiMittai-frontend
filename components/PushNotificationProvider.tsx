@@ -38,7 +38,6 @@ export default function PushNotificationProvider() {
     if (!('serviceWorker' in navigator)) return;
 
     const handleSwMessage = (event: MessageEvent) => {
-      console.log('[push] SW message received:', event.data);
       if (event.data?.type !== 'PUSH_NOTIFICATION') return;
       const { title, body, data } = event.data;
       const orderId = data?.orderId as string | undefined;
@@ -60,29 +59,24 @@ export default function PushNotificationProvider() {
     };
 
     navigator.serviceWorker.addEventListener('message', handleSwMessage);
-    console.log('[push] SW message listener registered');
     return () => navigator.serviceWorker.removeEventListener('message', handleSwMessage);
   }, [addNotification]);
 
   // Register FCM token when an admin session becomes active
   useEffect(() => {
     if (status !== 'authenticated') {
-      console.log('[push] skip: session status =', status);
       return;
     }
 
     const role = (session?.user as any)?.role;
     if (role !== 'admin') {
-      console.log('[push] skip: role is not admin, got =', role);
       return;
     }
-    console.log('[push] admin session detected, initializing FCM...');
 
     let unsubscribeMessage: (() => void) | undefined;
 
     const init = async () => {
       if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-        console.log('[push] skip: Notification or serviceWorker API not supported');
         return;
       }
 
@@ -100,18 +94,12 @@ export default function PushNotificationProvider() {
         `/firebase-messaging-sw.js?${swParams.toString()}`,
         { scope: '/' }
       );
-      console.log('[push] SW registered:', swRegistration.scope);
       await navigator.serviceWorker.ready;
-      console.log('[push] SW ready');
 
       const messaging = await getFirebaseMessaging();
-      if (!messaging) {
-        console.log('[push] skip: getFirebaseMessaging() returned null');
-        return;
-      }
+      if (!messaging) return;
 
       const permission = await Notification.requestPermission();
-      console.log('[push] notification permission:', permission);
       if (permission !== 'granted') return;
 
       const { getToken, onMessage } = await import('firebase/messaging');
@@ -120,24 +108,19 @@ export default function PushNotificationProvider() {
         vapidKey: VAPID_KEY,
         serviceWorkerRegistration: swRegistration,
       });
-      console.log('[push] getToken result:', token ? token.substring(0, 20) + '...' : 'null/empty');
       if (!token) return;
 
       const storedToken = localStorage.getItem(FCM_TOKEN_KEY);
       const tokenRotated = storedToken !== null && storedToken !== token;
-      if (tokenRotated) console.log('[push] FCM token rotated, re-registering');
 
       tokenRef.current = token;
       localStorage.setItem(FCM_TOKEN_KEY, token);
 
       const userId = (session?.user as any)?.id;
-      console.log('[push] registering token with backend, userId =', userId);
       await registerFcmToken(token, userId);
-      console.log('[push] token registered with backend successfully');
 
       // Handle foreground notifications
       unsubscribeMessage = onMessage(messaging, (payload) => {
-        console.log('[push] onMessage fired, payload =', payload);
         const title = payload.notification?.title ?? 'New Notification';
         const body  = payload.notification?.body  ?? '';
         const orderId = payload.data?.orderId as string | undefined;
@@ -158,7 +141,6 @@ export default function PushNotificationProvider() {
 
         toast(`${title}${body ? ': ' + body : ''}`, { duration: 8000 });
       });
-      console.log('[push] onMessage listener registered, ready to receive foreground pushes');
     };
 
     init().catch(e => console.error('[push] init error:', e));
