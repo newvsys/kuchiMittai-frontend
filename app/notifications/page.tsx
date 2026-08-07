@@ -19,95 +19,48 @@ import {
 const NotificationsPage = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-  // Notification feature removed
-  const notifications: any[] = [];
-  const total: number = 0;
-  const page: number = 1;
-  const totalPages: number = 1;
-  const loading: boolean = false;
-  const error: string = '';
-  const selectedIds: string[] = [];
-  const filters: { search?: string; type?: string; isRead?: boolean } = {};
-  const fetchNotifications = (..._args: any[]) => {};
-  const markSelectedAsRead = (..._args: any[]) => {};
-  const deleteSelectedNotifications = (..._args: any[]) => {};
-  const updateFilters = (..._args: any[]) => {};
-  const loadMore = (..._args: any[]) => {};
-  const markNotificationAsRead = (..._args: any[]) => {};
-  const deleteNotificationById = (..._args: any[]) => {};
 
-  const { toggleSelection, selectAll, clearSelection } = useNotificationStore();
+  const {
+    notifications: allNotifications,
+    selectedIds,
+    toggleSelection,
+    selectAll,
+    clearSelection,
+    markAsRead,
+    deleteNotification,
+  } = useNotificationStore();
 
-  const [searchTerm, setSearchTerm] = useState(filters.search || '');
-  const [selectedType, setSelectedType] = useState<string>(filters.type || 'all');
-  const [selectedStatus, setSelectedStatus] = useState<string>(
-    filters.isRead === undefined ? 'all' : filters.isRead ? 'read' : 'unread'
-  );
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedType, setSelectedType] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
-  // Redirect if not authenticated
-  useEffect(() => {
-    if (status === 'loading') return;
-    if (!session) {
-      router.push('/login');
-      return;
-    }
-  }, [session, status, router]);
+  // Client-side filtering of store notifications
+  const notifications = allNotifications.filter(n => {
+    const matchesSearch =
+      !searchTerm ||
+      n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      n.message.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = selectedType === 'all' || n.type === selectedType;
+    const matchesStatus =
+      selectedStatus === 'all' ||
+      (selectedStatus === 'read' && n.isRead) ||
+      (selectedStatus === 'unread' && !n.isRead);
+    return matchesSearch && matchesType && matchesStatus;
+  });
 
-  // Sync local state with store filters
-  useEffect(() => {
-    setSearchTerm(filters.search || '');
-    setSelectedType(filters.type || 'all');
-    setSelectedStatus(
-      filters.isRead === undefined ? 'all' : filters.isRead ? 'read' : 'unread'
-    );
-  }, [filters]);
+  const total = notifications.length;
+  const loading = false;
+  const error = '';
 
-  // Initial fetch
-  useEffect(() => {
-    if (session) {
-      fetchNotifications();
-    }
-  }, [session, fetchNotifications]);
-
-  // Handle search
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateFilters({ 
-      ...filters,
-      search: searchTerm || undefined,
-      page: 1
-    });
+  const handleBulkMarkAsRead = () => {
+    selectedIds.forEach(id => markAsRead(id));
+    clearSelection();
   };
 
-  // Handle filter changes
-  const handleTypeFilter = (type: string) => {
-    setSelectedType(type);
-    updateFilters({
-      ...filters,
-      type: type === 'all' ? undefined : type as NotificationType,
-      page: 1
-    });
-  };
-
-  const handleStatusFilter = (status: string) => {
-    setSelectedStatus(status);
-    updateFilters({
-      ...filters,
-      isRead: status === 'all' ? undefined : status === 'read',
-      page: 1
-    });
-  };
-
-  // Handle bulk actions
-  const handleBulkMarkAsRead = async () => {
-    if (selectedIds.length > 0) {
-      await markSelectedAsRead();
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (selectedIds.length > 0 && confirm(`Are you sure you want to delete ${selectedIds.length} notification(s)?`)) {
-      await deleteSelectedNotifications();
+  const handleBulkDelete = () => {
+    if (selectedIds.length > 0 && confirm(`Delete ${selectedIds.length} notification(s)?`)) {
+      selectedIds.forEach(id => deleteNotification(id));
+      clearSelection();
     }
   };
 
@@ -118,6 +71,18 @@ const NotificationsPage = () => {
       selectAll();
     }
   };
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (!session) router.push('/login');
+  }, [session, status, router]);
+
+  const handleSearch = (e: React.FormEvent) => { e.preventDefault(); };
+
+  const handleTypeFilter = (type: string) => setSelectedType(type);
+
+  const handleStatusFilter = (s: string) => setSelectedStatus(s);
 
   // Loading state
   if (status === 'loading') {
@@ -206,15 +171,6 @@ const NotificationsPage = () => {
                 setSearchTerm('');
                 setSelectedType('all');
                 setSelectedStatus('all');
-                updateFilters({ 
-                  type: undefined, 
-                  isRead: undefined, 
-                  search: undefined, 
-                  page: 1,
-                  limit: 10,
-                  sortBy: 'createdAt',
-                  sortOrder: 'desc'
-                });
               }}
               className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800 underline"
             >
@@ -281,20 +237,14 @@ const NotificationsPage = () => {
               </div>
               <p className="text-red-600 font-medium mb-2">Error loading notifications</p>
               <p className="text-gray-500 mb-4">{error}</p>
-              <button
-                onClick={() => fetchNotifications()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                Try Again
-              </button>
             </div>
           ) : notifications.length === 0 ? (
             <div className="text-center py-12">
               <FaBell className="w-16 h-16 mx-auto text-gray-300 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications found</h3>
               <p className="text-gray-500">
-                {Object.keys(filters).some(key => filters[key as keyof typeof filters] !== undefined && key !== 'page' && key !== 'limit' && key !== 'sortBy' && key !== 'sortOrder')
-                  ? "Try adjusting your filters to see more notifications."
+                {searchTerm || selectedType !== 'all' || selectedStatus !== 'all'
+                  ? 'Try adjusting your filters to see more notifications.'
                   : "You don't have any notifications yet."}
               </p>
             </div>
@@ -306,34 +256,16 @@ const NotificationsPage = () => {
                   notification={notification}
                   isSelected={selectedIds.includes(notification.id)}
                   onToggleSelect={toggleSelection}
-                  onMarkAsRead={markNotificationAsRead}
-                  onDelete={async (id) => {
+                  onMarkAsRead={(id) => markAsRead(id)}
+                  onDelete={(id) => {
                     if (confirm('Are you sure you want to delete this notification?')) {
-                      await deleteNotificationById(id);
+                      deleteNotification(id);
                     }
                   }}
                 />
               ))}
 
-              {/* Load More Button */}
-              {page < totalPages && (
-                <div className="text-center pt-6">
-                  <button
-                    onClick={loadMore}
-                    disabled={loading}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? (
-                      <>
-                        <FaSpinner className="animate-spin inline mr-2" />
-                        Loading...
-                      </>
-                    ) : (
-                      'Load More'
-                    )}
-                  </button>
-                </div>
-              )}
+
             </>
           )}
         </div>
@@ -341,8 +273,7 @@ const NotificationsPage = () => {
         {/* Stats */}
         {total > 0 && (
           <div className="mt-8 text-center text-sm text-gray-500">
-            Showing {notifications.length} of {total} notification{total !== 1 ? 's' : ''}
-            {page < totalPages && ` (Page ${page} of ${totalPages})`}
+            Showing {total} notification{total !== 1 ? 's' : ''}
           </div>
         )}
       </div>

@@ -34,6 +34,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
   const unwrappedParams = React.use(params);
   const [baseProduct, setBaseProduct] = useState<any>(null); // always the original product
   const [product, setProduct] = useState<any>(null); // currently selected product/variant
+  const [isLoading, setIsLoading] = useState(true);
   const [images, setImages] = useState<ImageItem[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [returnPolicyDialog, setReturnPolicyDialog] = useState(false);
@@ -67,6 +68,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
         const res = await fetch(`${API_BASE_URL}/products/productSlug/${unwrappedParams.productSlug}`, { signal });
         if (signal.aborted) return;
         const data = await res.json();
+        setIsLoading(false);
         setBaseProduct(data);
 
         // If main variant is out of stock, auto-select first in-stock variant
@@ -119,6 +121,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
         setProduct(null);
         setImages([]);
         setSelectedImage("/product_placeholder.jpg");
+        setIsLoading(false);
       }
     };
     const timer = setTimeout(() => { fetchProduct(); }, 0);
@@ -199,6 +202,14 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
     const lensY = Math.max(0, Math.min(cy - LENS_SIZE / 2, rect.height - LENS_SIZE));
     setZoomLens({ lensX, lensY, containerW: rect.width, containerH: rect.height });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent" />
+      </div>
+    );
+  }
 
   if (!product) {
     return <div className="text-center py-10 text-xl">Product not found.</div>;

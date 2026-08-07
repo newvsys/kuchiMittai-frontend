@@ -178,7 +178,7 @@ const Filters = () => {
           <div className="border-t border-gray-100 mt-3 pt-3">
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Categories</h4>
             <div className="flex flex-col gap-1">
-            {(showAllCategories ? categories : categories.slice(0, 5)).map((cat) => {
+            {(showAllCategories ? categories : categories.slice(0, 10)).map((cat) => {
               const label = cat.title.replace(/%20/g, " ");
               const catId = String(cat.id);
               const isChecked = selectedCategories.includes(catId);
@@ -202,12 +202,12 @@ const Filters = () => {
                 </div>
               );
             })}
-            {categories.length > 5 && (
+            {categories.length > 10 && (
               <button
                 onClick={() => setShowAllCategories((prev) => !prev)}
                 className="text-sm text-blue-500 hover:underline text-left mt-1"
               >
-                {showAllCategories ? "Show less" : `+${categories.length - 5} more`}
+                {showAllCategories ? "Show less" : `+${categories.length - 10} more`}
               </button>
             )}
             {selectedCategories.length > 0 && (

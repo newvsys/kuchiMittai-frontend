@@ -19,16 +19,10 @@ export function sanitize(text: string | null | undefined): string {
     });
   }
   
-  // For server-side, use comprehensive escaping
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;')
-    .replace(/\//g, '&#x2F;')
-    .replace(/`/g, '&#x60;')
-    .replace(/=/g, '&#x3D;');
+  // Server-side: strip HTML tags to match DOMPurify's plain-text output.
+  // React encodes special characters automatically when rendering in JSX,
+  // so returning raw text here is correct and avoids the server/client mismatch.
+  return text.replace(/<[^>]*>/g, '');
 }
 
 /**

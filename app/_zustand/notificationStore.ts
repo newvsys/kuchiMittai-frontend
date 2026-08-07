@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Notification, NotificationFilters, NotificationResponse } from '@/types/notification';
 
 interface NotificationState {
@@ -28,7 +29,9 @@ interface NotificationState {
   clearNotifications: () => void;
 }
 
-export const useNotificationStore = create<NotificationState>((set, get) => ({
+export const useNotificationStore = create<NotificationState>()(
+  persist(
+    (set, get) => ({
   // Initial state
   notifications: [],
   unreadCount: 0,
@@ -132,4 +135,13 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       totalPages: 0,
       selectedIds: []
     })
-}));
+  }),
+  {
+    name: 'push-notifications',
+    partialize: (state) => ({
+      notifications: state.notifications,
+      unreadCount: state.unreadCount,
+      total: state.total,
+    }),
+  }
+));

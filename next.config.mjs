@@ -67,6 +67,23 @@ const nextConfig = {
             },
           ],
         },
+        // Service worker must never be served from a CDN cache.
+        // - Cache-Control: no-cache forces the browser to revalidate on every page load.
+        // - Service-Worker-Allowed: / explicitly permits root-scope registration even
+        //   though the file already lives at the root (belt-and-suspenders for Vercel).
+        {
+          source: '/firebase-messaging-sw.js',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'no-cache, no-store, must-revalidate',
+            },
+            {
+              key: 'Service-Worker-Allowed',
+              value: '/',
+            },
+          ],
+        },
       ];
     },
 };

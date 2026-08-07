@@ -20,6 +20,7 @@ import { FaHome } from "react-icons/fa";
 import SearchInput from "./SearchInput";
 import CartElement from "./CartElement";
 import HeartElement from "./HeartElement";
+import NotificationBell from "./NotificationBell";
 import { useWishlistStore } from "@/app/_zustand/wishlistStore";
 import { useProductStore } from "@/app/_zustand/store";
 
@@ -151,6 +152,7 @@ const HeaderTop = () => {
             </>
           )}
           <li className="flex items-center gap-x-4">
+            {session?.user?.role === 'admin' && <NotificationBell />}
             <HeartElement wishQuantity={wishQuantity} />
             <CartElement />
           </li>

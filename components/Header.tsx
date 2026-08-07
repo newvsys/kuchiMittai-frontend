@@ -14,8 +14,6 @@ import React, { useEffect, useState } from "react";
 import HeaderTop from "./HeaderTop";
 import Image from "next/image";
 import Link from "next/link";
-import { FaBell } from "react-icons/fa6";
-
 import CartElement from "./CartElement";
 import HeartElement from "./HeartElement";
 import CategoryNavBar from "./CategoryNavBar";
