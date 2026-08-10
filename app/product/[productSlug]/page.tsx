@@ -563,8 +563,7 @@ const ZOOM_PANEL_SIZE = 380;
           onClick={() => setFullViewOpen(false)}
         >
           <div
-            className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden"
-            style={{ width: "80vw", height: "80vh" }}
+            className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden w-[95vw] h-[95vh] sm:w-[85vw] sm:h-[85vh] md:w-[80vw] md:h-[80vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header: tabs + close */}
@@ -618,7 +617,7 @@ const ZOOM_PANEL_SIZE = 380;
                     </button>
                   )}
 
-                  <div className="relative w-full h-full px-14" style={{ minHeight: 360 }}>
+                  <div className="relative w-full h-full px-10 sm:px-14">
                     <Image
                       src={slideImages[fullViewIndex] || "/product_placeholder.jpg"}
                       fill
@@ -666,7 +665,7 @@ const ZOOM_PANEL_SIZE = 380;
 
             {/* Video tab */}
             {fullViewTab === "video" && (
-              <div className="flex-1 flex flex-col items-center justify-center p-8 min-h-[360px]">
+              <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 min-h-0 overflow-y-auto">
                 {product?.videoUrl ? (
                   <video
                     key={product.videoUrl}

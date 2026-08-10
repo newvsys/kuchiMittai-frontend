@@ -239,15 +239,6 @@ const RegisterPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center py-8 px-4">
       <div className="w-full max-w-md">
 
-        {/* Brand logo */}
-        <div className="text-center mb-6">
-          <img
-            src="/companyLogo/CompanyLogo.png"
-            alt="Logo"
-            className="h-12 w-auto mx-auto object-contain"
-            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-          />
-        </div>
 
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
