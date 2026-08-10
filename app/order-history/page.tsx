@@ -439,9 +439,9 @@ const OrderHistoryPage = () => {
             <div className="h-8 w-36 bg-gray-200 rounded-lg animate-pulse mb-2" />
             <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
           </div>
-          <div className="flex gap-6 items-start">
+          <div className="flex flex-col gap-4 lg:flex-row lg:gap-6 lg:items-start">
             {/* Sidebar skeleton */}
-            <div className="w-56 flex-shrink-0 bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            <div className="w-full lg:w-56 lg:flex-shrink-0 bg-white rounded-2xl border border-gray-200 overflow-hidden">
               <div className="h-9 bg-gray-200 animate-pulse" />
               <div className="p-5 space-y-3">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -576,11 +576,11 @@ const OrderHistoryPage = () => {
           </div>
         </div>
 
-        <div className="flex gap-6 items-start">
+        <div className="flex flex-col gap-4 lg:flex-row lg:gap-6 lg:items-start">
 
           {/* ── Filters sidebar ── */}
-          <aside className="w-56 flex-shrink-0 bg-white rounded-2xl border border-gray-200 overflow-hidden sticky top-4">
-            <p className="text-sm font-bold text-gray-700 uppercase tracking-widest px-5 py-3 bg-gray-100 border-b border-gray-200">Filters</p>
+          <aside className="w-full lg:w-56 lg:flex-shrink-0 bg-white rounded-2xl border border-gray-200 overflow-hidden lg:sticky lg:top-4">
+            <p className="text-sm font-bold text-white uppercase tracking-widest px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-500 border-b border-blue-700">Filters</p>
             <div className="p-5">
 
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Status</p>
@@ -665,7 +665,7 @@ const OrderHistoryPage = () => {
                     <div key={order.orderId} className="rounded-xl border border-gray-200 bg-gray-50 overflow-hidden">
 
                       {/* Order header */}
-                      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 bg-gray-200 border-b border-gray-300">
+                      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 bg-gradient-to-r from-gray-100 to-gray-50 border-b border-gray-200">
                         <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
                           <span className="flex items-center gap-1">
                             <span className="font-semibold text-gray-600">Order #</span>
@@ -705,7 +705,7 @@ const OrderHistoryPage = () => {
                           ))}
                         </div>
                         <div className="flex items-center gap-3">
-                          <span className="text-xs text-gray-500">Status: <span className="font-semibold text-gray-800">{order.status === "P" ? "PENDING" : order.status}</span></span>
+                          {getStatusBadge(order.status)}
                           <button
                             type="button"
                             className="text-xs text-blue-600 hover:text-blue-800 font-semibold border border-blue-200 rounded-lg px-3 py-1 hover:bg-blue-50 transition-colors"

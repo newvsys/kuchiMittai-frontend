@@ -400,9 +400,9 @@ const ProfilePage = () => {
               <div className="h-3 w-48 bg-gray-200 rounded animate-pulse" />
             </div>
           </div>
-          <div className="flex gap-6 items-start pb-12">
+          <div className="flex flex-col gap-4 lg:flex-row lg:gap-6 lg:items-start pb-12">
             {/* Sidebar */}
-            <div className="w-56 flex-shrink-0 bg-white rounded-2xl border border-gray-200 p-3 space-y-1">
+            <div className="w-full lg:w-56 lg:flex-shrink-0 bg-white rounded-2xl border border-gray-200 p-3 space-y-1">
               {[1,2,3].map(i => <div key={i} className="h-9 bg-gray-100 rounded-xl animate-pulse" />)}
             </div>
             {/* Main content */}
@@ -464,10 +464,10 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        <div className="flex gap-6 items-start pb-12">
+        <div className="flex flex-col gap-4 lg:flex-row lg:gap-6 lg:items-start pb-12">
 
           {/* Sidebar nav */}
-          <aside className="w-56 flex-shrink-0 bg-white rounded-2xl border border-gray-200 p-3">
+          <aside className="w-full lg:w-56 lg:flex-shrink-0 lg:sticky lg:top-6 bg-white rounded-2xl border border-gray-200 p-3">
             {([
               { key: "profile", label: "Profile Info", icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg> },
               { key: "addresses", label: "Addresses", icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg> },
@@ -513,9 +513,9 @@ const ProfilePage = () => {
             {/* ── Profile Info tab ── */}
             {activeTab === "profile" && (
               <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-                <div className="bg-gray-100 px-6 py-4 border-b border-gray-200">
-                  <h3 className="text-base font-semibold text-gray-800">Profile Information</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">Manage your personal details</p>
+              <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-3.5 border-b border-blue-700 rounded-t-2xl">
+                  <h3 className="text-sm font-bold text-white tracking-wide">Profile Information</h3>
+                  <p className="text-xs text-blue-100 mt-0.5">Manage your personal details</p>
                 </div>
                 <div className="divide-y divide-gray-50 px-6">
 
@@ -628,8 +628,8 @@ const ProfilePage = () => {
             {/* ── Addresses tab ── */}
             {activeTab === "addresses" && (
               <div className="bg-white rounded-xl border border-gray-200 p-6">
-                <div className="bg-gray-100 border-b border-gray-200 -mx-6 -mt-6 px-6 py-3 mb-5 rounded-t-xl">
-                  <h3 className="text-base font-semibold text-gray-800">Saved Addresses</h3>
+                <div className="bg-gradient-to-r from-blue-600 to-blue-500 border-b border-blue-700 -mx-6 -mt-6 px-6 py-3.5 mb-5 rounded-t-xl">
+                  <h3 className="text-sm font-bold text-white tracking-wide">Saved Addresses</h3>
                 </div>
 
                 {(customer.addresses || []).length === 0 && (

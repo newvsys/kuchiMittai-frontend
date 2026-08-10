@@ -191,8 +191,8 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
     return () => window.removeEventListener("keydown", handleKey);
   }, [fullViewOpen]);
 
-  const LENS_SIZE = 150;
-  const ZOOM_PANEL_SIZE = 600;
+const LENS_SIZE = 120;
+const ZOOM_PANEL_SIZE = 380;
 
   const handleMainImageMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -230,7 +230,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
           <span className="min-w-0 max-w-full truncate font-semibold text-gray-800 sm:max-w-sm">{sanitize(product?.title)}</span>
         </nav>
         <div className="flex flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 lg:flex-row lg:items-start lg:justify-center lg:gap-x-10 lg:p-8">
-          <div className="relative w-full max-w-[500px] self-center lg:self-start">
+          <div className="relative w-full max-w-[360px] self-center lg:self-start">
             <div className="relative aspect-square w-full">
               {/* Prev arrow */}
               {slideImages.length > 1 && (
@@ -253,7 +253,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
                 <Image
                   src={selectedImage || "/product_placeholder.jpg"}
                   fill
-                  sizes="(max-width: 640px) 300px, (max-width: 1024px) 350px, 500px"
+                  sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 360px"
                   alt="main image"
                   className="object-contain p-2"
                 />
