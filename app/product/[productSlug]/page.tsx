@@ -217,21 +217,21 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-screen-2xl mx-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 py-6">
         {/* Breadcrumb */}
-        <nav className="mb-5 flex items-center gap-2 text-xl font-medium">
-          <a href="/search?categoryId=0&price=10000&minPrice=0" className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 transition-colors">
+        <nav className="mb-5 flex flex-wrap items-center gap-2 text-sm font-medium sm:text-base">
+          <a href="/search?categoryId=0&price=10000&minPrice=0" className="flex items-center gap-1.5 text-blue-600 transition-colors hover:text-blue-800">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75a.75.75 0 01-.75-.75v-4.5h-6V21a.75.75 0 01-.75.75H3.75A.75.75 0 013 21V9.75z"/></svg>
             Home
           </a>
           <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
-          <a href="/search?categoryId=0&price=10000&minPrice=0" className="text-blue-600 hover:text-blue-800 transition-colors">Products</a>
+          <a href="/search?categoryId=0&price=10000&minPrice=0" className="text-blue-600 transition-colors hover:text-blue-800">Products</a>
           <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
-          <span className="text-gray-800 font-semibold truncate max-w-sm">{sanitize(product?.title)}</span>
+          <span className="min-w-0 max-w-full truncate font-semibold text-gray-800 sm:max-w-sm">{sanitize(product?.title)}</span>
         </nav>
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 flex justify-center gap-x-12 max-lg:flex-col items-center gap-y-6">
-          <div className="relative">
-            <div className="relative w-[500px] max-w-full aspect-square max-lg:w-[350px] max-sm:w-[300px]">
+        <div className="flex flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 lg:flex-row lg:items-start lg:justify-center lg:gap-x-10 lg:p-8">
+          <div className="relative w-full max-w-[500px] self-center lg:self-start">
+            <div className="relative aspect-square w-full">
               {/* Prev arrow */}
               {slideImages.length > 1 && (
                 <button
@@ -326,7 +326,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
                 Click to see full view
               </button>
             </div>
-            <div className="flex justify-around mt-3 flex-wrap gap-y-1 max-[500px]:justify-center max-[500px]:gap-x-1">
+            <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-around">
               {images.map((imageItem: ImageItem, key: number) => (
                 <div
                   key={imageItem.imageID + key}
@@ -344,17 +344,17 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
               ))}
             </div>
           </div>
-          <div className="flex flex-col gap-y-7 text-black max-[500px]:text-center">
-            <h1 className="text-2xl font-bold text-gray-900 leading-snug">{sanitize(product?.title)}</h1>
+          <div className="flex min-w-0 flex-1 flex-col gap-y-6 text-black max-[500px]:text-center">
+            <h1 className="text-xl font-bold leading-snug text-gray-900 sm:text-2xl">{sanitize(product?.title)}</h1>
             {product?.inStock !== 1 ? (
-              <p className="text-xl font-semibold text-red-500">Currently out of stock</p>
+              <p className="text-lg font-semibold text-red-500 sm:text-xl">Currently out of stock</p>
             ) : (
               <>
                 <div className="flex flex-col gap-y-1">
                   {product?.mrp && product.mrp > product.price ? (
                     <>
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <p className="text-2xl font-bold text-gray-900">₹{product.price}</p>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <p className="text-xl font-bold text-gray-900 sm:text-2xl">₹{product.price}</p>
                         <p className="text-base text-gray-400 line-through">MRP ₹{product.mrp}</p>
                         <span className="bg-green-100 text-green-700 text-sm font-semibold px-2 py-0.5 rounded">
                           {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% off
@@ -365,7 +365,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
                       </p>
                     </>
                   ) : (
-                    <p className="text-2xl font-bold text-gray-900">₹{product?.price}</p>
+                    <p className="text-xl font-bold text-gray-900 sm:text-2xl">₹{product?.price}</p>
                   )}
                 </div>
                 <StockAvailabillity stock={product?.stock || 0} inStock={product?.inStock} />
@@ -418,8 +418,8 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
                 ];
                 const uniqueVariants = allVariants.filter((v, idx, arr) => arr.findIndex(x => x.sku === v.sku) === idx);
                 return (
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className="font-semibold mr-2">Size:</span>
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    <span className="mr-2 font-semibold">Size:</span>
                     {uniqueVariants.map((variant: any) => (
                       <button
                         key={variant.sku}

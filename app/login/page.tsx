@@ -243,20 +243,30 @@ const LoginPage = () => {
         </div>
       )}
 
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-start justify-center pt-6 pb-6 px-4 overflow-y-auto">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center py-8 px-4">
 <div className="w-full max-w-sm">
 
+        {/* Brand logo */}
+        <div className="text-center mb-6">
+          <img
+            src="/companyLogo/CompanyLogo.png"
+            alt="Logo"
+            className="h-12 w-auto mx-auto object-contain"
+            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+          />
+        </div>
+
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl border-2 border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
 
           {/* Card Header */}
-          <div className="bg-blue-500 px-6 py-2.5 flex items-center justify-center gap-2">
+          <div className="bg-blue-500 px-6 py-3 flex items-center justify-center gap-2">
             <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/20 flex-shrink-0">
               <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-lg font-bold text-white">
               {isAdminLogin ? "Admin Portal" : "Sign In"}
             </h1>
           </div>

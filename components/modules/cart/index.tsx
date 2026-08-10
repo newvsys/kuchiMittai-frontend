@@ -82,8 +82,8 @@ export const CartModule = () => {
     <>
     {!hydrated ? (
       /* Skeleton while Zustand rehydrates from localStorage */
-      <div className="lg:grid lg:grid-cols-12 lg:gap-x-6 xl:gap-x-8">
-        <div className="lg:col-span-7 rounded-2xl border border-gray-200 overflow-hidden bg-white">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+        <div className="rounded-2xl border border-gray-200 overflow-hidden bg-white">
           <div className="bg-gray-100 border-b border-gray-200 px-5 py-3">
             <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
           </div>
@@ -98,7 +98,7 @@ export const CartModule = () => {
             </div>
           ))}
         </div>
-        <div className="lg:col-span-5 mt-6 lg:mt-0 rounded-2xl border border-gray-200 bg-white p-6">
+        <div className="rounded-2xl border border-gray-200 bg-white p-6">
           <div className="space-y-3">
             {[1, 2, 3].map(i => (
               <div key={i} className="h-4 bg-gray-200 rounded animate-pulse" style={{ width: `${70 - i * 10}%` }} />
@@ -107,8 +107,8 @@ export const CartModule = () => {
         </div>
       </div>
     ) : (
-    <form className="lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-6 xl:gap-x-8">
-      <section aria-labelledby="cart-heading" className="lg:col-span-7">
+    <form className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+      <section aria-labelledby="cart-heading" className="min-w-0">
         <div className="rounded-2xl border border-gray-200 overflow-hidden bg-white">
           <div className="bg-gray-100 border-b border-gray-200 px-5 py-3">
             <h2 id="cart-heading" className="text-sm font-bold text-gray-800">
@@ -139,7 +139,7 @@ export const CartModule = () => {
                 <Image
                   width={96}
                   height={96}
-                  src={product?.image ? `/${product.image}` : "/product_placeholder.jpg"}
+                  src={product?.image ? (product.image.startsWith("http") ? product.image : `/${product.image}`) : "/product_placeholder.jpg"}
                   alt="laptop image"
                   className="h-20 w-20 sm:h-24 sm:w-24 rounded-xl object-cover border border-gray-100"
                 />
@@ -210,7 +210,7 @@ export const CartModule = () => {
       {/* Order summary */}
       <section
         aria-labelledby="summary-heading"
-        className="rounded-2xl border border-gray-200 overflow-hidden bg-white lg:col-span-5 mt-6 lg:mt-0"
+        className="rounded-2xl border border-gray-200 overflow-hidden bg-white sticky top-6"
       >
         <div className="bg-blue-500 border-b border-blue-600 px-6 py-3">
           <h2 id="summary-heading" className="text-sm font-bold text-white">Order Summary</h2>

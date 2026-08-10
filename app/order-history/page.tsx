@@ -433,8 +433,8 @@ const OrderHistoryPage = () => {
   if (status === "loading" || !session || loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-10">
-          {/* Header skeleton */}
+        <div className="max-w-screen-xl mx-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 py-10">
+          {/* Header skeleton */
           <div className="mb-8">
             <div className="h-8 w-36 bg-gray-200 rounded-lg animate-pulse mb-2" />
             <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
@@ -566,9 +566,9 @@ const OrderHistoryPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-10">
+      <div className="max-w-screen-xl mx-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 py-10">
 
-        {/* Page header */}
+        {/* Page header */
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">My Orders</h2>
@@ -579,37 +579,37 @@ const OrderHistoryPage = () => {
         <div className="flex gap-6 items-start">
 
           {/* ── Filters sidebar ── */}
-          <aside className="w-96 flex-shrink-0 bg-white rounded-2xl border border-gray-200 overflow-hidden sticky top-4">
-            <p className="text-lg font-bold text-gray-700 uppercase tracking-widest px-5 py-3 bg-gray-300 border-b border-gray-300">Filters</p>
+          <aside className="w-56 flex-shrink-0 bg-white rounded-2xl border border-gray-200 overflow-hidden sticky top-4">
+            <p className="text-sm font-bold text-gray-700 uppercase tracking-widest px-5 py-3 bg-gray-100 border-b border-gray-200">Filters</p>
             <div className="p-5">
 
-            <p className="text-lg font-semibold text-gray-400 uppercase tracking-wide mb-2">Status</p>
-            <div className="space-y-3 text-xl mb-5">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Status</p>
+            <div className="space-y-2.5 mb-5">
               {statusOptions.map(option => (
-                <label key={option} className="flex items-center gap-3 cursor-pointer group">
+                <label key={option} className="flex items-center gap-2.5 cursor-pointer group">
                   <input
                     type="checkbox"
-                    className="h-5 w-5 rounded accent-blue-600"
+                    className="h-4 w-4 rounded accent-blue-600"
                     checked={selectedStatuses.includes(option)}
                     onChange={() => toggleStatusFilter(option)}
                   />
-                  <span className={`text-xl transition-colors ${selectedStatuses.includes(option) ? "text-blue-600 font-semibold" : "text-gray-600 group-hover:text-gray-900"}`}>{option}</span>
+                  <span className={`text-sm transition-colors ${selectedStatuses.includes(option) ? "text-blue-600 font-semibold" : "text-gray-600 group-hover:text-gray-900"}`}>{option}</span>
                 </label>
               ))}
             </div>
 
-            <p className="text-lg font-semibold text-gray-400 uppercase tracking-wide mb-2">Order Time</p>
-            <div className="space-y-3 text-xl">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Order Time</p>
+            <div className="space-y-2.5">
               {([["all","All time"],["last30","Last 30 days"],["lastYear","Last 1 year"],["older","Older"]] as const).map(([val, label]) => (
-                <label key={val} className="flex items-center gap-3 cursor-pointer group">
+                <label key={val} className="flex items-center gap-2.5 cursor-pointer group">
                   <input
                     type="radio"
                     name="orderTime"
-                    className="h-5 w-5 accent-blue-600"
+                    className="h-4 w-4 accent-blue-600"
                     checked={orderTimeFilter === val}
                     onChange={() => setOrderTimeFilter(val)}
                   />
-                  <span className={`text-xl transition-colors ${orderTimeFilter === val ? "text-blue-600 font-semibold" : "text-gray-600 group-hover:text-gray-900"}`}>{label}</span>
+                  <span className={`text-sm transition-colors ${orderTimeFilter === val ? "text-blue-600 font-semibold" : "text-gray-600 group-hover:text-gray-900"}`}>{label}</span>
                 </label>
               ))}
             </div>

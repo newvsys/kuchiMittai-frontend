@@ -765,7 +765,7 @@ const CheckoutPage = () => {
         </div>
       )}
 
-      <div className="w-full px-4 sm:px-6 lg:px-10 py-6">
+      <div className="max-w-screen-xl mx-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 py-6">
         {/* Breadcrumb */}
         <nav className="mb-6 flex items-center gap-2 text-sm font-medium">
           <a href="/search?categoryId=0&price=10000&minPrice=0" className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 transition-colors">
@@ -781,12 +781,12 @@ const CheckoutPage = () => {
           <svg className="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
           <span className="text-gray-400">Confirmation</span>
         </nav>
-        <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-4 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
 
           {/* Order Summary — right column on desktop, below form on mobile */}
-          <div className="order-last lg:order-none">
+          <div className="order-last lg:order-last">
           <div className="sticky top-6">
-          <section aria-labelledby="summary-heading" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+          <section aria-labelledby="summary-heading" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
             <div className="bg-gradient-to-r from-blue-600 to-blue-500 -mx-6 -mt-6 px-6 py-3.5 mb-5 rounded-t-2xl">
               <h2 id="summary-heading" className="text-sm font-bold text-white tracking-wide">Order Summary</h2>
             </div>
@@ -901,7 +901,7 @@ const CheckoutPage = () => {
           </div>
 
           {/* LEFT — Contact & Shipping form */}
-          <form className="space-y-5 order-first">
+          <form className="min-w-0 space-y-5 order-first">
             {/* Address skeleton — shown while customer details are loading for logged-in users */}
             {customerLoading && status !== "unauthenticated" && (
               <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">

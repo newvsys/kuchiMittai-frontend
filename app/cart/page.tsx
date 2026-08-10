@@ -6,9 +6,9 @@ import { Suspense } from "react";
 const CartPage = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="w-full px-4 pb-16 pt-8 sm:px-6 lg:px-8">
+      <div className="max-w-screen-xl mx-auto overflow-x-hidden px-4 pb-16 pt-8 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
-        <nav className="mb-6 flex items-center gap-2 text-xl font-medium">
+        <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm font-medium sm:text-base">
           <a href="/search?categoryId=0&price=10000&minPrice=0" className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75a.75.75 0 01-.75-.75v-4.5h-6V21a.75.75 0 01-.75.75H3.75A.75.75 0 013 21V9.75z"/></svg>
             Home
