@@ -568,7 +568,7 @@ const OrderHistoryPage = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-screen-xl mx-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 py-10">
 
-        {/* Page header */
+        {/* Page header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">My Orders</h2>
