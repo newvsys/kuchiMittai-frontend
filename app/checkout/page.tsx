@@ -781,7 +781,7 @@ const CheckoutPage = () => {
           <svg className="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
           <span className="text-gray-400">Confirmation</span>
         </nav>
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_500px] gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_650px] gap-2 items-start">
 
           {/* Order Summary — right column on desktop, below form on mobile */}
           <div className="order-last lg:order-last">

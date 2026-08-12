@@ -441,7 +441,7 @@ const OrderHistoryPage = () => {
           </div>
           <div className="flex flex-col gap-4 lg:flex-row lg:gap-6 lg:items-start">
             {/* Sidebar skeleton */}
-            <div className="w-full lg:w-56 lg:flex-shrink-0 bg-white rounded-2xl border border-gray-200 overflow-hidden">
+            <div className="w-full lg:w-80 lg:flex-shrink-0 bg-white rounded-2xl border border-gray-200 overflow-hidden">
               <div className="h-9 bg-gray-200 animate-pulse" />
               <div className="p-5 space-y-3">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -579,7 +579,7 @@ const OrderHistoryPage = () => {
         <div className="flex flex-col gap-4 lg:flex-row lg:gap-6 lg:items-start">
 
           {/* ── Filters sidebar ── */}
-          <aside className="w-full lg:w-56 lg:flex-shrink-0 bg-white rounded-2xl border border-gray-200 overflow-hidden lg:sticky lg:top-4">
+          <aside className="w-full lg:w-80 lg:flex-shrink-0 bg-white rounded-2xl border border-gray-200 overflow-hidden lg:sticky lg:top-4">
             <p className="text-sm font-bold text-white uppercase tracking-widest px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-500 border-b border-blue-700">Filters</p>
             <div className="p-5">
 

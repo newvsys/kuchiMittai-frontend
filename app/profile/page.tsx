@@ -389,11 +389,10 @@ const ProfilePage = () => {
   if (status === "loading" || !session || loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        {/* Banner */}
-        <div className="h-20 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500" />
+        
         <div className="max-w-screen-xl mx-auto overflow-x-hidden px-4 sm:px-6 lg:px-8">
           {/* Avatar row */}
-          <div className="-mt-14 mb-8 flex items-end gap-4">
+          <div className="mt-4 mb-6 flex items-end gap-4">
             <div className="w-24 h-24 rounded-full ring-4 ring-white shadow-lg bg-gray-200 animate-pulse flex-shrink-0" />
             <div className="mb-2 space-y-2">
               <div className="h-5 w-36 bg-gray-200 rounded animate-pulse" />
@@ -402,7 +401,7 @@ const ProfilePage = () => {
           </div>
           <div className="flex flex-col gap-4 lg:flex-row lg:gap-6 lg:items-start pb-12">
             {/* Sidebar */}
-            <div className="w-full lg:w-72 lg:flex-shrink-0 bg-white rounded-2xl border border-gray-200 p-3 space-y-1">
+            <div className="w-full lg:w-96 lg:flex-shrink-0 bg-white rounded-2xl border border-gray-200 p-3 space-y-1">
               {[1,2,3].map(i => <div key={i} className="h-9 bg-gray-100 rounded-xl animate-pulse" />)}
             </div>
             {/* Main content */}
@@ -444,12 +443,11 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Banner */}
-      <div className="h-20 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500" />
+      
 
       <div className="max-w-screen-xl mx-auto overflow-x-hidden px-4 sm:px-6 lg:px-8">
-        {/* Avatar row — overlaps banner */}
-        <div className="-mt-14 mb-8 flex items-end gap-4">
+        {/* Avatar row */}
+        <div className="mt-4 mb-6 flex items-end gap-4">
           <div className="w-24 h-24 rounded-full ring-4 ring-white shadow-lg bg-white flex items-center justify-center flex-shrink-0 overflow-hidden">
             {initials ? (
               <span className="text-3xl font-bold text-blue-600">{initials}</span>
@@ -467,7 +465,7 @@ const ProfilePage = () => {
         <div className="flex flex-col gap-4 lg:flex-row lg:gap-6 lg:items-start pb-12">
 
           {/* Sidebar nav */}
-          <aside className="w-full lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-6 bg-white rounded-2xl border border-gray-200 p-3">
+          <aside className="w-full lg:w-96 lg:flex-shrink-0 lg:sticky lg:top-6 bg-white rounded-2xl border border-gray-200 p-3">
             {([
               { key: "profile", label: "Profile Info", icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg> },
               { key: "addresses", label: "Addresses", icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg> },

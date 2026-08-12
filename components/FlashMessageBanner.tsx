@@ -79,19 +79,6 @@ const FlashMessageBanner = () => {
       `}</style>
 
       <div className="w-full flex items-center text-lg border-b border-gray-100 overflow-hidden">
-        {/* Dots */}
-        {messages.length > 1 && (
-          <div className="flex-shrink-0 flex items-center gap-1 px-2">
-            {messages.map((_, i) => (
-              <span key={i} className="rounded-full transition-all duration-300" style={{
-                width: i === activeIdx ? "14px" : "5px",
-                height: "5px",
-                backgroundColor: i === activeIdx ? "#2563eb" : "#93c5fd",
-              }} />
-            ))}
-          </div>
-        )}
-
         {/* Ticker */}
         <div
           className="flex-1 overflow-hidden py-2"

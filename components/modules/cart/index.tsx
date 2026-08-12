@@ -82,7 +82,7 @@ export const CartModule = () => {
     <>
     {!hydrated ? (
       /* Skeleton while Zustand rehydrates from localStorage */
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_470px] gap-6 items-start">
         <div className="rounded-2xl border border-gray-200 overflow-hidden bg-white">
           <div className="bg-gray-100 border-b border-gray-200 px-5 py-3">
             <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
@@ -107,7 +107,7 @@ export const CartModule = () => {
         </div>
       </div>
     ) : (
-    <form className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+    <form className="grid grid-cols-1 lg:grid-cols-[1fr_470px] gap-6 items-start">
       <section aria-labelledby="cart-heading" className="min-w-0">
         <div className="rounded-2xl border border-gray-200 overflow-hidden bg-white">
           <div className="bg-gray-100 border-b border-gray-200 px-5 py-3">

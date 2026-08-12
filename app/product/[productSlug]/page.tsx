@@ -217,7 +217,7 @@ const ZOOM_PANEL_SIZE = 380;
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-screen-2xl mx-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-screen-2xl mx-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 py-3">
         {/* Breadcrumb */}
         <nav className="mb-5 flex flex-wrap items-center gap-2 text-sm font-medium sm:text-base">
           <a href="/search?categoryId=0&price=10000&minPrice=0" className="flex items-center gap-1.5 text-blue-600 transition-colors hover:text-blue-800">
@@ -229,8 +229,8 @@ const ZOOM_PANEL_SIZE = 380;
           <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
           <span className="min-w-0 max-w-full truncate font-semibold text-gray-800 sm:max-w-sm">{sanitize(product?.title)}</span>
         </nav>
-        <div className="flex flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 lg:flex-row lg:items-start lg:justify-center lg:gap-x-10 lg:p-8">
-          <div className="relative w-full max-w-[360px] self-center lg:self-start">
+        <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-3 sm:p-4 lg:flex-row lg:items-center lg:justify-center lg:gap-x-8 lg:p-5">
+          <div className="relative w-full max-w-[200px] self-center mx-auto">
             <div className="relative aspect-square w-full">
               {/* Prev arrow */}
               {slideImages.length > 1 && (
@@ -253,7 +253,7 @@ const ZOOM_PANEL_SIZE = 380;
                 <Image
                   src={selectedImage || "/product_placeholder.jpg"}
                   fill
-                  sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 360px"
+                  sizes="(max-width: 640px) 200px, (max-width: 1024px) 200px, 200px"
                   alt="main image"
                   className="object-contain p-2"
                 />
@@ -330,7 +330,7 @@ const ZOOM_PANEL_SIZE = 380;
               {images.map((imageItem: ImageItem, key: number) => (
                 <div
                   key={imageItem.imageID + key}
-                  className={`w-20 h-20 relative overflow-hidden rounded border-2 cursor-pointer flex-shrink-0 ${selectedImage === getMediaUrl(imageItem.image) ? 'border-blue-500' : 'border-transparent'}`}
+                  className={`w-14 h-14 relative overflow-hidden rounded border-2 cursor-pointer flex-shrink-0 ${selectedImage === getMediaUrl(imageItem.image) ? 'border-blue-500' : 'border-transparent'}`}
                   onClick={() => setSelectedImage(getMediaUrl(imageItem.image))}
                 >
                   <Image
@@ -344,18 +344,18 @@ const ZOOM_PANEL_SIZE = 380;
               ))}
             </div>
           </div>
-          <div className="flex min-w-0 flex-1 flex-col gap-y-6 text-black max-[500px]:text-center">
-            <h1 className="text-xl font-bold leading-snug text-gray-900 sm:text-2xl">{sanitize(product?.title)}</h1>
+          <div className="flex min-w-0 flex-1 flex-col gap-y-3 text-black text-center items-center">
+            <h1 className="text-base font-bold leading-snug text-gray-900 sm:text-lg">{sanitize(product?.title)}</h1>
             {product?.inStock !== 1 ? (
-              <p className="text-lg font-semibold text-red-500 sm:text-xl">Currently out of stock</p>
+              <p className="text-sm font-semibold text-red-500">Currently out of stock</p>
             ) : (
               <>
                 <div className="flex flex-col gap-y-1">
                   {product?.mrp && product.mrp > product.price ? (
                     <>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <p className="text-xl font-bold text-gray-900 sm:text-2xl">₹{product.price}</p>
-                        <p className="text-base text-gray-400 line-through">MRP ₹{product.mrp}</p>
+                        <div className="flex flex-wrap items-center justify-center gap-3">
+                        <p className="text-base font-bold text-gray-900 sm:text-lg">₹{product.price}</p>
+                        <p className="text-xs text-gray-400 line-through">MRP ₹{product.mrp}</p>
                         <span className="bg-green-100 text-green-700 text-sm font-semibold px-2 py-0.5 rounded">
                           {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% off
                         </span>
@@ -365,7 +365,7 @@ const ZOOM_PANEL_SIZE = 380;
                       </p>
                     </>
                   ) : (
-                    <p className="text-xl font-bold text-gray-900 sm:text-2xl">₹{product?.price}</p>
+                    <p className="text-base font-bold text-gray-900 sm:text-lg">₹{product?.price}</p>
                   )}
                 </div>
                 <StockAvailabillity stock={product?.stock || 0} inStock={product?.inStock} />
@@ -386,7 +386,7 @@ const ZOOM_PANEL_SIZE = 380;
               />
             )}
             {product?.isReturnable === "Y" ? (
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center justify-center gap-2 text-sm">
                 <span className="text-green-600">✔</span>
                 <button
                   type="button"
@@ -397,7 +397,7 @@ const ZOOM_PANEL_SIZE = 380;
                 </button>
               </div>
             ) : product?.isReturnable === "N" ? (
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center justify-center gap-2 text-sm">
                 <span className="text-gray-800">✖</span>
                 <button
                   type="button"
@@ -418,7 +418,7 @@ const ZOOM_PANEL_SIZE = 380;
                 ];
                 const uniqueVariants = allVariants.filter((v, idx, arr) => arr.findIndex(x => x.sku === v.sku) === idx);
                 return (
-                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <div className="mb-2 flex flex-wrap items-center justify-center gap-2">
                     <span className="mr-2 font-semibold">Size:</span>
                     {uniqueVariants.map((variant: any) => (
                       <button
