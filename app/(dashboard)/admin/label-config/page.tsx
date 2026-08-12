@@ -229,7 +229,7 @@ const LabelConfigPage = () => {
           {/* Table */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
             {loading ? (
-              <p className="text-sm text-gray-400 p-6">Loadingâ€¦</p>
+              <p className="text-sm text-gray-400 p-6">Loading…</p>
             ) : configs.length === 0 ? (
               <p className="text-sm text-gray-400 p-6">No configurations found. Create one to get started.</p>
             ) : (
@@ -238,7 +238,7 @@ const LabelConfigPage = () => {
                   <thead className="bg-gray-50 border-b border-gray-100">
                     <tr>
                       <th className="text-left px-4 py-3 font-semibold text-gray-600">Name</th>
-                      <th className="text-left px-4 py-3 font-semibold text-gray-600">Size (WÃ—H)</th>
+                      <th className="text-left px-4 py-3 font-semibold text-gray-600">Size (W×H)</th>
                       <th className="text-left px-4 py-3 font-semibold text-gray-600">Cols/Row</th>
                       <th className="text-left px-4 py-3 font-semibold text-gray-600">Fields</th>
                       <th className="text-left px-4 py-3 font-semibold text-gray-600">Status</th>
@@ -273,7 +273,7 @@ const LabelConfigPage = () => {
                         </td>
                         <td className="px-4 py-3 text-center">
                           {c.isDefault ? (
-                            <span className="text-yellow-500 font-bold text-base" title="Default">â˜…</span>
+                            <span className="text-yellow-500 font-bold text-base" title="Default">★</span>
                           ) : (
                             <button
                               type="button"
@@ -282,7 +282,7 @@ const LabelConfigPage = () => {
                               className="text-xs text-gray-400 hover:text-yellow-500 disabled:opacity-50"
                               title="Set as default"
                             >
-                              {settingDefault === c.id ? "â€¦" : "â˜† Set"}
+                              {settingDefault === c.id ? "…" : "☆ Set"}
                             </button>
                           )}
                         </td>
@@ -463,7 +463,7 @@ const LabelConfigPage = () => {
               <div className="flex justify-end gap-3 pt-2 border-t">
                 <button type="button" onClick={() => setDialogOpen(false)} className="px-4 py-2 text-sm border rounded-lg text-gray-600 hover:bg-gray-50">Cancel</button>
                 <button type="submit" disabled={saving} className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60 font-medium">
-                  {saving ? "Savingâ€¦" : editingId ? "Update" : "Create"}
+                  {saving ? "Saving…" : editingId ? "Update" : "Create"}
                 </button>
               </div>
             </form>
@@ -482,7 +482,7 @@ const LabelConfigPage = () => {
             <div className="flex justify-end gap-3">
               <button type="button" onClick={() => setDeleteConfirm(null)} className="px-4 py-2 text-sm border rounded-lg text-gray-600 hover:bg-gray-50">Cancel</button>
               <button type="button" onClick={handleDelete} disabled={deleting} className="px-4 py-2 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-60 font-medium">
-                {deleting ? "Deletingâ€¦" : "Delete"}
+                {deleting ? "Deleting…" : "Delete"}
               </button>
             </div>
           </div>

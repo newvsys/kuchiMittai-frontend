@@ -284,7 +284,7 @@ const AdminWarehousesPage = () => {
                     <td className="px-4 py-3 text-gray-500">{w.warehouseId}</td>
                     <td className="px-4 py-3 font-medium text-gray-900">{w.warehouseName}</td>
                     <td className="px-4 py-3 text-gray-700 font-mono text-xs">{w.warehouseCode}</td>
-                    <td className="px-4 py-3 text-gray-700 font-mono text-xs">{w.channelId || "â€”"}</td>
+                    <td className="px-4 py-3 text-gray-700 font-mono text-xs">{w.channelId || "—"}</td>
                     <td className="px-4 py-3 text-gray-700">{w.contactPerson}</td>
                     <td className="px-4 py-3 text-gray-700">{w.contactNumber}</td>
                     <td className="px-4 py-3 text-gray-700">{w.city}</td>

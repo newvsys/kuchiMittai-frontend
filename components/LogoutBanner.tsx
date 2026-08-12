@@ -18,8 +18,10 @@ export default function LogoutBanner() {
 
   const dismiss = () => {
     setVisible(false);
-    // Remove the query param without reloading
-    router.replace("/", { scroll: false });
+    // Remove loggedout param without reloading
+    const url = new URL(window.location.href);
+    url.searchParams.delete("loggedout");
+    router.replace(url.pathname + (url.searchParams.size ? "?" + url.searchParams.toString() : ""), { scroll: false });
   };
 
   if (!visible) return null;

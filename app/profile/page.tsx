@@ -457,9 +457,6 @@ const ProfilePage = () => {
               </svg>
             )}
           </div>
-          <div className="mb-2">
-            <h1 className="text-xl font-bold text-gray-900">{customer.firstName || "My Account"}</h1>
-          </div>
         </div>
 
         <div className="flex flex-col gap-4 lg:flex-row lg:gap-6 lg:items-start pb-12">

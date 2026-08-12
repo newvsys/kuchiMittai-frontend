@@ -241,7 +241,7 @@ const AdminUOMPage = () => {
                           <span className="text-gray-400 text-xs">No</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-gray-500 text-xs max-w-xs truncate">{uom.description || "â€”"}</td>
+                      <td className="px-4 py-3 text-gray-500 text-xs max-w-xs truncate">{uom.description || "—"}</td>
                       <td className="px-4 py-3 text-center">
                         <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
                           uom.status === "ACTIVE"
@@ -286,7 +286,7 @@ const AdminUOMPage = () => {
               <h3 className="text-lg font-semibold text-gray-800">
                 {formDialog.mode === "add" ? "Add Unit of Measure" : "Edit Unit of Measure"}
               </h3>
-              <button type="button" className="text-gray-400 hover:text-gray-700 text-xl leading-none" onClick={closeForm}>âœ•</button>
+              <button type="button" className="text-gray-400 hover:text-gray-700 text-xl leading-none" onClick={closeForm}>✕</button>
             </div>
 
             {formError && (
@@ -353,11 +353,11 @@ const AdminUOMPage = () => {
                     required={UOM_TYPES.includes(form.uomType) || form.uomType === ""}
                     className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white"
                   >
-                    <option value="">â€” Select Type â€”</option>
+                    <option value="">— Select Type —</option>
                     {UOM_TYPES.map(t => (
                       <option key={t} value={t}>{t}</option>
                     ))}
-                    <option value="__custom__">Customâ€¦</option>
+                    <option value="__custom__">Custom…</option>
                   </select>
                   {!UOM_TYPES.includes(form.uomType) && form.uomType !== "" && (
                     <input
@@ -412,7 +412,7 @@ const AdminUOMPage = () => {
                   onChange={handleChange}
                   maxLength={255}
                   rows={2}
-                  placeholder="Optional descriptionâ€¦"
+                  placeholder="Optional description…"
                   className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
                 />
               </div>
@@ -432,7 +432,7 @@ const AdminUOMPage = () => {
                   className="px-4 py-1.5 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
                 >
                   {formLoading
-                    ? formDialog.mode === "add" ? "Creatingâ€¦" : "Savingâ€¦"
+                    ? formDialog.mode === "add" ? "Creating…" : "Saving…"
                     : formDialog.mode === "add" ? "Create" : "Save Changes"}
                 </button>
               </div>
@@ -467,7 +467,7 @@ const AdminUOMPage = () => {
                 onClick={handleDelete}
                 disabled={deleteLoading}
               >
-                {deleteLoading ? "Deletingâ€¦" : "Delete"}
+                {deleteLoading ? "Deleting…" : "Delete"}
               </button>
             </div>
           </div>

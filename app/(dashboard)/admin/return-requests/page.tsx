@@ -311,21 +311,21 @@ const AdminReturnRequestsPage = () => {
               <div><span className="font-semibold">Return ID:</span> <span className="font-mono text-xs">{detailsDialog.item.returnId}</span></div>
               <div><span className="font-semibold">Order Number:</span> {detailsDialog.item.orderNumber}</div>
               <div><span className="font-semibold">Return Type:</span> {detailsDialog.item.returnType}</div>
-              <div><span className="font-semibold">Return Reason:</span> {detailsDialog.item.reasonDescription || detailsDialog.item.reasonCode || "â€”"}</div>
+              <div><span className="font-semibold">Return Reason:</span> {detailsDialog.item.reasonDescription || detailsDialog.item.reasonCode || "—"}</div>
               <div>
                 <span className="font-semibold">Status:</span>{" "}
                 <span className={`px-2 py-0.5 rounded text-xs font-semibold ${statusBadgeColor(detailsDialog.item.status)}`}>
                   {detailsDialog.item.status}
                 </span>
               </div>
-              <div><span className="font-semibold">Carrier:</span> {detailsDialog.item.carrier || "â€”"}</div>
-              <div><span className="font-semibold">Tracking #:</span> {detailsDialog.item.reverseTrackingNumber || "â€”"}</div>
-              <div><span className="font-semibold">Pickup Scheduled:</span> {detailsDialog.item.pickupScheduledDate || "â€”"}</div>
-              <div><span className="font-semibold">Pickup Completed:</span> {detailsDialog.item.pickupCompletedDate || "â€”"}</div>
-              <div><span className="font-semibold">Warehouse Received:</span> {detailsDialog.item.warehouseReceivedDate || "â€”"}</div>
-              <div><span className="font-semibold">QC Status:</span> {detailsDialog.item.qcStatus || "â€”"}</div>
-              <div><span className="font-semibold">QC Remarks:</span> {detailsDialog.item.qcRemarks || "â€”"}</div>
-              <div><span className="font-semibold">Refund Amount:</span> {detailsDialog.item.refundAmount != null ? detailsDialog.item.refundAmount : "â€”"}</div>
+              <div><span className="font-semibold">Carrier:</span> {detailsDialog.item.carrier || "—"}</div>
+              <div><span className="font-semibold">Tracking #:</span> {detailsDialog.item.reverseTrackingNumber || "—"}</div>
+              <div><span className="font-semibold">Pickup Scheduled:</span> {detailsDialog.item.pickupScheduledDate || "—"}</div>
+              <div><span className="font-semibold">Pickup Completed:</span> {detailsDialog.item.pickupCompletedDate || "—"}</div>
+              <div><span className="font-semibold">Warehouse Received:</span> {detailsDialog.item.warehouseReceivedDate || "—"}</div>
+              <div><span className="font-semibold">QC Status:</span> {detailsDialog.item.qcStatus || "—"}</div>
+              <div><span className="font-semibold">QC Remarks:</span> {detailsDialog.item.qcRemarks || "—"}</div>
+              <div><span className="font-semibold">Refund Amount:</span> {detailsDialog.item.refundAmount != null ? detailsDialog.item.refundAmount : "—"}</div>
               {detailsDialog.item.userComments && (
                 <div className="sm:col-span-2"><span className="font-semibold">Comments:</span> {detailsDialog.item.userComments}</div>
               )}
@@ -387,11 +387,11 @@ const AdminReturnRequestsPage = () => {
                             {h.newStatus}
                           </span>
                         </td>
-                        <td className="px-3 py-2 text-gray-700">{h.remarks || "â€”"}</td>
+                        <td className="px-3 py-2 text-gray-700">{h.remarks || "—"}</td>
                         <td className="px-3 py-2 text-gray-600 whitespace-nowrap">
-                          {h.changedAt ? new Date(h.changedAt).toLocaleString() : "â€”"}
+                          {h.changedAt ? new Date(h.changedAt).toLocaleString() : "—"}
                         </td>
-                        <td className="px-3 py-2 text-gray-600">{h.changedBy || "â€”"}</td>
+                        <td className="px-3 py-2 text-gray-600">{h.changedBy || "—"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -436,7 +436,7 @@ const AdminReturnRequestsPage = () => {
           </div>
         </div>
 
-        {/* Return Policy Popup â€” rendered inside details dialog for correct stacking */}
+        {/* Return Policy Popup — rendered inside details dialog for correct stacking */}
         {returnPolicyPopup && detailsDialog.item?.returnPolicy && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
             <div className="bg-white rounded shadow-xl w-full max-w-lg max-h-[85vh] overflow-y-auto p-6">

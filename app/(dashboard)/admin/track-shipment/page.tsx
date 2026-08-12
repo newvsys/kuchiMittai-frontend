@@ -225,7 +225,7 @@ const AdminTrackShipmentPage = () => {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-gray-600 whitespace-nowrap text-xs">
-                        {item.createdAt ? new Date(item.createdAt).toLocaleString() : "â€”"}
+                        {item.createdAt ? new Date(item.createdAt).toLocaleString() : "—"}
                       </td>
                       <td className="px-4 py-3">
                         <button
@@ -304,19 +304,19 @@ const AdminTrackShipmentPage = () => {
               </div>
               <div>
                 <span className="font-semibold">Shipped Date:</span>{" "}
-                {trackingDialog.item.shippedDate ? new Date(trackingDialog.item.shippedDate).toLocaleString() : "â€”"}
+                {trackingDialog.item.shippedDate ? new Date(trackingDialog.item.shippedDate).toLocaleString() : "—"}
               </div>
               <div>
                 <span className="font-semibold">Delivered Date:</span>{" "}
-                {trackingDialog.item.deliveredDate ? new Date(trackingDialog.item.deliveredDate).toLocaleString() : "â€”"}
+                {trackingDialog.item.deliveredDate ? new Date(trackingDialog.item.deliveredDate).toLocaleString() : "—"}
               </div>
               <div>
                 <span className="font-semibold">Created At:</span>{" "}
-                {trackingDialog.item.createdAt ? new Date(trackingDialog.item.createdAt).toLocaleString() : "â€”"}
+                {trackingDialog.item.createdAt ? new Date(trackingDialog.item.createdAt).toLocaleString() : "—"}
               </div>
               <div>
                 <span className="font-semibold">Updated At:</span>{" "}
-                {trackingDialog.item.updatedAt ? new Date(trackingDialog.item.updatedAt).toLocaleString() : "â€”"}
+                {trackingDialog.item.updatedAt ? new Date(trackingDialog.item.updatedAt).toLocaleString() : "—"}
               </div>
             </div>
 
@@ -333,7 +333,7 @@ const AdminTrackShipmentPage = () => {
                           {h.status}
                         </span>
                         <span className="text-xs text-gray-500">
-                          {h.date ? new Date(h.date).toLocaleString() : "â€”"}
+                          {h.date ? new Date(h.date).toLocaleString() : "—"}
                         </span>
                         {h.location && (
                           <span className="text-xs text-gray-700">

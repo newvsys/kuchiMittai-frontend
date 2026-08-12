@@ -54,7 +54,7 @@ function getStatusBadge(status: string) {
 }
 
 function formatDate(d: string | null) {
-  if (!d) return "â€”";
+  if (!d) return "—";
   return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
@@ -589,7 +589,7 @@ const AdminShippingManagementPage = () => {
               <div className="flex gap-2 pt-5">
                 <button type="submit" disabled={pendingLoading}
                   className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-60">
-                  {pendingLoading ? "Searchingâ€¦" : "Search"}
+                  {pendingLoading ? "Searching…" : "Search"}
                 </button>
                 <button type="button" onClick={handleListReset} disabled={pendingLoading}
                   className="px-4 py-1.5 border border-gray-300 text-gray-700 text-sm rounded hover:bg-gray-50 disabled:opacity-60">
@@ -602,7 +602,7 @@ const AdminShippingManagementPage = () => {
           <p className="text-sm text-gray-500 mb-3">
             Total orders: <span className="font-semibold">{pendingTotal}</span>
             {(listStatuses.length > 0 || noShipmentFilter) && (
-              <span className="ml-2">â€” Showing <span className="font-semibold">{filteredPending.length}</span> filtered</span>
+              <span className="ml-2">— Showing <span className="font-semibold">{filteredPending.length}</span> filtered</span>
             )}
           </p>
 
@@ -682,25 +682,25 @@ const AdminShippingManagementPage = () => {
             <div className="flex items-center justify-between mt-4">
               <p className="text-sm text-gray-500">
                 Page <span className="font-semibold">{listPage + 1}</span> of <span className="font-semibold">{totalListPages}</span>
-                {" "}â€” records {listPage * LIST_PAGE_SIZE + 1}â€“{Math.min((listPage + 1) * LIST_PAGE_SIZE, filteredPending.length)} of {filteredPending.length}
+                {" "}— records {listPage * LIST_PAGE_SIZE + 1}â€“{Math.min((listPage + 1) * LIST_PAGE_SIZE, filteredPending.length)} of {filteredPending.length}
               </p>
               <div className="flex items-center gap-1">
                 <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(0)} disabled={listPage === 0}>Â«</button>
-                <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(p => Math.max(0, p - 1))} disabled={listPage === 0}>â€¹</button>
+                <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(p => Math.max(0, p - 1))} disabled={listPage === 0}>‹</button>
                 {Array.from({ length: totalListPages }, (_, i) => i).filter(i => Math.abs(i - listPage) <= 2).map(i => (
                   <button key={i} onClick={() => setListPage(i)}
                     className={`px-2.5 py-1 rounded border text-sm ${i === listPage ? "bg-blue-500 text-white border-blue-500" : "hover:bg-gray-50"}`}>
                     {i + 1}
                   </button>
                 ))}
-                <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(p => Math.min(totalListPages - 1, p + 1))} disabled={listPage === totalListPages - 1}>â€º</button>
+                <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(p => Math.min(totalListPages - 1, p + 1))} disabled={listPage === totalListPages - 1}>›</button>
                 <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(totalListPages - 1)} disabled={listPage === totalListPages - 1}>Â»</button>
               </div>
             </div>
           )}
         </div>
 
-        {/* â•â• SECTION 2 â€” Modal â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        {/* â•â• SECTION 2 — Modal â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
         {modalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={e => { if (e.target === e.currentTarget) closeModal(); }}>
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col">
@@ -711,7 +711,7 @@ const AdminShippingManagementPage = () => {
                   <h2 className="text-base font-bold text-white">Create / Update Shipping Record</h2>
                   {mode !== "idle" && (
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded ${mode === "create" ? "bg-green-100 text-green-700" : "bg-white/20 text-white"}`}>
-                      {mode === "create" ? "CREATE" : "UPDATE"} â€” {orderNumber}
+                      {mode === "create" ? "CREATE" : "UPDATE"} — {orderNumber}
                     </span>
                   )}
                 </div>
@@ -776,7 +776,7 @@ const AdminShippingManagementPage = () => {
                         {h.status}
                       </span>
                       <span className="text-gray-600">
-                        {h.location && <span className="font-medium">{h.location} â€” </span>}
+                        {h.location && <span className="font-medium">{h.location} — </span>}
                         {h.remarks}
                       </span>
                       <span className="ml-auto shrink-0 text-gray-400">{h.date?.slice(0, 16).replace("T", " ")}</span>
@@ -818,7 +818,7 @@ const AdminShippingManagementPage = () => {
                       onChange={handleChange}
                       className="w-full border rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
                     >
-                      <option value="">â€” select warehouse â€”</option>
+                      <option value="">— select warehouse —</option>
                       {warehouses
                         .filter(w => w.status === "A")
                         .map(w => (
@@ -884,7 +884,7 @@ const AdminShippingManagementPage = () => {
                 </div>
               </div>
 
-              {/* Actions â€” inside form, sticky at bottom */}
+              {/* Actions — inside form, sticky at bottom */}
               <div className="flex justify-end gap-3 pt-3 border-t mt-4">
                 <button
                   type="submit"

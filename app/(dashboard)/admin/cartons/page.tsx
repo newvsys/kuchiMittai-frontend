@@ -297,7 +297,7 @@ const AdminCartonsPage = () => {
             <form onSubmit={handleFormSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Name <span className="text-xs text-gray-400 font-normal">(optional â€” auto-derived if blank)</span>
+                  Name <span className="text-xs text-gray-400 font-normal">(optional — auto-derived if blank)</span>
                 </label>
                 <input
                   type="text"

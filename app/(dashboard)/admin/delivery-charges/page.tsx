@@ -187,7 +187,7 @@ export default function DeliveryChargesPage() {
                       {rule.isFreeDelivery && <span className="ml-2 text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-semibold">FREE</span>}
                     </td>
                     <td className="px-4 py-3 text-right text-gray-700">â‚¹{rule.minOrderAmount}</td>
-                    <td className="px-4 py-3 text-right text-gray-700">{rule.maxOrderAmount != null ? `â‚¹${rule.maxOrderAmount}` : "â€”"}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{rule.maxOrderAmount != null ? `â‚¹${rule.maxOrderAmount}` : "—"}</td>
                     <td className="px-4 py-3 text-right font-semibold text-gray-900">
                       {rule.deliveryCharge === 0 ? <span className="text-green-600">Free</span> : `â‚¹${rule.deliveryCharge}`}
                     </td>
@@ -196,7 +196,7 @@ export default function DeliveryChargesPage() {
                         {rule.status === "A" ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-gray-500 text-xs max-w-[180px] truncate">{rule.description || "â€”"}</td>
+                    <td className="px-4 py-3 text-gray-500 text-xs max-w-[180px] truncate">{rule.description || "—"}</td>
                     <td className="px-4 py-3 text-center">
                       <div className="flex items-center justify-center gap-3">
                         <button onClick={() => openEdit(rule)} className="text-blue-600 hover:underline text-xs font-semibold">Edit</button>

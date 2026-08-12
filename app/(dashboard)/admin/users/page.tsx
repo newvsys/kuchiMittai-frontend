@@ -104,7 +104,7 @@ const DashboardUsers = () => {
   };
 
   const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return "â€”";
+    if (!dateStr) return "—";
     return new Date(dateStr).toLocaleString("en-IN", {
       dateStyle: "medium",
       timeStyle: "short",
@@ -194,7 +194,7 @@ const DashboardUsers = () => {
                           <div className="text-xs text-gray-400">{user.customerType}</div>
                         </td>
                         <td>{user.email}</td>
-                        <td>{user.phone || user.mobileNumber || "â€”"}</td>
+                        <td>{user.phone || user.mobileNumber || "—"}</td>
                         <td>
                           <span className="badge badge-ghost badge-sm">{user.role}</span>
                         </td>

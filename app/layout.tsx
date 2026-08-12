@@ -7,6 +7,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Providers from "@/Providers";
 import SessionTimeoutWrapper from "@/components/SessionTimeoutWrapper";
+import { Suspense } from "react";
+import LogoutBanner from "@/components/LogoutBanner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,6 +33,9 @@ export default async function RootLayout({
           <SessionTimeoutWrapper />
           <Header />
           <Providers>
+            <Suspense>
+              <LogoutBanner />
+            </Suspense>
             <main className="min-h-screen">
               {children}
             </main>

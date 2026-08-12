@@ -73,7 +73,7 @@ const InventoryPage = () => {
   const [loadVariants, setLoadVariants] = useState<ProductVariant[]>([]);
   const [loadWarehouseNumericId, setLoadWarehouseNumericId] = useState("");
 
-  // â”€â”€ load form â€” existing stock preview
+  // â”€â”€ load form — existing stock preview
   const [loadStockPreview, setLoadStockPreview] = useState<InventoryRecord | null>(null);
   const [loadStockPreviewLoading, setLoadStockPreviewLoading] = useState(false);
 
@@ -279,13 +279,7 @@ const InventoryPage = () => {
       return;
     }
 
-    // Expiry must be after best-before
-    if (computedBestBefore && loadForm.expiryDate) {
-      if (loadForm.expiryDate <= computedBestBefore) {
-        showError("Expiry Date must be after Best Before date (" + computedBestBefore + ").");
-        return;
-      }
-    }
+    // Expiry date is auto-calculated from MFD + bestBeforeDays — no extra validation needed
 
     setLoadSubmitting(true);
     setLoadResult(null);
@@ -418,7 +412,7 @@ const InventoryPage = () => {
                       fetchVariantsFor(e.target.value, "filter");
                     }}
                   >
-                    <option value="">â€” Select Product â€”</option>
+                    <option value="">— Select Product —</option>
                     {products.map(p => (
                       <option key={p.id} value={p.id}>{p.title}</option>
                     ))}
@@ -432,7 +426,7 @@ const InventoryPage = () => {
                     disabled={!filterProductId}
                     onChange={e => setFilterVariantId(e.target.value)}
                   >
-                    <option value="">â€” Select Variant â€”</option>
+                    <option value="">— Select Variant —</option>
                     {filterVariants.map(v => (
                       <option key={v.variantId} value={v.variantId}>
                         {v.skuCode}{v.packSize ? ` (${v.packSize})` : ""}
@@ -447,7 +441,7 @@ const InventoryPage = () => {
                     value={filterWarehouseId}
                     onChange={e => setFilterWarehouseId(e.target.value)}
                   >
-                    <option value="">â€” Select Warehouse â€”</option>
+                    <option value="">— Select Warehouse —</option>
                     {warehouses.map(w => (
                       <option key={w.warehouseId} value={w.warehouseId}>
                         {w.warehouseName} ({w.warehouseCode})
@@ -474,7 +468,7 @@ const InventoryPage = () => {
                   disabled={fetching}
                   className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-60 font-medium"
                 >
-                  {fetching ? "Searchingâ€¦" : "Search"}
+                  {fetching ? "Searching…" : "Search"}
                 </button>
                 <button
                   type="button"
@@ -497,23 +491,67 @@ const InventoryPage = () => {
                   className="px-4 py-2 bg-amber-500 text-white text-sm rounded-lg hover:bg-amber-600 disabled:opacity-60 font-medium ml-auto"
                   title="Recalculates totalQty and availableQty from actual inventory_details rows"
                 >
-                  {refreshingCounts ? "Refreshingâ€¦" : "â†» Refresh Inv Count"}
+                  {refreshingCounts ? "Refreshing…" : "↻ Refresh Inv Count"}
                 </button>
+                {records.length > 0 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setShowAlertOnly(v => !v)}
+                      className={`px-4 py-2 text-sm rounded-lg font-medium border transition-colors ${
+                        showAlertOnly
+                          ? "bg-red-600 text-white border-red-600 hover:bg-red-700"
+                          : "bg-white text-red-600 border-red-400 hover:bg-red-50"
+                      }`}
+                    >
+                      {showAlertOnly ? "Show All" : `⚠ Show Alerts (${records.filter(isAlert).length})`}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={exportAlertCSV}
+                      className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 font-medium"
+                      title="Download out-of-stock and low-stock items as CSV"
+                    >
+                      ↓ Export Alert CSV
+                    </button>
+                  </>
+                )}
               </div>
             </div>
 
             {/* Results */}
             {records.length > 0 && (
               <div className="space-y-4">
-                {records.map(rec => (
-                  <div key={rec.inventoryId} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                {records.filter(rec => !showAlertOnly || isAlert(rec)).map(rec => (
+                  <div key={rec.inventoryId} className={`rounded-xl shadow-sm overflow-hidden border ${
+                    rec.availableQty === 0
+                      ? "bg-red-50 border-red-300"
+                      : rec.reorderLevel > 0 && rec.availableQty <= rec.reorderLevel
+                      ? "bg-orange-50 border-orange-300"
+                      : "bg-white border-gray-100"
+                  }`}>
                     {/* Summary row */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 bg-gray-50 border-b border-gray-100">
+                    <div className={`flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b ${
+                      rec.availableQty === 0
+                        ? "bg-red-100 border-red-200"
+                        : rec.reorderLevel > 0 && rec.availableQty <= rec.reorderLevel
+                        ? "bg-orange-100 border-orange-200"
+                        : "bg-gray-50 border-gray-100"
+                    }`}>
                       <div className="flex flex-wrap gap-4 text-xs text-gray-600">
-                        <span><span className="font-semibold text-gray-800">Product:</span> {rec.productVariantName || `Variant #${rec.productVarId}`}</span>
+                        <span className="flex items-center gap-1.5">
+                          <span className="font-semibold text-gray-800">Product:</span>
+                          {rec.productVariantName || `Variant #${rec.productVarId}`}
+                          {rec.availableQty === 0 && (
+                            <span className="ml-1 px-1.5 py-0.5 rounded text-xs font-bold bg-red-600 text-white">OUT OF STOCK</span>
+                          )}
+                          {rec.availableQty > 0 && rec.reorderLevel > 0 && rec.availableQty <= rec.reorderLevel && (
+                            <span className="ml-1 px-1.5 py-0.5 rounded text-xs font-bold bg-orange-500 text-white">LOW STOCK</span>
+                          )}
+                        </span>
                         <span><span className="font-semibold text-gray-800">Warehouse:</span> {rec.warehouseName || rec.warehouseCode || `#${rec.warehouseId}`}</span>
                         <span><span className="font-semibold text-gray-800">Total Qty:</span> {rec.totalQty}</span>
-                        <span className="text-green-700 font-semibold">Available: {rec.availableQty}</span>
+                        <span className={`font-semibold ${rec.availableQty === 0 ? "text-red-700" : "text-green-700"}`}>Available: {rec.availableQty}</span>
                         <span><span className="font-semibold text-gray-800">Reserved:</span> {rec.quantityReserved ?? rec.reservedQty ?? 0}</span>
                         {rec.reorderLevel > 0 && <span className={`${rec.availableQty <= rec.reorderLevel ? "text-red-600 font-bold" : "text-gray-600"}`}>Reorder Level: {rec.reorderLevel}</span>}
                       </div>
@@ -551,9 +589,9 @@ const InventoryPage = () => {
                                     {item.status}
                                   </span>
                                 </td>
-                                <td className="px-4 py-2 text-gray-600">{item.mfd || "â€”"}</td>
-                                <td className="px-4 py-2 text-gray-600">{item.bestBefore || "â€”"}</td>
-                                <td className="px-4 py-2 text-gray-600">{item.expiryDate || "â€”"}</td>
+                                <td className="px-4 py-2 text-gray-600">{item.mfd || "—"}</td>
+                                <td className="px-4 py-2 text-gray-600">{item.bestBefore || "—"}</td>
+                                <td className="px-4 py-2 text-gray-600">{item.expiryDate || "—"}</td>
                                 <td className="px-4 py-2 flex gap-2">
                                   {item.status !== "I" && (
                                     <button
@@ -608,7 +646,7 @@ const InventoryPage = () => {
                       fetchVariantsFor(e.target.value, "load");
                     }}
                   >
-                    <option value="">â€” Select Product â€”</option>
+                    <option value="">— Select Product —</option>
                     {products.map(p => (
                       <option key={p.id} value={p.id}>{p.title}</option>
                     ))}
@@ -626,7 +664,7 @@ const InventoryPage = () => {
                       fetchLoadStockPreview(vid, loadWarehouseNumericId);
                     }}
                   >
-                    <option value="">â€” Select Variant â€”</option>
+                    <option value="">— Select Variant —</option>
                     {loadVariants.map(v => (
                       <option key={v.variantId} value={v.variantId}>
                         {v.skuCode}{v.packSize ? ` (${v.packSize})` : ""}
@@ -649,7 +687,7 @@ const InventoryPage = () => {
                       fetchLoadStockPreview(loadForm.productVarId, numId);
                     }}
                   >
-                    <option value="">â€” Select Warehouse â€”</option>
+                    <option value="">— Select Warehouse —</option>
                     {warehouses.map(w => (
                       <option key={w.warehouseId} value={w.warehouseCode}>
                         {w.warehouseName} ({w.warehouseCode})
@@ -672,7 +710,17 @@ const InventoryPage = () => {
                   <input type="date"
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
                     value={loadForm.mfd}
-                    onChange={e => setLoadForm(f => ({ ...f, mfd: e.target.value }))} />
+                    onChange={e => {
+                      const mfd = e.target.value;
+                      const days = Number(loadForm.bestBeforeDays);
+                      let expiry = "";
+                      if (mfd && days > 0) {
+                        const d = new Date(mfd);
+                        d.setDate(d.getDate() + days);
+                        expiry = d.toISOString().split("T")[0];
+                      }
+                      setLoadForm(f => ({ ...f, mfd, expiryDate: expiry }));
+                    }} />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -682,7 +730,16 @@ const InventoryPage = () => {
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
                     placeholder="e.g. 180"
                     value={loadForm.bestBeforeDays}
-                    onChange={e => setLoadForm(f => ({ ...f, bestBeforeDays: e.target.value }))} />
+                    onChange={e => {
+                      const days = Number(e.target.value);
+                      let expiry = "";
+                      if (loadForm.mfd && days > 0) {
+                        const d = new Date(loadForm.mfd);
+                        d.setDate(d.getDate() + days);
+                        expiry = d.toISOString().split("T")[0];
+                      }
+                      setLoadForm(f => ({ ...f, bestBeforeDays: e.target.value, expiryDate: expiry }));
+                    }} />
                   {loadForm.mfd && loadForm.bestBeforeDays && Number(loadForm.bestBeforeDays) > 0 && (() => {
                     const d = new Date(loadForm.mfd);
                     d.setDate(d.getDate() + Number(loadForm.bestBeforeDays));
@@ -694,20 +751,14 @@ const InventoryPage = () => {
                   })()}
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Expiry Date</label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Expiry Date <span className="text-blue-500 font-normal">(auto-calculated)</span></label>
                   <input type="date"
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    value={loadForm.expiryDate}
-                    onChange={e => setLoadForm(f => ({ ...f, expiryDate: e.target.value }))} />
-                  {loadForm.mfd && loadForm.bestBeforeDays && Number(loadForm.bestBeforeDays) > 0 && loadForm.expiryDate && (() => {
-                    const d = new Date(loadForm.mfd);
-                    d.setDate(d.getDate() + Number(loadForm.bestBeforeDays));
-                    const bestBefore = d.toISOString().split("T")[0];
-                    const invalid = loadForm.expiryDate <= bestBefore;
-                    return invalid ? (
-                      <p className="mt-1 text-xs text-red-500">Must be after {d.toLocaleDateString()}</p>
-                    ) : null;
-                  })()}
+                    readOnly
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-600 cursor-not-allowed"
+                    value={loadForm.expiryDate} />
+                  {!loadForm.expiryDate && (
+                    <p className="mt-1 text-xs text-gray-400">Enter MFD and Best Before days to auto-fill</p>
+                  )}
                 </div>
               </div>
               {/* â”€â”€ Existing stock preview â”€â”€ */}
@@ -716,7 +767,7 @@ const InventoryPage = () => {
                   loadStockPreview ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-200"
                 }`}>
                   {loadStockPreviewLoading ? (
-                    <p className="text-xs text-gray-400">Loading existing stockâ€¦</p>
+                    <p className="text-xs text-gray-400">Loading existing stock…</p>
                   ) : loadStockPreview ? (
                     <>
                       <p className="text-xs font-semibold text-blue-700 mb-2">Current Stock in Selected Warehouse</p>
@@ -741,7 +792,7 @@ const InventoryPage = () => {
                           <p className={`text-lg font-bold ${
                             loadStockPreview.reorderLevel > 0 && loadStockPreview.availableQty <= loadStockPreview.reorderLevel
                               ? "text-red-600" : "text-gray-800"
-                          }`}>{loadStockPreview.reorderLevel || "â€”"}</p>
+                          }`}>{loadStockPreview.reorderLevel || "—"}</p>
                         </div>
                       </div>
                       {loadStockPreview.reorderLevel > 0 && loadStockPreview.availableQty <= loadStockPreview.reorderLevel && (
@@ -755,7 +806,7 @@ const InventoryPage = () => {
 
               <button type="submit" disabled={loadSubmitting}
                 className="w-full py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 font-medium disabled:opacity-60">
-                {loadSubmitting ? "Loadingâ€¦" : "Load Inventory"}
+                {loadSubmitting ? "Loading…" : "Load Inventory"}
               </button>
             </form>
 
@@ -803,7 +854,7 @@ const InventoryPage = () => {
                 onClick={() => handleRemove(removeBarcode)}
                 className="w-full py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 font-medium disabled:opacity-60"
               >
-                {removeSubmitting ? "Removingâ€¦" : "Remove Item"}
+                {removeSubmitting ? "Removing…" : "Remove Item"}
               </button>
             </div>
           </div>
@@ -831,7 +882,7 @@ const InventoryPage = () => {
                 onClick={() => handleRestore(restoreBarcode)}
                 className="w-full py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 font-medium disabled:opacity-60"
               >
-                {restoreSubmitting ? "Restoringâ€¦" : "Restore Item"}
+                {restoreSubmitting ? "Restoring…" : "Restore Item"}
               </button>
             </div>
           </div>
@@ -890,22 +941,22 @@ const InventoryPage = () => {
                         if (def && !labelConfigId) setLabelConfigId(String(def.id));
                       } catch { showError("Failed to load configurations"); }
                     }}
-                  >â†» Refresh</button>
+                  >↻ Refresh</button>
                 </div>
                 <select
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
                   value={labelConfigId}
                   onChange={e => setLabelConfigId(e.target.value)}
                 >
-                  <option value="">â€” System default (auto) â€”</option>
+                  <option value="">— System default (auto) —</option>
                   {labelConfigs.map(c => (
                     <option key={c.id} value={c.id}>
-                      {c.configName} â€” {c.labelWidthInches}â€³ Ã— {c.labelHeightInches}â€³{c.isDefault ? " â˜… default" : ""}
+                      {c.configName} — {c.labelWidthInches}″ × {c.labelHeightInches}″{c.isDefault ? " ★ default" : ""}
                     </option>
                   ))}
                 </select>
                 {labelConfigs.length === 0 && (
-                  <p className="text-xs text-gray-400 mt-1">Click â†» Refresh to load saved configurations, or leave blank to use the system default.</p>
+                  <p className="text-xs text-gray-400 mt-1">Click ↻ Refresh to load saved configurations, or leave blank to use the system default.</p>
                 )}
               </div>
               <div>
@@ -976,7 +1027,7 @@ const InventoryPage = () => {
                 disabled={labelSubmitting}
                 className="w-full py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 font-medium disabled:opacity-60"
               >
-                {labelSubmitting ? "Generating PDFâ€¦" : "Generate Label PDF"}
+                {labelSubmitting ? "Generating PDF…" : "Generate Label PDF"}
               </button>
             </form>
 
@@ -1055,7 +1106,7 @@ const InventoryPage = () => {
                     disabled={labelJobsLoading}
                     className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-60 font-medium"
                   >
-                    {labelJobsLoading ? "Loadingâ€¦" : "Search"}
+                    {labelJobsLoading ? "Loading…" : "Search"}
                   </button>
                   <button
                     type="button"
@@ -1073,7 +1124,7 @@ const InventoryPage = () => {
 
             {/* Jobs table */}
             {labelJobsLoading ? (
-              <p className="text-sm text-gray-400 px-1">Loadingâ€¦</p>
+              <p className="text-sm text-gray-400 px-1">Loading…</p>
             ) : labelJobs.length === 0 ? (
               <p className="text-sm text-gray-400 px-1">No label jobs found. Use Search to load history.</p>
             ) : (
@@ -1100,7 +1151,7 @@ const InventoryPage = () => {
                           <td className="px-4 py-3 text-gray-600 max-w-[180px]">
                             {job.batchNo
                               ? <span><span className="font-semibold text-gray-700">Batch:</span> {job.batchNo}</span>
-                              : <span className="font-mono truncate block" title={job.barcodes || ""}>{job.barcodes || "â€”"}</span>
+                              : <span className="font-mono truncate block" title={job.barcodes || ""}>{job.barcodes || "—"}</span>
                             }
                           </td>
                           <td className="px-4 py-3 text-center font-semibold text-gray-700">{job.labelCount}</td>
@@ -1116,11 +1167,11 @@ const InventoryPage = () => {
                             }
                           </td>
                           <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
-                            {job.printedAt ? new Date(job.printedAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "â€”"}
+                            {job.printedAt ? new Date(job.printedAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "—"}
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex gap-2 flex-wrap">
-                              {/* Download â€” only if PDF still exists */}
+                              {/* Download — only if PDF still exists */}
                               {job.pdfFileExists && job.pdfUrl && (
                                 <a
                                   href={job.pdfUrl?.startsWith('/') ? `${API_BASE}${job.pdfUrl}` : job.pdfUrl}
@@ -1141,7 +1192,7 @@ const InventoryPage = () => {
                                   ðŸ“„ Open
                                 </a>
                               )}
-                              {/* Reprint â€” regenerates PDF */}
+                              {/* Reprint — regenerates PDF */}
                               <button
                                 type="button"
                                 disabled={reprinting === job.jobId}
@@ -1155,7 +1206,7 @@ const InventoryPage = () => {
                                     );
                                     const d = await r.json();
                                     if (d.status === "SUCCESS") {
-                                      showToast(`Reprinted â€” ${d.labelCount} label${d.labelCount !== 1 ? "s" : ""}`);
+                                      showToast(`Reprinted — ${d.labelCount} label${d.labelCount !== 1 ? "s" : ""}`);
                                       // Refresh list so new job appears
                                       fetchLabelJobs(labelJobsPage, labelJobsFilter);
                                     } else {
@@ -1168,7 +1219,7 @@ const InventoryPage = () => {
                                   }
                                 }}
                               >
-                                {reprinting === job.jobId ? "â†» Printingâ€¦" : "â†» Reprint"}
+                                {reprinting === job.jobId ? "↻ Printing…" : "↻ Reprint"}
                               </button>
                             </div>
                           </td>

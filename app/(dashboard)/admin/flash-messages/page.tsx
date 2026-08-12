@@ -273,7 +273,7 @@ const AdminFlashMessagesPage = () => {
                   >
                     <td className="px-3 py-3 text-gray-500">{msg.id}</td>
                     <td className="px-3 py-3 text-gray-800 max-w-[120px] truncate" title={msg.title}>
-                      {msg.title || <span className="text-gray-400 italic">â€”</span>}
+                      {msg.title || <span className="text-gray-400 italic">—</span>}
                     </td>
                     <td className="px-3 py-3 text-gray-700 max-w-[220px]">
                       <span className="line-clamp-2">{msg.message}</span>
@@ -284,11 +284,11 @@ const AdminFlashMessagesPage = () => {
                           TYPE_COLORS[msg.type] || "bg-gray-100 text-gray-600 border-gray-200"
                         }`}
                       >
-                        {msg.type || "â€”"}
+                        {msg.type || "—"}
                       </span>
                     </td>
                     <td className="px-3 py-3 text-center text-gray-600">{msg.priority}</td>
-                    <td className="px-3 py-3 text-center text-gray-600 capitalize">{msg.speed || "â€”"}</td>
+                    <td className="px-3 py-3 text-center text-gray-600 capitalize">{msg.speed || "—"}</td>
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-1.5">
                         {msg.bgColor && (
@@ -306,7 +306,7 @@ const AdminFlashMessagesPage = () => {
                           />
                         )}
                         {!msg.bgColor && !msg.textColor && (
-                          <span className="text-gray-400 italic text-xs">â€”</span>
+                          <span className="text-gray-400 italic text-xs">—</span>
                         )}
                       </div>
                     </td>

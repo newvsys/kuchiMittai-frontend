@@ -1057,7 +1057,7 @@ const AdminReturnPoliciesPage = () => {
               </button>
             </div>
 
-            {/* Already Mapped Products â€” driven by by-category API */}
+            {/* Already Mapped Products — driven by by-category API */}
             <div className="mb-5">
               <h4 className="text-sm font-semibold text-gray-700 mb-2">
                 Existing Return Policy Mapping for Selected Category
@@ -1090,10 +1090,10 @@ const AdminReturnPoliciesPage = () => {
                               {entry.returnPolicy ? entry.returnPolicy.name : <span className="text-gray-400 italic">None</span>}
                             </td>
                             <td className="px-4 py-2">
-                              {entry.returnPolicy ? `${entry.returnPolicy.returnWindowDays} days` : "â€”"}
+                              {entry.returnPolicy ? `${entry.returnPolicy.returnWindowDays} days` : "—"}
                             </td>
                             <td className="px-4 py-2">
-                              {entry.returnPolicy ? (entry.returnPolicy.isReturnable ? "Yes" : "No") : "â€”"}
+                              {entry.returnPolicy ? (entry.returnPolicy.isReturnable ? "Yes" : "No") : "—"}
                             </td>
                             <td className="px-4 py-2">
                               {!entry.returnPolicy ? (
@@ -1136,10 +1136,10 @@ const AdminReturnPoliciesPage = () => {
                             <td className="px-4 py-2 text-gray-600">
                               {m.productTitle ||
                                 categoryProducts.find((p) => p.id === m.entityId)?.title ||
-                                "â€”"}
+                                "—"}
                             </td>
                             <td className="px-4 py-2 text-gray-600">{m.policyName || `Policy #${m.policyId}`}</td>
-                            <td className="px-4 py-2">{m.priority ?? "â€”"}</td>
+                            <td className="px-4 py-2">{m.priority ?? "—"}</td>
                             <td className="px-4 py-2">
                               <div className="flex items-center gap-3">
                                 <button
