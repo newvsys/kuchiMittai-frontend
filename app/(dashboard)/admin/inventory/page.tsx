@@ -224,7 +224,7 @@ const InventoryPage = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = stock-alert-report-.csv;
+    a.download = `stock-alert-report-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
