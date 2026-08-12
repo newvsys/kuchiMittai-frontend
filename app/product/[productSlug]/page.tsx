@@ -229,7 +229,7 @@ const ZOOM_PANEL_SIZE = 380;
           <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
           <span className="min-w-0 max-w-full truncate font-semibold text-gray-800 sm:max-w-sm">{sanitize(product?.title)}</span>
         </nav>
-        <div className="flex flex-col items-center gap-4 rounded-2xl border border-gray-200 bg-white p-3 sm:p-4 lg:p-5">
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-gray-200 bg-white p-3 sm:p-4 lg:flex-row lg:items-center lg:justify-center lg:gap-x-8 lg:p-5">
           <div className="relative w-full max-w-[200px] self-center mx-auto">
             <div className="relative aspect-square w-full">
               {/* Prev arrow */}
@@ -344,7 +344,7 @@ const ZOOM_PANEL_SIZE = 380;
               ))}
             </div>
           </div>
-          <div className="flex min-w-0 w-full max-w-md flex-col gap-y-3 text-black text-center items-center">
+          <div className="flex min-w-0 w-full lg:w-auto lg:max-w-md flex-col gap-y-3 text-black text-center items-center">
             <h1 className="text-base font-bold leading-snug text-gray-900 sm:text-lg">{sanitize(product?.title)}</h1>
             {product?.inStock !== 1 ? (
               <p className="text-sm font-semibold text-red-500">Currently out of stock</p>
