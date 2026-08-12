@@ -230,7 +230,7 @@ const ZOOM_PANEL_SIZE = 380;
           <span className="min-w-0 max-w-full truncate font-semibold text-gray-800 sm:max-w-sm">{sanitize(product?.title)}</span>
         </nav>
         <div className="flex flex-col items-center gap-4 rounded-2xl border border-gray-200 bg-white p-3 sm:p-4 lg:flex-row lg:items-start lg:gap-x-4 lg:p-5">
-          <div className="relative w-full max-w-[200px] self-center mx-auto">
+          <div className="relative w-full max-w-[200px] mx-auto lg:mx-0 lg:self-start">
             <div className="relative aspect-square w-full">
               {/* Prev arrow */}
               {slideImages.length > 1 && (
