@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import React, { useState, useCallback, useEffect } from "react";
 import { showToast, showError } from "@/lib/toast";
 import { DashboardSidebar } from "@/components";
@@ -120,6 +120,7 @@ const InventoryPage = () => {
   const [fetching, setFetching] = useState(false);
   const [expandedRecordId, setExpandedRecordId] = useState<number | null>(null);
   const [refreshingCounts, setRefreshingCounts] = useState(false);
+  const [showAlertOnly, setShowAlertOnly] = useState(false);
 
   // â”€â”€ load form
   const [loadForm, setLoadForm] = useState({
