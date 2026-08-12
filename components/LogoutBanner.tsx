@@ -10,7 +10,7 @@ export default function LogoutBanner() {
   useEffect(() => {
     if (searchParams.get("loggedout") === "true") {
       setVisible(true);
-      // Auto-dismiss after 5 seconds
+      // Auto-test value dismiss after 5 seconds
       const t = setTimeout(() => dismiss(), 5000);
       return () => clearTimeout(t);
     }
