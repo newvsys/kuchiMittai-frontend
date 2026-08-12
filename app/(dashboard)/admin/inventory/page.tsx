@@ -212,14 +212,14 @@ const InventoryPage = () => {
     if (alerts.length === 0) { showToast("No low-stock or out-of-stock items found."); return; }
     const header = ["Product/Variant", "Warehouse", "Total Qty", "Available Qty", "Reserved Qty", "Reorder Level", "Alert Status"];
     const rows = alerts.map((r: InventoryRecord) => [
-      r.productVariantName || Variant #,
-      r.warehouseName || r.warehouseCode || #,
+      r.productVariantName || `Variant #${r.productVarId}`,
+      r.warehouseName || r.warehouseCode || `#${r.warehouseId}`,
       r.totalQty, r.availableQty,
       r.quantityReserved ?? r.reservedQty ?? 0,
       r.reorderLevel,
       r.availableQty === 0 ? "OUT OF STOCK" : "LOW STOCK",
     ]);
-    const csv = [header, ...rows].map((row: any[]) => row.map((c: any) => "").join(",")).join("\n");
+    const csv = [header, ...rows].map((row: any[]) => row.map((c: any) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
