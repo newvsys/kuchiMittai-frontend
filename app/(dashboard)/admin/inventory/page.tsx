@@ -205,6 +205,29 @@ const InventoryPage = () => {
   }, []);
 
   // â”€â”€ fetch inventory list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const isAlert = (r: InventoryRecord) => r.availableQty === 0 || (r.reorderLevel > 0 && r.availableQty <= r.reorderLevel);
+
+  const exportAlertCSV = () => {
+    const alerts = records.filter(isAlert);
+    if (alerts.length === 0) { showToast("No low-stock or out-of-stock items found."); return; }
+    const header = ["Product/Variant", "Warehouse", "Total Qty", "Available Qty", "Reserved Qty", "Reorder Level", "Alert Status"];
+    const rows = alerts.map((r: InventoryRecord) => [
+      r.productVariantName || Variant #,
+      r.warehouseName || r.warehouseCode || #,
+      r.totalQty, r.availableQty,
+      r.quantityReserved ?? r.reservedQty ?? 0,
+      r.reorderLevel,
+      r.availableQty === 0 ? "OUT OF STOCK" : "LOW STOCK",
+    ]);
+    const csv = [header, ...rows].map((row: any[]) => row.map((c: any) => "").join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = stock-alert-report-.csv;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
   const fetchInventory = useCallback(async () => {
     const params = new URLSearchParams();
     if (filterBarcode.trim()) {
