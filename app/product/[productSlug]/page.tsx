@@ -271,12 +271,12 @@ const ZOOM_PANEL_SIZE = 380;
                 )}
               </div>
 
-              {/* Zoom panel — floats to the right of the image column */}
+              {/* Zoom panel — floats to the left of the image column */}
               {zoomLens && (
                 <div
                   className="hidden lg:block absolute top-0 z-50 rounded-lg border border-gray-200 shadow-2xl"
                   style={{
-                    left: "calc(100% + 16px)",
+                    right: "calc(100% + 16px)",
                     width: ZOOM_PANEL_SIZE,
                     height: ZOOM_PANEL_SIZE,
                     backgroundImage: `url(${selectedImage || "/product_placeholder.jpg"})`,
