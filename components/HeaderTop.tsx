@@ -37,7 +37,7 @@ const HeaderTop = () => {
     clearCart();
     setWishlist([]);
     // Navigate immediately — don't wait for the server
-    router.push("/search?price=10000&minPrice=0&inStock=false&sort=lowPrice&page=1&loggedout=true");
+    router.push("/search?price=10000&minPrice=0&inStock=false&sort=lowPrice&page=1");
     // Invalidate the server session in the background
     signOut({ redirect: false });
   }

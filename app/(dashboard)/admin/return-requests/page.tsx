@@ -274,7 +274,7 @@ const AdminReturnRequestsPage = () => {
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={safeCurrentPage === 1}
                 >
-                  Â«
+                  <<
                 </button>
                 <span className="text-sm text-gray-600">Page {safeCurrentPage} of {totalPages}</span>
                 <button
@@ -282,7 +282,7 @@ const AdminReturnRequestsPage = () => {
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={safeCurrentPage === totalPages}
                 >
-                  Â»
+                  >>
                 </button>
               </div>
             )}

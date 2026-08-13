@@ -584,7 +584,7 @@ const InventoryPage = () => {
                         className="text-xs font-medium text-blue-600 hover:underline"
                         onClick={() => setExpandedRecordId(expandedRecordId === rec.inventoryId ? null : rec.inventoryId)}
                       >
-                        {expandedRecordId === rec.inventoryId ? "Hide Items â–²" : `Show Items (${rec.items?.length ?? 0}) â–¼`}
+                        {expandedRecordId === rec.inventoryId ? "Hide Items ^" : `Show Items (${rec.items?.length ?? 0}) v`}
                       </button>
                     </div>
 
@@ -820,7 +820,7 @@ const InventoryPage = () => {
                         </div>
                       </div>
                       {loadStockPreview.reorderLevel > 0 && loadStockPreview.availableQty <= loadStockPreview.reorderLevel && (
-                        <p className="mt-2 text-xs text-red-600 font-semibold">âš  Available stock is at or below reorder level</p>
+                        <p className="mt-2 text-xs text-red-600 font-semibold">Warning: Available stock is at or below reorder level</p>
                       )}
                       <p className="mt-2 text-xs text-gray-400">Inventory ID: {loadStockPreview.inventoryId} &middot; Status: {loadStockPreview.status}</p>
                     </>
@@ -1078,14 +1078,14 @@ const InventoryPage = () => {
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 px-4 py-2 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-700 font-medium"
                       >
-                        ðŸ“„ Open PDF
+                        Open PDF
                       </a>
                       <a
                         href={labelResult.pdfUrl?.startsWith('/') ? `${API_BASE}${labelResult.pdfUrl}` : labelResult.pdfUrl!}
                         download
                         className="inline-flex items-center gap-1 px-4 py-2 bg-gray-100 border border-gray-300 text-gray-700 text-xs rounded-lg hover:bg-gray-200 font-medium"
                       >
-                        â¬‡ Download
+                        Download
                       </a>
                     </div>
                     <p className="text-xs text-gray-400 font-mono">{labelResult.pdfUrl}</p>
@@ -1202,7 +1202,7 @@ const InventoryPage = () => {
                                   download
                                   className="px-2 py-1 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded text-xs font-medium hover:bg-indigo-100"
                                 >
-                                  â¬‡ Download
+                                  Download
                                 </a>
                               )}
                               {/* Open PDF in new tab */}
@@ -1213,7 +1213,7 @@ const InventoryPage = () => {
                                   rel="noopener noreferrer"
                                   className="px-2 py-1 bg-gray-50 border border-gray-200 text-gray-700 rounded text-xs font-medium hover:bg-gray-100"
                                 >
-                                  ðŸ“„ Open
+                                  Open
                                 </a>
                               )}
                               {/* Reprint — regenerates PDF */}
@@ -1262,13 +1262,13 @@ const InventoryPage = () => {
                       disabled={labelJobsPage <= 1 || labelJobsLoading}
                       onClick={() => { const p = labelJobsPage - 1; setLabelJobsPage(p); fetchLabelJobs(p, labelJobsFilter); }}
                       className="px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 disabled:opacity-40"
-                    >â† Prev</button>
+                    >&lt; Prev</button>
                     <button
                       type="button"
                       disabled={!labelJobsHasMore || labelJobsLoading}
                       onClick={() => { const p = labelJobsPage + 1; setLabelJobsPage(p); fetchLabelJobs(p, labelJobsFilter); }}
                       className="px-3 py-1 rounded border border-gray-200 hover:bg-gray-50 disabled:opacity-40"
-                    >Next â†’</button>
+                    >Next &gt;</button>
                   </div>
                 </div>
               </div>

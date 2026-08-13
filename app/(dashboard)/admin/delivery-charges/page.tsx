@@ -84,7 +84,7 @@ export default function DeliveryChargesPage() {
     e.preventDefault();
     if (!form.ruleName.trim()) { showError("Rule name is required"); return; }
     if (form.deliveryCharge === "" || isNaN(Number(form.deliveryCharge)) || Number(form.deliveryCharge) < 0) {
-      showError("Delivery charge must be a number â‰¥ 0"); return;
+      showError("Delivery charge must be a number >= 0"); return;
     }
     setSubmitting(true);
     try {
@@ -170,9 +170,9 @@ export default function DeliveryChargesPage() {
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold">Priority</th>
                   <th className="px-4 py-3 text-left font-semibold">Rule Name</th>
-                  <th className="px-4 py-3 text-right font-semibold">Min (â‚¹)</th>
-                  <th className="px-4 py-3 text-right font-semibold">Max (â‚¹)</th>
-                  <th className="px-4 py-3 text-right font-semibold">Charge (â‚¹)</th>
+                  <th className="px-4 py-3 text-right font-semibold">Min (₹)</th>
+                  <th className="px-4 py-3 text-right font-semibold">Max (₹)</th>
+                  <th className="px-4 py-3 text-right font-semibold">Charge (₹)</th>
                   <th className="px-4 py-3 text-center font-semibold">Status</th>
                   <th className="px-4 py-3 text-left font-semibold">Description</th>
                   <th className="px-4 py-3 text-center font-semibold">Actions</th>
@@ -186,10 +186,10 @@ export default function DeliveryChargesPage() {
                       {rule.ruleName}
                       {rule.isFreeDelivery && <span className="ml-2 text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded font-semibold">FREE</span>}
                     </td>
-                    <td className="px-4 py-3 text-right text-gray-700">â‚¹{rule.minOrderAmount}</td>
-                    <td className="px-4 py-3 text-right text-gray-700">{rule.maxOrderAmount != null ? `â‚¹${rule.maxOrderAmount}` : "—"}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">₹{rule.minOrderAmount}</td>
+                    <td className="px-4 py-3 text-right text-gray-700">{rule.maxOrderAmount != null ? `₹${rule.maxOrderAmount}` : "—"}</td>
                     <td className="px-4 py-3 text-right font-semibold text-gray-900">
-                      {rule.deliveryCharge === 0 ? <span className="text-green-600">Free</span> : `â‚¹${rule.deliveryCharge}`}
+                      {rule.deliveryCharge === 0 ? <span className="text-green-600">Free</span> : `₹${rule.deliveryCharge}`}
                     </td>
                     <td className="px-4 py-3 text-center">
                       <span className={`px-2 py-0.5 rounded text-xs font-semibold ${rule.status === "A" ? "bg-green-100 text-green-700" : "bg-gray-200 text-gray-500"}`}>
@@ -224,21 +224,21 @@ export default function DeliveryChargesPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Rule Name <span className="text-red-500">*</span></label>
-                <input required className="border rounded px-3 py-2 w-full text-sm" value={form.ruleName} onChange={e => setForm(f => ({ ...f, ruleName: e.target.value }))} placeholder="e.g. Free Delivery Above â‚¹500" />
+                <input required className="border rounded px-3 py-2 w-full text-sm" value={form.ruleName} onChange={e => setForm(f => ({ ...f, ruleName: e.target.value }))} placeholder="e.g. Free Delivery Above ₹500" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Min Order Amount (â‚¹)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Min Order Amount (₹)</label>
                   <input type="number" min="0" step="0.01" className="border rounded px-3 py-2 w-full text-sm" value={form.minOrderAmount} onChange={e => setForm(f => ({ ...f, minOrderAmount: e.target.value }))} placeholder="0.00" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Max Order Amount (â‚¹)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Max Order Amount (₹)</label>
                   <input type="number" min="0" step="0.01" className="border rounded px-3 py-2 w-full text-sm" value={form.maxOrderAmount} onChange={e => setForm(f => ({ ...f, maxOrderAmount: e.target.value }))} placeholder="Leave blank = no limit" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Charge (â‚¹) <span className="text-red-500">*</span></label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Charge (₹) <span className="text-red-500">*</span></label>
                   <input required type="number" min="0" step="0.01" className="border rounded px-3 py-2 w-full text-sm" value={form.deliveryCharge} onChange={e => setForm(f => ({ ...f, deliveryCharge: e.target.value }))} placeholder="0 = free" />
                 </div>
                 <div>

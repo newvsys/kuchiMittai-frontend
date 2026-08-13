@@ -55,13 +55,13 @@ const emptyForm: FormState = {
   status: "A",
 };
 
-// Convert "2026-07-01T00:00:00" â†’ "2026-07-01T00:00" for datetime-local input
+// Convert "2026-07-01T00:00:00" -> "2026-07-01T00:00" for datetime-local input
 const toInputDatetime = (val: string | null) => {
   if (!val) return "";
   return val.length >= 16 ? val.substring(0, 16) : val;
 };
 
-// Convert "2026-07-01T00:00" â†’ "2026-07-01T00:00:00" for API
+// Convert "2026-07-01T00:00" -> "2026-07-01T00:00:00" for API
 const toApiDatetime = (val: string) => {
   if (!val) return null;
   return val.length === 16 ? `${val}:00` : val;
@@ -397,7 +397,7 @@ const AdminFlashMessagesPage = () => {
                   value={form.message}
                   onChange={handleFormChange}
                   rows={3}
-                  placeholder="e.g. ðŸŽ‰ Get 50% off on all items this weekend!"
+                  placeholder="e.g. Get 50% off on all items this weekend!"
                   className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-y focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
               </div>

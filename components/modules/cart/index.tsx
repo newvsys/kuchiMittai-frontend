@@ -210,7 +210,7 @@ export const CartModule = () => {
       {/* Order summary */}
       <section
         aria-labelledby="summary-heading"
-        className="rounded-2xl border border-gray-200 overflow-hidden bg-white sticky top-6 w-full max-w-xl lg:ml-auto lg:pl-2"
+        className="rounded-2xl border border-gray-200 overflow-hidden bg-white sticky top-6 w-full max-w-xl lg:ml-auto"
       >
         <div className="bg-blue-500 border-b border-blue-600 px-6 py-3">
           <h2 id="summary-heading" className="text-sm font-bold text-white">Order Summary</h2>

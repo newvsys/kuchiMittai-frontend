@@ -255,7 +255,7 @@ const AdminTrackShipmentPage = () => {
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={safeCurrentPage === 1}
                 >
-                  Â«
+                  <<
                 </button>
                 <span className="text-sm text-gray-600">Page {safeCurrentPage} of {totalPages}</span>
                 <button
@@ -263,7 +263,7 @@ const AdminTrackShipmentPage = () => {
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={safeCurrentPage === totalPages}
                 >
-                  Â»
+                  >>
                 </button>
               </div>
             )}
@@ -337,7 +337,7 @@ const AdminTrackShipmentPage = () => {
                         </span>
                         {h.location && (
                           <span className="text-xs text-gray-700">
-                            ðŸ“ {h.location}
+                            Location: {h.location}
                           </span>
                         )}
                         {h.remarks && (

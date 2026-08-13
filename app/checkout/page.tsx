@@ -781,12 +781,12 @@ const CheckoutPage = () => {
           <svg className="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
           <span className="text-gray-400">Confirmation</span>
         </nav>
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.9fr)] gap-5 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(420px,1fr)] gap-5 items-start">
 
           {/* Order Summary — right column on desktop, below form on mobile */}
           <div className="order-last lg:order-last lg:pl-2">
           <div className="sticky top-6">
-          <section aria-labelledby="summary-heading" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 w-full max-w-xl lg:ml-auto">
+          <section aria-labelledby="summary-heading" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 w-full lg:max-w-none">
             <div className="bg-gradient-to-r from-blue-600 to-blue-500 -mx-6 -mt-6 px-6 py-3.5 mb-5 rounded-t-2xl">
               <h2 id="summary-heading" className="text-sm font-bold text-white tracking-wide">Order Summary</h2>
             </div>

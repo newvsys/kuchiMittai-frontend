@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { showToast, showError } from "@/lib/toast";
 import apiClient from "@/lib/api";
 
-// â”€â”€â”€ Pending Orders Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Pending Orders Types
 
 interface PendingShipment {
   shipmentId: number;
@@ -58,7 +58,7 @@ function formatDate(d: string | null) {
   return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Types
 
 interface Warehouse {
   warehouseId: number;
@@ -132,7 +132,7 @@ interface ShippingForm {
   notes: string;
 }
 
-// â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Constants
 
 const SHIPMENT_STATUS_OPTIONS = [
   "CREATED",
@@ -173,7 +173,7 @@ const emptyForm: ShippingForm = {
   notes: "",
 };
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Helpers
 
 const statusBadgeClass = (status: string) => {
   switch (status?.toUpperCase()) {
@@ -251,7 +251,7 @@ const buildPayload = (form: ShippingForm) => {
   return payload;
 };
 
-// â”€â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Sub-components
 
 const Field = ({
   label, name, type = "text", value, onChange, placeholder, required, hint,
@@ -299,7 +299,7 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   </h3>
 );
 
-// â”€â”€â”€ Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Page
 
 const AdminShippingManagementPage = () => {
   const [searchInput, setSearchInput]     = useState("");
@@ -312,7 +312,7 @@ const AdminShippingManagementPage = () => {
   const [submitError, setSubmitError]     = useState("");
   const [warehouses, setWarehouses]       = useState<Warehouse[]>([]);
 
-  // â”€â”€ Pending Orders list state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Pending orders list state
   const [pendingOrders, setPendingOrders]         = useState<PendingOrder[]>([]);
   const [pendingTotal, setPendingTotal]           = useState(0);
   const [pendingLoading, setPendingLoading]       = useState(false);
@@ -419,7 +419,7 @@ const AdminShippingManagementPage = () => {
       .catch(() => {});
   }, []);
 
-  // â”€â”€ Fetch by order number (shared by form search + list row click) â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Fetch by order number (shared by form search + list row click)
 
   const handleFetchByOrderNumber = async (on: string) => {
     if (!on.trim()) return;
@@ -453,14 +453,14 @@ const AdminShippingManagementPage = () => {
     }
   };
 
-  // â”€â”€ Fetch (form search bar submit) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Fetch (form search bar submit)
 
   const handleFetch = async (e: React.FormEvent) => {
     e.preventDefault();
     await handleFetchByOrderNumber(searchInput);
   };
 
-  // â”€â”€ Submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Submit
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -497,13 +497,13 @@ const AdminShippingManagementPage = () => {
     }
   };
 
-  // â”€â”€ Field change â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Field change
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Render
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -511,7 +511,7 @@ const AdminShippingManagementPage = () => {
 
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
 
-        {/* â•â• SECTION 1: Pending Shipping Orders list â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        {/* SECTION 1: Pending Shipping Orders list */}
         <div>
           <div className="mb-4">
             <h1 className="text-2xl font-bold text-gray-800">Shipping Management</h1>
@@ -682,10 +682,10 @@ const AdminShippingManagementPage = () => {
             <div className="flex items-center justify-between mt-4">
               <p className="text-sm text-gray-500">
                 Page <span className="font-semibold">{listPage + 1}</span> of <span className="font-semibold">{totalListPages}</span>
-                {" "}— records {listPage * LIST_PAGE_SIZE + 1}â€“{Math.min((listPage + 1) * LIST_PAGE_SIZE, filteredPending.length)} of {filteredPending.length}
+                {" "}- records {listPage * LIST_PAGE_SIZE + 1}-{Math.min((listPage + 1) * LIST_PAGE_SIZE, filteredPending.length)} of {filteredPending.length}
               </p>
               <div className="flex items-center gap-1">
-                <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(0)} disabled={listPage === 0}>Â«</button>
+                <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(0)} disabled={listPage === 0}>«</button>
                 <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(p => Math.max(0, p - 1))} disabled={listPage === 0}>‹</button>
                 {Array.from({ length: totalListPages }, (_, i) => i).filter(i => Math.abs(i - listPage) <= 2).map(i => (
                   <button key={i} onClick={() => setListPage(i)}
@@ -694,13 +694,13 @@ const AdminShippingManagementPage = () => {
                   </button>
                 ))}
                 <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(p => Math.min(totalListPages - 1, p + 1))} disabled={listPage === totalListPages - 1}>›</button>
-                <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(totalListPages - 1)} disabled={listPage === totalListPages - 1}>Â»</button>
+                <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(totalListPages - 1)} disabled={listPage === totalListPages - 1}>»</button>
               </div>
             </div>
           )}
         </div>
 
-        {/* â•â• SECTION 2 — Modal â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        {/* SECTION 2: Modal */}
         {modalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={e => { if (e.target === e.currentTarget) closeModal(); }}>
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col">
@@ -735,7 +735,7 @@ const AdminShippingManagementPage = () => {
                   </div>
                 )}
 
-        {/* â”€â”€ Existing record summary card â”€â”€ */}
+        {/* Existing record summary card */}
         {!fetchLoading && mode === "update" && record && (
           <div className="bg-gray-50 border rounded-lg p-4">
             <div className="flex flex-wrap items-start justify-between gap-4">
@@ -760,7 +760,7 @@ const AdminShippingManagementPage = () => {
               {record.awbCode      && <span><span className="font-medium">AWB:</span> {record.awbCode}</span>}
               {record.courierName  && <span><span className="font-medium">Courier:</span> {record.courierName}</span>}
               {record.trackingNumber && <span><span className="font-medium">Tracking:</span> {record.trackingNumber}</span>}
-              {record.shippingPrice != null && <span><span className="font-medium">Price:</span> â‚¹{record.shippingPrice}</span>}
+              {record.shippingPrice != null && <span><span className="font-medium">Price:</span> ₹{record.shippingPrice}</span>}
               {record.shippedDate  && <span><span className="font-medium">Shipped:</span> {record.shippedDate.slice(0, 10)}</span>}
               {record.deliveredDate && <span><span className="font-medium">Delivered:</span> {record.deliveredDate.slice(0, 10)}</span>}
             </div>
@@ -788,7 +788,7 @@ const AdminShippingManagementPage = () => {
           </div>
         )}
 
-        {/* â”€â”€ Create / Update form â”€â”€ */}
+        {/* Create / Update form */}
         {!fetchLoading && mode !== "idle" && (
           <div className="bg-white">
             <div className="flex items-center gap-3 mb-5">
@@ -868,7 +868,7 @@ const AdminShippingManagementPage = () => {
               <div>
                 <SectionTitle>Pricing & URLs</SectionTitle>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <Field label="Shipping Price (â‚¹)" name="shippingPrice" type="number" value={form.shippingPrice} onChange={handleChange} placeholder="48.50" />
+                  <Field label="Shipping Price (₹)" name="shippingPrice" type="number" value={form.shippingPrice} onChange={handleChange} placeholder="48.50" />
                   <Field label="Label URL" name="labelUrl" value={form.labelUrl} onChange={handleChange} placeholder="https://..." />
                   <Field label="Track URL" name="trackUrl" value={form.trackUrl} onChange={handleChange} placeholder="https://..." />
                 </div>
