@@ -781,12 +781,12 @@ const CheckoutPage = () => {
           <svg className="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
           <span className="text-gray-400">Confirmation</span>
         </nav>
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_850px] gap-2 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.9fr)] gap-5 items-start">
 
           {/* Order Summary — right column on desktop, below form on mobile */}
-          <div className="order-last lg:order-last">
+          <div className="order-last lg:order-last lg:pl-2">
           <div className="sticky top-6">
-          <section aria-labelledby="summary-heading" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+          <section aria-labelledby="summary-heading" className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 w-full max-w-xl lg:ml-auto">
             <div className="bg-gradient-to-r from-blue-600 to-blue-500 -mx-6 -mt-6 px-6 py-3.5 mb-5 rounded-t-2xl">
               <h2 id="summary-heading" className="text-sm font-bold text-white tracking-wide">Order Summary</h2>
             </div>
@@ -901,7 +901,7 @@ const CheckoutPage = () => {
           </div>
 
           {/* LEFT — Contact & Shipping form */}
-          <form className="min-w-0 space-y-5 order-first">
+          <form className="min-w-0 space-y-5 order-first lg:pr-2">
             {/* Address skeleton — shown while customer details are loading for logged-in users */}
             {customerLoading && status !== "unauthenticated" && (
               <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
@@ -922,28 +922,28 @@ const CheckoutPage = () => {
               </section>
             )}
             {hasSavedAddresses && (
-              <section className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 max-w-sm">
-                <div className="bg-gray-100 border-b border-gray-200 -mx-6 -mt-6 px-6 py-3 mb-5 rounded-t-2xl">
+              <section className="w-full max-w-2xl bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+                <div className="bg-gradient-to-r from-sky-50 to-blue-50 border-b border-blue-100 -mx-6 -mt-6 px-6 py-3.5 mb-5 rounded-t-2xl">
                   <h2 className="text-sm font-bold text-gray-800">Delivery Address</h2>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {customer.addresses.map((addr: any, idx: number) => (
                     <label
                       key={addr.addressId ?? idx}
-                      className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
+                      className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
                         selectedAddressIndex === idx
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                          ? "border-blue-500 bg-blue-50 ring-1 ring-blue-100"
+                          : "border-gray-200 hover:border-blue-300 hover:bg-blue-50/50"
                       }`}
                     >
                       <input
                         type="radio"
                         name="saved-address"
-                        className="mt-0.5 accent-blue-600"
+                        className="mt-1 accent-blue-600"
                         checked={selectedAddressIndex === idx}
                         onChange={() => handleSelectAddress(idx)}
                       />
-                      <span className="text-sm text-gray-700 leading-snug">
+                      <span className="text-sm text-gray-700 leading-relaxed break-words">
                         {addr.addressLine1}
                         {addr.addressLine2 ? `, ${addr.addressLine2}` : ""}
                         {", "}
@@ -952,7 +952,7 @@ const CheckoutPage = () => {
                     </label>
                   ))}
                 </div>
-                <div className="mt-4 flex gap-2">
+                <div className="mt-5 flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => {
@@ -960,14 +960,14 @@ const CheckoutPage = () => {
                       setIsAddingAddress(false);
                       setIsAddressReadOnly(false);
                     }}
-                    className="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-100 transition-colors"
                   >
                     Edit selected address
                   </button>
                   <button
                     type="button"
                     onClick={handleAddNewAddress}
-                    className="rounded-lg border border-blue-500 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                    className="rounded-lg border border-blue-500 px-3 py-2 text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors"
                   >
                     + Add new address
                   </button>

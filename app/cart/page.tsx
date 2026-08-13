@@ -6,7 +6,7 @@ import { Suspense } from "react";
 const CartPage = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-screen-xl mx-auto overflow-x-hidden px-4 pb-16 pt-8 sm:px-6 lg:px-8">
+      <div className="max-w-screen-2xl mx-auto overflow-x-hidden px-4 pb-16 pt-8 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm font-medium sm:text-base">
           <a href="/search?categoryId=0&price=10000&minPrice=0" className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 transition-colors">
