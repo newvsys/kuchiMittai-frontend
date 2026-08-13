@@ -217,7 +217,7 @@ const ZOOM_PANEL_SIZE = 380;
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-screen-2xl mx-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 py-3">
+      <div className="max-w-screen-2xl mx-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 py-5 sm:py-6">
         {/* Breadcrumb */}
         <nav className="mb-5 flex flex-wrap items-center gap-2 text-sm font-medium sm:text-base">
           <a href="/search?categoryId=0&price=10000&minPrice=0" className="flex items-center gap-1.5 text-blue-600 transition-colors hover:text-blue-800">
@@ -229,15 +229,15 @@ const ZOOM_PANEL_SIZE = 380;
           <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
           <span className="min-w-0 max-w-full truncate font-semibold text-gray-800 sm:max-w-sm">{sanitize(product?.title)}</span>
         </nav>
-        <div className="flex flex-col items-center gap-4 rounded-2xl border border-gray-200 bg-white p-3 sm:p-4 lg:flex-row lg:items-center lg:justify-center lg:gap-x-0 lg:p-0">
-          <div className="relative w-full max-w-[200px] self-center mx-auto lg:mx-0 lg:flex-shrink-0">
+        <div className="grid grid-cols-1 gap-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-10">
+          <div className="relative w-full max-w-xl self-start mx-auto lg:mx-0 lg:sticky lg:top-24">
             <div className="relative aspect-square w-full">
               {/* Prev arrow */}
               {slideImages.length > 1 && (
                 <button
                   type="button"
                   onClick={goToPrev}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white/80 hover:bg-white rounded-full w-9 h-9 flex items-center justify-center shadow-md text-gray-700 hover:text-gray-900 transition-colors"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white rounded-full w-9 h-9 flex items-center justify-center shadow-md text-gray-700 hover:text-gray-900 transition-colors"
                   aria-label="Previous image"
                 >
                   <MdChevronLeft className="text-2xl" />
@@ -246,16 +246,16 @@ const ZOOM_PANEL_SIZE = 380;
 
               {/* Main image with lens overlay */}
               <div
-                className="w-full h-full rounded-lg border border-gray-100 bg-gray-50 relative select-none cursor-crosshair overflow-hidden"
+                className="w-full h-full rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white relative select-none cursor-crosshair overflow-hidden"
                 onMouseMove={handleMainImageMouseMove}
                 onMouseLeave={() => setZoomLens(null)}
               >
                 <Image
                   src={selectedImage || "/product_placeholder.jpg"}
                   fill
-                  sizes="(max-width: 640px) 200px, (max-width: 1024px) 200px, 200px"
+                  sizes="(max-width: 640px) 92vw, (max-width: 1024px) 70vw, 44vw"
                   alt="main image"
-                  className="object-contain p-2"
+                  className="object-contain p-4 sm:p-5"
                 />
                 {/* Lens box */}
                 {zoomLens && (
@@ -301,7 +301,7 @@ const ZOOM_PANEL_SIZE = 380;
 
               {/* Dot indicators */}
               {slideImages.length > 1 && (
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
                   {slideImages.map((img, idx) => (
                     <button
                       key={idx}
@@ -317,7 +317,7 @@ const ZOOM_PANEL_SIZE = 380;
               )}
             </div>
             {/* Click to see full view */}
-            <div className="text-center mt-2">
+            <div className="text-center mt-3">
               <button
                 type="button"
                 onClick={openFullView}
@@ -326,11 +326,11 @@ const ZOOM_PANEL_SIZE = 380;
                 Click to see full view
               </button>
             </div>
-            <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-around">
+            <div className="mt-4 grid grid-cols-5 gap-2 sm:grid-cols-6">
               {images.map((imageItem: ImageItem, key: number) => (
                 <div
                   key={imageItem.imageID + key}
-                  className={`w-14 h-14 relative overflow-hidden rounded border-2 cursor-pointer flex-shrink-0 ${selectedImage === getMediaUrl(imageItem.image) ? 'border-blue-500' : 'border-transparent'}`}
+                  className={`w-full aspect-square relative overflow-hidden rounded-lg border-2 cursor-pointer ${selectedImage === getMediaUrl(imageItem.image) ? 'border-blue-500' : 'border-transparent hover:border-blue-200'}`}
                   onClick={() => setSelectedImage(getMediaUrl(imageItem.image))}
                 >
                   <Image
@@ -344,8 +344,8 @@ const ZOOM_PANEL_SIZE = 380;
               ))}
             </div>
           </div>
-          <div className="flex min-w-0 w-full lg:w-auto lg:max-w-md flex-col gap-y-3 text-black text-center items-center lg:ml-0 lg:px-5">
-            <h1 className="text-base font-bold leading-snug text-gray-900 sm:text-lg">{sanitize(product?.title)}</h1>
+          <div className="flex min-w-0 w-full lg:w-auto lg:max-w-xl flex-col gap-y-3 text-black text-left items-start lg:px-2">
+            <h1 className="text-xl font-bold leading-snug text-gray-900 sm:text-2xl">{sanitize(product?.title)}</h1>
             {product?.inStock !== 1 ? (
               <p className="text-sm font-semibold text-red-500">Currently out of stock</p>
             ) : (
@@ -353,10 +353,10 @@ const ZOOM_PANEL_SIZE = 380;
                 <div className="flex flex-col gap-y-1">
                   {product?.mrp && product.mrp > product.price ? (
                     <>
-                        <div className="flex flex-wrap items-center justify-center gap-3">
-                        <p className="text-base font-bold text-gray-900 sm:text-lg">₹{product.price}</p>
-                        <p className="text-xs text-gray-400 line-through">MRP ₹{product.mrp}</p>
-                        <span className="bg-green-100 text-green-700 text-sm font-semibold px-2 py-0.5 rounded">
+                        <div className="flex flex-wrap items-center justify-start gap-3">
+                        <p className="text-2xl font-bold text-gray-900">₹{product.price}</p>
+                        <p className="text-sm text-gray-400 line-through">MRP ₹{product.mrp}</p>
+                        <span className="bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full">
                           {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% off
                         </span>
                       </div>
@@ -365,7 +365,7 @@ const ZOOM_PANEL_SIZE = 380;
                       </p>
                     </>
                   ) : (
-                    <p className="text-base font-bold text-gray-900 sm:text-lg">₹{product?.price}</p>
+                    <p className="text-2xl font-bold text-gray-900">₹{product?.price}</p>
                   )}
                 </div>
                 <StockAvailabillity stock={product?.stock || 0} inStock={product?.inStock} />
@@ -386,7 +386,7 @@ const ZOOM_PANEL_SIZE = 380;
               />
             )}
             {product?.isReturnable === "Y" ? (
-              <div className="flex items-center justify-center gap-2 text-sm">
+              <div className="flex items-center justify-start gap-2 text-sm">
                 <span className="text-green-600">✔</span>
                 <button
                   type="button"
@@ -397,7 +397,7 @@ const ZOOM_PANEL_SIZE = 380;
                 </button>
               </div>
             ) : product?.isReturnable === "N" ? (
-              <div className="flex items-center justify-center gap-2 text-sm">
+              <div className="flex items-center justify-start gap-2 text-sm">
                 <span className="text-gray-800">✖</span>
                 <button
                   type="button"
@@ -408,7 +408,7 @@ const ZOOM_PANEL_SIZE = 380;
                 </button>
               </div>
             ) : null}
-            <div className="flex flex-col gap-y-2 max-[500px]:items-center">
+            <div className="flex w-full flex-col gap-y-2">
               {/* Size Option Buttons - Always show all sizes from baseProduct */}
               {Array.isArray(baseProduct?.productvarlist) && baseProduct.productvarlist.length > 0 && (() => {
                 // Build unique list: main product + variants (avoid duplicate SKUs)
@@ -418,13 +418,13 @@ const ZOOM_PANEL_SIZE = 380;
                 ];
                 const uniqueVariants = allVariants.filter((v, idx, arr) => arr.findIndex(x => x.sku === v.sku) === idx);
                 return (
-                  <div className="mb-2 flex flex-wrap items-center justify-center gap-2">
-                    <span className="mr-2 font-semibold">Size:</span>
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    <span className="mr-1 font-semibold text-sm text-gray-700">Size:</span>
                     {uniqueVariants.map((variant: any) => (
                       <button
                         key={variant.sku}
-                        className={`border rounded px-3 py-1 font-medium transition-colors
-                          ${product.sku === variant.sku ? 'bg-blue-500 text-white' : 'bg-white text-black hover:bg-blue-100'}
+                        className={`border rounded-lg px-3 py-1.5 text-sm font-medium transition-colors
+                          ${product.sku === variant.sku ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-black hover:bg-blue-50 border-gray-300'}
                           ${variant.inStock !== 1 ? 'opacity-40' : 'cursor-pointer'}
                         `}
                         onClick={async () => {
@@ -475,7 +475,7 @@ const ZOOM_PANEL_SIZE = 380;
             </div>
           </div>
         </div>
-        <div className="mt-6 rounded-2xl border border-gray-200 bg-white overflow-hidden">
+        <div className="mt-7 rounded-2xl border border-gray-200 bg-white overflow-hidden">
           <ProductTabs product={product} baseProduct={baseProduct} />
         </div>
       </div>
