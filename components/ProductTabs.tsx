@@ -24,8 +24,8 @@ const ProductTabs = ({ product, baseProduct }: { product: Product; baseProduct?:
   );
 
   return (
-    <div className="px-5 text-black">
-      <div className="grid grid-cols-4 border-b border-gray-200">
+    <div className="text-black">
+      <div className="grid grid-cols-2 sm:grid-cols-4 border-b border-gray-200 bg-gray-100 divide-x divide-gray-200">
         {[
           { label: "Description", idx: 0 },
           { label: "Additional Info", idx: 1 },
@@ -36,7 +36,7 @@ const ProductTabs = ({ product, baseProduct }: { product: Product; baseProduct?:
             key={idx}
             type="button"
             onClick={() => setCurrentProductTab(idx)}
-            className={`py-3 text-sm font-semibold border-b-2 transition-all duration-150 text-center
+            className={`py-3 px-2 text-xs sm:text-sm font-semibold border-b-2 transition-all duration-150 text-center
               ${currentProductTab === idx
                 ? "bg-blue-500 text-white border-blue-500"
                 : "bg-gray-100 text-gray-600 border-transparent hover:bg-blue-50 hover:text-blue-600"
@@ -46,7 +46,7 @@ const ProductTabs = ({ product, baseProduct }: { product: Product; baseProduct?:
           </button>
         ))}
       </div>
-      <div className="pt-5">
+      <div className="p-5">
         {currentProductTab === 0 && (
           <div 
             className="text-lg max-sm:text-base max-sm:text-sm"
