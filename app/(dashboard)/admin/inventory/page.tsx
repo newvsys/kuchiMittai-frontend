@@ -1,5 +1,5 @@
 ﻿"use client";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { showToast, showError } from "@/lib/toast";
 import { DashboardSidebar } from "@/components";
 import { API_BASE } from "@/lib/env";
@@ -30,6 +30,29 @@ interface ProductVariant {
   skuCode: string;
   packSize?: string;
 }
+interface CategoryOption {
+  id: number;
+  title: string;
+}
+
+interface StockReportItem {
+  categoryId: number;
+  categoryName: string;
+  productId: number;
+  productName: string;
+  variantId: number;
+  skuCode: string;
+  packSize?: string;
+  warehouseId: number;
+  warehouseCode: string;
+  warehouseName: string;
+  totalQty: number;
+  availableQty: number;
+  quantityReserved?: number;
+  reorderLevel?: number;
+  inventoryStatus?: string;
+  stockStatus: string;
+}
 interface InventoryItem {
   id: number;
   barcode: string;
@@ -40,6 +63,26 @@ interface InventoryItem {
   expiryDate?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+interface OutOfStockItem {
+  categoryId: number;
+  categoryName: string;
+  productId: number;
+  productName: string;
+  productSlug?: string;
+  productStatus?: string;
+  variantId: number;
+  skuCode: string;
+  packSize?: string;
+  uom?: string;
+  mrp?: number;
+  sellingPrice?: number;
+  currency?: string;
+  variantStatus?: string;
+  hasInventoryRecord: boolean;
+  totalAvailableQty: number;
+  stockStatus: string;
 }
 
 interface InventoryRecord {
@@ -80,6 +123,55 @@ const InventoryPage = () => {
   // â”€â”€ master data
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<CategoryOption[]>([]);
+
+  // Stock report tab state
+  const [reportProductId, setReportProductId] = useState("");
+  const [reportVariantId, setReportVariantId] = useState("");
+  const [reportVariants, setReportVariants] = useState<ProductVariant[]>([]);
+  const [reportWarehouseId, setReportWarehouseId] = useState("");
+  const [reportCategoryId, setReportCategoryId] = useState("");
+  const [reportCategoryProducts, setReportCategoryProducts] = useState<Product[]>([]);
+  const [reportStatus, setReportStatus] = useState("A");
+  const [reportAvailableQtyOp, setReportAvailableQtyOp] = useState<"" | "<" | ">">("");
+  const [reportAvailableQtyValue, setReportAvailableQtyValue] = useState("");
+  const [reportLoading, setReportLoading] = useState(false);
+  const [reportItems, setReportItems] = useState<StockReportItem[]>([]);
+  const [reportTotals, setReportTotals] = useState({ totalRecords: 0, totalAvailableQty: 0, totalStockQty: 0 });
+
+  // Load tab out-of-stock helper state
+  const [outOfStockCategoryId, setOutOfStockCategoryId] = useState("");
+  const [outOfStockProductId, setOutOfStockProductId] = useState("");
+  const [outOfStockVariantId, setOutOfStockVariantId] = useState("");
+  const [outOfStockVariants, setOutOfStockVariants] = useState<ProductVariant[]>([]);
+  const [outOfStockCategoryProducts, setOutOfStockCategoryProducts] = useState<Product[]>([]);
+  const [outOfStockLoading, setOutOfStockLoading] = useState(false);
+  const [outOfStockItems, setOutOfStockItems] = useState<OutOfStockItem[]>([]);
+  const [outOfStockTotal, setOutOfStockTotal] = useState(0);
+
+  // â”€â”€ fetch products scoped to the selected out-of-stock category â”€â”€
+  useEffect(() => {
+    if (!outOfStockCategoryId) {
+      setOutOfStockCategoryProducts([]);
+      return;
+    }
+    fetch(`${API_BASE}/products/categories/${outOfStockCategoryId}/products`)
+      .then(r => r.json())
+      .then(data => setOutOfStockCategoryProducts(Array.isArray(data) ? data : []))
+      .catch(() => setOutOfStockCategoryProducts([]));
+  }, [outOfStockCategoryId]);
+
+  // — fetch products scoped to the selected stock-report category —
+  useEffect(() => {
+    if (!reportCategoryId) {
+      setReportCategoryProducts([]);
+      return;
+    }
+    fetch(`${API_BASE}/products/categories/${reportCategoryId}/products`)
+      .then(r => r.json())
+      .then(data => setReportCategoryProducts(Array.isArray(data) ? data : []))
+      .catch(() => setReportCategoryProducts([]));
+  }, [reportCategoryId]);
 
   // â”€â”€ fetch master data on mount
   useEffect(() => {
@@ -92,6 +184,10 @@ const InventoryPage = () => {
         .then(r => r.json())
         .then(data => setProducts(Array.isArray(data) ? data : []))
         .catch(() => {});
+      fetch(`${API_BASE}/products/categories`)
+        .then(r => r.json())
+        .then(data => setCategories(Array.isArray(data) ? data : []))
+        .catch(() => {});
     }, 0);
     return () => clearTimeout(t);
   }, []);
@@ -99,19 +195,28 @@ const InventoryPage = () => {
   // â”€â”€ fetch variants for a product
   const fetchVariantsFor = useCallback(async (
     productId: string,
-    target: "filter" | "load",
+    target: "filter" | "load" | "report" | "outofstock",
   ) => {
     if (!productId) {
-      target === "filter" ? setFilterVariants([]) : setLoadVariants([]);
+      if (target === "filter") setFilterVariants([]);
+      else if (target === "load") setLoadVariants([]);
+      else if (target === "outofstock") setOutOfStockVariants([]);
+      else setReportVariants([]);
       return;
     }
     try {
       const res = await fetch(`${API_BASE}/products/productsVariant/${productId}`);
       const data = await res.json();
       const list: ProductVariant[] = Array.isArray(data) ? data : [];
-      target === "filter" ? setFilterVariants(list) : setLoadVariants(list);
+      if (target === "filter") setFilterVariants(list);
+      else if (target === "load") setLoadVariants(list);
+      else if (target === "outofstock") setOutOfStockVariants(list);
+      else setReportVariants(list);
     } catch {
-      target === "filter" ? setFilterVariants([]) : setLoadVariants([]);
+      if (target === "filter") setFilterVariants([]);
+      else if (target === "load") setLoadVariants([]);
+      else if (target === "outofstock") setOutOfStockVariants([]);
+      else setReportVariants([]);
     }
   }, []);
 
@@ -137,7 +242,170 @@ const InventoryPage = () => {
   const [restoreSubmitting, setRestoreSubmitting] = useState(false);
 
   // â”€â”€ active tab
-  const [tab, setTab] = useState<"list" | "load" | "remove" | "restore" | "labels" | "labelhistory">("list");
+  const [tab, setTab] = useState<"list" | "load" | "stockreport" | "outofstock" | "remove" | "restore" | "labels" | "labelhistory">("list");
+
+  const fetchStockReport = useCallback(async () => {
+    const params = new URLSearchParams();
+    if (reportWarehouseId) params.set("warehouseId", reportWarehouseId);
+    if (reportCategoryId) params.set("categoryId", reportCategoryId);
+    if (reportProductId) params.set("productId", reportProductId);
+    if (reportVariantId) params.set("productVarId", reportVariantId);
+    if (reportStatus) params.set("status", reportStatus);
+
+    setReportLoading(true);
+    try {
+      const res = await fetch(`${API}/stock-report${params.toString() ? `?${params.toString()}` : ""}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.responseMessage || "Failed to fetch stock report");
+
+      const items: StockReportItem[] = Array.isArray(data?.reportItems) ? data.reportItems : [];
+      setReportItems(items);
+      setReportTotals({
+        totalRecords: Number(data?.totalRecords ?? items.length ?? 0),
+        totalAvailableQty: Number(data?.totalAvailableQty ?? 0),
+        totalStockQty: Number(data?.totalStockQty ?? 0),
+      });
+    } catch (err: any) {
+      setReportItems([]);
+      setReportTotals({ totalRecords: 0, totalAvailableQty: 0, totalStockQty: 0 });
+      showError(err?.message || "Failed to fetch stock report");
+    } finally {
+      setReportLoading(false);
+    }
+  }, [reportWarehouseId, reportCategoryId, reportProductId, reportVariantId, reportStatus]);
+
+  // â”€â”€ out-of-stock products/variants for the Load tab, filterable by category & product â”€â”€
+  const fetchOutOfStock = useCallback(async () => {
+    const params = new URLSearchParams();
+    if (outOfStockCategoryId) params.set("categoryId", outOfStockCategoryId);
+    if (outOfStockProductId) params.set("productId", outOfStockProductId);
+    if (outOfStockVariantId) params.set("productVarId", outOfStockVariantId);
+
+    setOutOfStockLoading(true);
+    try {
+      const res = await fetch(`${API}/out-of-stock${params.toString() ? `?${params.toString()}` : ""}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.responseMessage || "Failed to fetch out-of-stock report");
+
+      const items: OutOfStockItem[] = Array.isArray(data?.items) ? data.items : [];
+      setOutOfStockItems(items);
+      setOutOfStockTotal(Number(data?.totalRecords ?? items.length ?? 0));
+    } catch (err: any) {
+      setOutOfStockItems([]);
+      setOutOfStockTotal(0);
+      showError(err?.message || "Failed to fetch out-of-stock report");
+    } finally {
+      setOutOfStockLoading(false);
+    }
+  }, [outOfStockCategoryId, outOfStockProductId, outOfStockVariantId]);
+
+  // â”€â”€ client-side available-qty threshold filter for the stock report table â”€â”€
+  const filteredReportItems = useMemo(() => {
+    if (!reportAvailableQtyOp || reportAvailableQtyValue.trim() === "") return reportItems;
+    const threshold = Number(reportAvailableQtyValue);
+    if (Number.isNaN(threshold)) return reportItems;
+    return reportItems.filter((r) => {
+      const qty = r.availableQty ?? 0;
+      return reportAvailableQtyOp === "<" ? qty < threshold : qty > threshold;
+    });
+  }, [reportItems, reportAvailableQtyOp, reportAvailableQtyValue]);
+
+  const filteredReportTotals = useMemo(() => ({
+    totalRecords: filteredReportItems.length,
+    totalAvailableQty: filteredReportItems.reduce((sum, r) => sum + (r.availableQty ?? 0), 0),
+    totalStockQty: filteredReportItems.reduce((sum, r) => sum + (r.totalQty ?? 0), 0),
+  }), [filteredReportItems]);
+
+  const downloadStockReportCsv = () => {
+    if (filteredReportItems.length === 0) {
+      showError("No stock report rows to download.");
+      return;
+    }
+    const header = [
+      "Category",
+      "Product",
+      "Variant SKU",
+      "Pack Size",
+      "Warehouse",
+      "Total Qty",
+      "Available Qty",
+      "Reserved Qty",
+      "Reorder Level",
+      "Stock Status",
+    ];
+    const rows = filteredReportItems.map((r) => [
+      r.categoryName || "-",
+      r.productName || "-",
+      r.skuCode || "-",
+      r.packSize || "-",
+      `${r.warehouseName || ""}${r.warehouseCode ? ` (${r.warehouseCode})` : ""}`,
+      r.totalQty ?? 0,
+      r.availableQty ?? 0,
+      r.quantityReserved ?? 0,
+      r.reorderLevel ?? 0,
+      r.stockStatus || "-",
+    ]);
+
+    const csv = [header, ...rows]
+      .map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `inventory-stock-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadOutOfStockCsv = () => {
+    if (outOfStockItems.length === 0) {
+      showError("No out-of-stock rows to download.");
+      return;
+    }
+    const header = [
+      "Category",
+      "Product",
+      "Variant SKU",
+      "Pack Size",
+      "MRP",
+      "Selling Price",
+      "Has Inventory Record",
+      "Total Available Qty",
+      "Stock Status",
+    ];
+    const rows = outOfStockItems.map((r) => [
+      r.categoryName || "-",
+      r.productName || "-",
+      r.skuCode || "-",
+      r.packSize || "-",
+      r.mrp ?? "-",
+      r.sellingPrice ?? "-",
+      r.hasInventoryRecord ? "Yes" : "No",
+      r.totalAvailableQty ?? 0,
+      r.stockStatus || "-",
+    ]);
+
+    const csv = [header, ...rows]
+      .map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `out-of-stock-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  useEffect(() => {
+    if (tab === "stockreport") {
+      fetchStockReport();
+    }
+    if (tab === "outofstock") {
+      fetchOutOfStock();
+    }
+  }, [tab, fetchStockReport, fetchOutOfStock]);
 
   // â”€â”€ label print
   const [labelMode, setLabelMode] = useState<"batch" | "barcodes">("batch");
@@ -398,6 +666,8 @@ const InventoryPage = () => {
           {([  
             { key: "list",         label: "View Inventory" },
             { key: "load",         label: "Load Stock" },
+            { key: "stockreport",  label: "Stock Report" },
+            { key: "outofstock",   label: "Out of Stock" },
             { key: "remove",       label: "Remove Item" },
             { key: "restore",      label: "Restore Item" },
             { key: "labels",       label: "Print Labels" },
@@ -656,6 +926,7 @@ const InventoryPage = () => {
         {tab === "load" && (
           <div className="bg-white rounded-xl shadow-sm p-6 max-w-lg">
             <h2 className="text-base font-semibold text-gray-800 border-b pb-3 mb-5">Load Inventory Stock</h2>
+
             <form onSubmit={handleLoad} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -853,6 +1124,323 @@ const InventoryPage = () => {
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {tab === "stockreport" && (
+          <div className="space-y-5">
+            <div className="bg-white rounded-xl shadow-sm p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-semibold text-gray-700">Inventory Stock Report</h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fetchStockReport()}
+                    disabled={reportLoading}
+                    className="px-3 py-1.5 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+                  >
+                    {reportLoading ? "Loading…" : "View Report"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={downloadStockReportCsv}
+                    disabled={filteredReportItems.length === 0}
+                    className="px-3 py-1.5 text-xs rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
+                  >
+                    Download CSV
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Category</label>
+                  <select
+                    value={reportCategoryId}
+                    onChange={(e) => {
+                      setReportCategoryId(e.target.value);
+                      setReportProductId("");
+                      setReportVariantId("");
+                    }}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <option value="">All Categories</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.title}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Product</label>
+                  <select
+                    value={reportProductId}
+                    onChange={async (e) => {
+                      const v = e.target.value;
+                      setReportProductId(v);
+                      setReportVariantId("");
+                      await fetchVariantsFor(v, "report");
+                    }}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <option value="">All Products</option>
+                    {(reportCategoryId ? reportCategoryProducts : products).map((p) => (
+                      <option key={p.id} value={p.id}>{p.title}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Variant</label>
+                  <select
+                    value={reportVariantId}
+                    onChange={(e) => setReportVariantId(e.target.value)}
+                    disabled={!reportProductId}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:bg-gray-50"
+                  >
+                    <option value="">All Variants</option>
+                    {reportVariants.map((v) => (
+                      <option key={v.variantId} value={v.variantId}>{v.skuCode}{v.packSize ? ` (${v.packSize})` : ""}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Warehouse</label>
+                  <select
+                    value={reportWarehouseId}
+                    onChange={(e) => setReportWarehouseId(e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <option value="">All Warehouses</option>
+                    {warehouses.map((w) => (
+                      <option key={w.warehouseId} value={w.warehouseId}>{w.warehouseName} ({w.warehouseCode})</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Inventory Status</label>
+                  <select
+                    value={reportStatus}
+                    onChange={(e) => setReportStatus(e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <option value="A">Active (A)</option>
+                    <option value="I">Inactive (I)</option>
+                    <option value="">All</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Available Qty</label>
+                  <div className="flex gap-1">
+                    <select
+                      value={reportAvailableQtyOp}
+                      onChange={(e) => setReportAvailableQtyOp(e.target.value as "" | "<" | ">")}
+                      className="border border-gray-200 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    >
+                      <option value="">--</option>
+                      <option value="<">&lt;</option>
+                      <option value=">">&gt;</option>
+                    </select>
+                    <input
+                      type="number"
+                      min={0}
+                      value={reportAvailableQtyValue}
+                      onChange={(e) => setReportAvailableQtyValue(e.target.value)}
+                      disabled={!reportAvailableQtyOp}
+                      placeholder="Qty"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:bg-gray-50"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="bg-blue-50 border border-blue-100 rounded-lg px-3 py-2">
+                  <p className="text-xs text-blue-600">Rows</p>
+                  <p className="text-lg font-bold text-blue-700">{filteredReportTotals.totalRecords}</p>
+                </div>
+                <div className="bg-green-50 border border-green-100 rounded-lg px-3 py-2">
+                  <p className="text-xs text-green-600">Total Available Qty</p>
+                  <p className="text-lg font-bold text-green-700">{filteredReportTotals.totalAvailableQty}</p>
+                </div>
+                <div className="bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-2">
+                  <p className="text-xs text-indigo-600">Total Stock Qty</p>
+                  <p className="text-lg font-bold text-indigo-700">{filteredReportTotals.totalStockQty}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              {reportLoading ? (
+                <p className="text-sm text-gray-400 px-5 py-6">Loading report…</p>
+              ) : filteredReportItems.length === 0 ? (
+                <p className="text-sm text-gray-400 px-5 py-6">No stock report data found for selected filters.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead className="bg-gray-50 border-b border-gray-100">
+                      <tr>
+                        <th className="text-left px-4 py-3 font-semibold text-gray-600">Category</th>
+                        <th className="text-left px-4 py-3 font-semibold text-gray-600">Product</th>
+                        <th className="text-left px-4 py-3 font-semibold text-gray-600">Variant</th>
+                        <th className="text-left px-4 py-3 font-semibold text-gray-600">Warehouse</th>
+                        <th className="text-right px-4 py-3 font-semibold text-gray-600">Total</th>
+                        <th className="text-right px-4 py-3 font-semibold text-gray-600">Available</th>
+                        <th className="text-right px-4 py-3 font-semibold text-gray-600">Reserved</th>
+                        <th className="text-left px-4 py-3 font-semibold text-gray-600">Stock Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {filteredReportItems.map((r, idx) => (
+                        <tr key={`${r.variantId}-${r.warehouseId}-${idx}`} className="hover:bg-gray-50">
+                          <td className="px-4 py-2.5 text-gray-600">{r.categoryName || "-"}</td>
+                          <td className="px-4 py-2.5 text-gray-700 font-medium">{r.productName || "-"}</td>
+                          <td className="px-4 py-2.5 text-gray-600">{r.skuCode}{r.packSize ? ` (${r.packSize})` : ""}</td>
+                          <td className="px-4 py-2.5 text-gray-600">{r.warehouseName} ({r.warehouseCode})</td>
+                          <td className="px-4 py-2.5 text-right text-gray-700">{r.totalQty ?? 0}</td>
+                          <td className="px-4 py-2.5 text-right font-semibold text-gray-800">{r.availableQty ?? 0}</td>
+                          <td className="px-4 py-2.5 text-right text-gray-700">{r.quantityReserved ?? 0}</td>
+                          <td className="px-4 py-2.5">
+                            <span className={`px-2 py-0.5 rounded-full font-semibold ${
+                              r.stockStatus === "OUT_OF_STOCK"
+                                ? "bg-red-100 text-red-700"
+                                : r.stockStatus === "LOW_STOCK"
+                                  ? "bg-orange-100 text-orange-700"
+                                  : "bg-green-100 text-green-700"
+                            }`}>
+                              {r.stockStatus}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── OUT OF STOCK REPORT TAB ─────────────────────────────────────── */}
+        {tab === "outofstock" && (
+          <div className="space-y-5">
+            <div className="bg-white rounded-xl shadow-sm p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-semibold text-gray-700">
+                  Out-of-Stock Products &amp; Variants{outOfStockTotal ? ` (${outOfStockTotal})` : ""}
+                </h2>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fetchOutOfStock()}
+                    disabled={outOfStockLoading}
+                    className="px-3 py-1.5 text-xs rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
+                  >
+                    {outOfStockLoading ? "Loading…" : "Refresh"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={downloadOutOfStockCsv}
+                    disabled={outOfStockItems.length === 0}
+                    className="px-3 py-1.5 text-xs rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
+                  >
+                    Download CSV
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 max-w-2xl gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Category</label>
+                  <select
+                    value={outOfStockCategoryId}
+                    onChange={(e) => { setOutOfStockCategoryId(e.target.value); setOutOfStockProductId(""); }}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <option value="">All Categories</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.title}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Product</label>
+                  <select
+                    value={outOfStockProductId}
+                    onChange={async (e) => {
+                      const v = e.target.value;
+                      setOutOfStockProductId(v);
+                      setOutOfStockVariantId("");
+                      await fetchVariantsFor(v, "outofstock");
+                    }}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <option value="">All Products</option>
+                    {(outOfStockCategoryId ? outOfStockCategoryProducts : products).map((p) => (
+                      <option key={p.id} value={p.id}>{p.title}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Variant</label>
+                  <select
+                    value={outOfStockVariantId}
+                    onChange={(e) => setOutOfStockVariantId(e.target.value)}
+                    disabled={!outOfStockProductId}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:bg-gray-50"
+                  >
+                    <option value="">All Variants</option>
+                    {outOfStockVariants.map((v) => (
+                      <option key={v.variantId} value={v.variantId}>{v.skuCode}{v.packSize ? ` (${v.packSize})` : ""}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-lg border border-gray-100 overflow-hidden">
+                {outOfStockLoading ? (
+                  <p className="text-sm text-gray-400 px-4 py-6">Loading out-of-stock report…</p>
+                ) : outOfStockItems.length === 0 ? (
+                  <p className="text-sm text-gray-400 px-4 py-6">No out-of-stock products/variants found for the selected filters.</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50 border-b border-gray-100">
+                        <tr>
+                          <th className="text-left px-4 py-3 font-semibold text-gray-600">Category</th>
+                          <th className="text-left px-4 py-3 font-semibold text-gray-600">Product</th>
+                          <th className="text-left px-4 py-3 font-semibold text-gray-600">Variant</th>
+                          <th className="text-right px-4 py-3 font-semibold text-gray-600">MRP</th>
+                          <th className="text-right px-4 py-3 font-semibold text-gray-600">Selling Price</th>
+                          <th className="text-right px-4 py-3 font-semibold text-gray-600">Available Qty</th>
+                          <th className="text-left px-4 py-3 font-semibold text-gray-600">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {outOfStockItems.map((r) => (
+                          <tr key={r.variantId} className="hover:bg-gray-50">
+                            <td className="px-4 py-2.5 text-gray-600">{r.categoryName || "-"}</td>
+                            <td className="px-4 py-2.5 text-gray-700 font-medium">{r.productName || "-"}</td>
+                            <td className="px-4 py-2.5 text-gray-600">{r.skuCode}{r.packSize ? ` (${r.packSize})` : ""}</td>
+                            <td className="px-4 py-2.5 text-right text-gray-700">{r.mrp ?? "-"}</td>
+                            <td className="px-4 py-2.5 text-right text-gray-700">{r.sellingPrice ?? "-"}</td>
+                            <td className="px-4 py-2.5 text-right font-semibold text-gray-800">{r.totalAvailableQty ?? 0}</td>
+                            <td className="px-4 py-2.5">
+                              <span className="px-2 py-0.5 rounded-full font-semibold bg-red-100 text-red-700">
+                                {r.stockStatus}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

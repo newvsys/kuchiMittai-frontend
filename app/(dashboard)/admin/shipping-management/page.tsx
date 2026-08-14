@@ -251,6 +251,28 @@ const buildPayload = (form: ShippingForm) => {
   return payload;
 };
 
+/** Merges the live Shiprocket payload (GET .../shiprocket-payload) into the form, keeping existing values for fields the payload doesn't populate. */
+const applyShiprocketPayload = (payload: any, prev: ShippingForm): ShippingForm => ({
+  ...prev,
+  shiprocketOrderId:     payload.shiprocketOrderId != null ? String(payload.shiprocketOrderId) : prev.shiprocketOrderId,
+  shiprocketShipmentId:  payload.shiprocketShipmentId != null ? String(payload.shiprocketShipmentId) : prev.shiprocketShipmentId,
+  awbCode:               payload.awbCode ?? prev.awbCode,
+  courierName:           payload.courierName ?? prev.courierName,
+  courierCompanyId:      payload.courierCompanyId != null ? String(payload.courierCompanyId) : prev.courierCompanyId,
+  shipmentStatus:        payload.shipmentStatus ?? prev.shipmentStatus,
+  shipmentType:          payload.shipmentType ?? prev.shipmentType,
+  trackingNumber:        payload.trackingNumber ?? prev.trackingNumber,
+  length:                payload.length != null ? String(payload.length) : prev.length,
+  breadth:               payload.breadth != null ? String(payload.breadth) : prev.breadth,
+  height:                payload.height != null ? String(payload.height) : prev.height,
+  weight:                payload.weight != null ? String(payload.weight) : prev.weight,
+  shippingPrice:         payload.shippingPrice != null ? String(payload.shippingPrice) : prev.shippingPrice,
+  labelUrl:              payload.labelUrl ?? prev.labelUrl,
+  trackUrl:              payload.trackUrl ?? prev.trackUrl,
+  estimatedDeliveryDate: payload.estimatedDeliveryDate ? String(payload.estimatedDeliveryDate).slice(0, 10) : prev.estimatedDeliveryDate,
+  expectedDeliveryDate:  payload.expectedDeliveryDate ? String(payload.expectedDeliveryDate).slice(0, 10) : prev.expectedDeliveryDate,
+});
+
 // Sub-components
 
 const Field = ({
@@ -311,6 +333,9 @@ const AdminShippingManagementPage = () => {
   const [form, setForm]                   = useState<ShippingForm>(emptyForm);
   const [submitError, setSubmitError]     = useState("");
   const [warehouses, setWarehouses]       = useState<Warehouse[]>([]);
+  const [shiprocketFetchLoading, setShiprocketFetchLoading] = useState(false);
+  const [retriggerLoading, setRetriggerLoading] = useState(false);
+  const [retriggerResult, setRetriggerResult]   = useState<{ ok: boolean; data: any } | null>(null);
 
   // Pending orders list state
   const [pendingOrders, setPendingOrders]         = useState<PendingOrder[]>([]);
@@ -458,6 +483,44 @@ const AdminShippingManagementPage = () => {
   const handleFetch = async (e: React.FormEvent) => {
     e.preventDefault();
     await handleFetchByOrderNumber(searchInput);
+  };
+
+  // Fetch the live Shiprocket PUT payload and pre-fill the form with it
+
+  const handleFetchFromShiprocket = async () => {
+    if (!orderNumber) return;
+    setShiprocketFetchLoading(true);
+    try {
+      const res  = await apiClient.get(`/api/shipment/order/${encodeURIComponent(orderNumber)}/shiprocket-payload`);
+      const data = await res.json();
+
+      if (!res.ok || data.responseStatus === "FAILURE") {
+        throw new Error(data.responseMessage || "Failed to fetch Shiprocket payload");
+      }
+
+      setForm(prev => applyShiprocketPayload(data, prev));
+      showToast(data.responseMessage || "Fetched live Shiprocket data");
+    } catch (err: any) {
+      showError(err.message || "Failed to fetch Shiprocket payload");
+    } finally {
+      setShiprocketFetchLoading(false);
+    }
+  };
+
+  // Retrigger the Shiprocket shipping process for the order (e.g. after a failed order-creation attempt)
+
+  const handleRetriggerShipping = async () => {
+    if (!orderNumber) return;
+    setRetriggerLoading(true);
+    try {
+      const res  = await apiClient.post(`/api/order/${encodeURIComponent(orderNumber)}/retrigger-shipping`);
+      const data = await res.json().catch(() => null);
+      setRetriggerResult({ ok: res.ok && data?.responseStatus !== "FAILURE", data });
+    } catch (err: any) {
+      setRetriggerResult({ ok: false, data: { responseStatus: "FAILURE", responseMessage: err.message || "Failed to retrigger shipping process" } });
+    } finally {
+      setRetriggerLoading(false);
+    }
   };
 
   // Submit
@@ -796,6 +859,36 @@ const AdminShippingManagementPage = () => {
                 {mode === "create" ? "CREATE" : "UPDATE"}
               </span>
               <p className="text-sm font-medium text-gray-700">{orderNumber}</p>
+              <button
+                type="button"
+                onClick={handleFetchFromShiprocket}
+                disabled={shiprocketFetchLoading}
+                className="ml-auto flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-60"
+                title="Fetch live shipment data from Shiprocket and pre-fill the form below"
+              >
+                {shiprocketFetchLoading && (
+                  <svg className="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                )}
+                {shiprocketFetchLoading ? "Fetching…" : "Fetch from Shiprocket"}
+              </button>
+              <button
+                type="button"
+                onClick={handleRetriggerShipping}
+                disabled={retriggerLoading || mode !== "update"}
+                className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-orange-300 text-orange-700 hover:bg-orange-50 disabled:opacity-60"
+                title="Retrigger the Shiprocket shipping process (e.g. after a failed order-creation attempt)"
+              >
+                {retriggerLoading && (
+                  <svg className="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                )}
+                {retriggerLoading ? "Retriggering…" : "Retrigger Shipping"}
+              </button>
             </div>
 
             {submitError && (
@@ -915,6 +1008,79 @@ const AdminShippingManagementPage = () => {
                 </button>
               </div>
 
+            </div>
+          </div>
+        )}
+
+        {/* Retrigger Shipping — result popup */}
+        {retriggerResult && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4" onClick={e => { if (e.target === e.currentTarget) setRetriggerResult(null); }}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+              <div className={`flex items-center justify-between px-6 py-4 border-b rounded-t-2xl ${retriggerResult.ok ? "bg-green-500" : "bg-red-500"}`}>
+                <h2 className="text-base font-bold text-white">Retrigger Shipping Result</h2>
+                <button onClick={() => setRetriggerResult(null)} className="text-white/80 hover:text-white transition-colors">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-semibold px-2 py-1 rounded ${retriggerResult.ok ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                    {retriggerResult.data?.responseStatus || (retriggerResult.ok ? "SUCCESS" : "FAILURE")}
+                  </span>
+                  <p className="text-sm text-gray-700">{retriggerResult.data?.responseMessage || "No response message received."}</p>
+                </div>
+
+                {Array.isArray(retriggerResult.data?.results) && retriggerResult.data.results.length > 0 && (
+                  <div className="overflow-x-auto rounded border">
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50 text-gray-700">
+                        <tr>
+                          <th className="text-left px-3 py-2 font-semibold">Shipment</th>
+                          <th className="text-left px-3 py-2 font-semibold">Previous → Current Status</th>
+                          <th className="text-left px-3 py-2 font-semibold">Action</th>
+                          <th className="text-left px-3 py-2 font-semibold">Message</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {retriggerResult.data.results.map((r: any, idx: number) => (
+                          <tr key={r.shipmentId ?? idx} className="border-t align-top">
+                            <td className="px-3 py-2">
+                              <p className="font-medium text-gray-800">#{r.shipmentId}</p>
+                              {r.trackingNumber && <p className="text-gray-400">{r.trackingNumber}</p>}
+                            </td>
+                            <td className="px-3 py-2 text-gray-600">
+                              <span className={statusBadgeClass(r.previousStatus) + " px-1.5 py-0.5 rounded font-semibold"}>{r.previousStatus}</span>
+                              {" → "}
+                              <span className={statusBadgeClass(r.currentStatus) + " px-1.5 py-0.5 rounded font-semibold"}>{r.currentStatus}</span>
+                            </td>
+                            <td className="px-3 py-2">
+                              <span className={`px-1.5 py-0.5 rounded font-semibold ${
+                                r.action === "RETRIGGERED" ? "bg-green-100 text-green-700"
+                                  : r.action === "SKIPPED"  ? "bg-gray-100 text-gray-700"
+                                  : "bg-red-100 text-red-700"
+                              }`}>
+                                {r.action}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-gray-600">
+                              <p>{r.message}</p>
+                              {r.failedStep && <p className="text-red-500 mt-1"><span className="font-medium">Failed step:</span> {r.failedStep}</p>}
+                              {r.failureReason && <p className="text-red-500">{r.failureReason}</p>}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+              <div className="px-6 py-3 border-t bg-gray-50 rounded-b-2xl flex justify-end">
+                <button onClick={() => setRetriggerResult(null)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors">
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         )}

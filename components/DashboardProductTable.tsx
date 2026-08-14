@@ -68,12 +68,16 @@ const DashboardProductTable = () => {
 
   // Attribute add/edit dialog state
   const [attrEditDialog, setAttrEditDialog] = useState<{ open: boolean; mode: 'add' | 'edit'; attribute?: any } | null>(null);
-  const [attrEditForm, setAttrEditForm] = useState({ attributeName: '', attributeValue: '' });
+  const [attrEditForm, setAttrEditForm] = useState({ attributeName: '', attributeValue: '', displayOrder: '' });
   const [attrEditSubmitting, setAttrEditSubmitting] = useState(false);
 
   // Attribute delete dialog state
   const [attrDeleteDialog, setAttrDeleteDialog] = useState<{ open: boolean; attribute: any } | null>(null);
   const [attrDeleteSubmitting, setAttrDeleteSubmitting] = useState(false);
+
+  // Attribute display-sequence editing state (keyed by attribute id)
+  const [attrSeqEdits, setAttrSeqEdits] = useState<Record<number, string>>({});
+  const [attrSeqSubmitting, setAttrSeqSubmitting] = useState(false);
 
   // Edit variant dialog
   const [editVariantDialog, setEditVariantDialog] = useState(false);
@@ -91,6 +95,7 @@ const DashboardProductTable = () => {
   const [editVariantSelectedMain, setEditVariantSelectedMain] = useState<string>(""); // "existing-{id}" | "new-{idx}"
   const editVariantNewImgRef = useRef<HTMLInputElement>(null);
   const [editVariantImgUploading, setEditVariantImgUploading] = useState(false);
+  const [editImageSeqEdits, setEditImageSeqEdits] = useState<Record<number, string>>({});
 
   // Edit variant — video management
   const [editVariantVideoUrl, setEditVariantVideoUrl] = useState<string | null>(null);
@@ -104,6 +109,9 @@ const DashboardProductTable = () => {
       const data = await res.json();
       const imgs = Array.isArray(data) ? data : [];
       setEditVariantImages(imgs);
+      const seqMap: Record<number, string> = {};
+      imgs.forEach((i: any) => { seqMap[i.id] = i.displayOrder != null ? String(i.displayOrder) : ''; });
+      setEditImageSeqEdits(seqMap);
       // Auto-select current main
       const mainImg = imgs.find((i: any) => i.isMainImage === "Y");
       setEditVariantSelectedMain(mainImg ? `existing-${mainImg.id}` : (imgs.length > 0 ? `existing-${imgs[0].id}` : ""));
@@ -154,6 +162,52 @@ const DashboardProductTable = () => {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  // Keep the attribute sequence edit boxes in sync with the attributes currently shown in the dialog
+  const attrIdsKey = attrDialog?.attributes.map((a: any) => a.id).join(',') ?? '';
+  useEffect(() => {
+    if (!attrDialog?.open) return;
+    setAttrSeqEdits(prev => {
+      const next: Record<number, string> = {};
+      attrDialog.attributes.forEach((a: any) => {
+        next[a.id] = prev[a.id] !== undefined ? prev[a.id] : (a.displayOrder != null ? String(a.displayOrder) : '');
+      });
+      return next;
+    });
+  }, [attrDialog?.open, attrIdsKey]);
+
+  const handleUpdateAttributeSequence = async () => {
+    if (!attrDialog) return;
+    setAttrSeqSubmitting(true);
+    try {
+      const payload = {
+        attributes: attrDialog.attributes.map((a: any, idx: number) => {
+          const raw = attrSeqEdits[a.id];
+          const parsed = raw !== undefined && raw !== '' ? parseInt(raw, 10) : NaN;
+          return { attributeId: a.id, displayOrder: Number.isNaN(parsed) || parsed < 1 ? idx + 1 : parsed };
+        }),
+      };
+      const res = await fetch(`${API_BASE}/products/productsVariant/${attrDialog.variantId}/attributes/sequence`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        throw new Error(errData?.error || errData?.message || 'Failed to update attribute sequence');
+      }
+      const data = await res.json();
+      setAttrDialog(d => d ? { ...d, attributes: data } : d);
+      const seqMap: Record<number, string> = {};
+      (Array.isArray(data) ? data : []).forEach((a: any) => { seqMap[a.id] = a.displayOrder != null ? String(a.displayOrder) : ''; });
+      setAttrSeqEdits(seqMap);
+      toast.success('Attribute sequence updated');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update attribute sequence');
+    } finally {
+      setAttrSeqSubmitting(false);
+    }
+  };
 
   const openAddDialog = () => {
     setForm({ name: "", description: "", categoryId: "", slug: "" });
@@ -767,6 +821,24 @@ const DashboardProductTable = () => {
                       await fetch(`${API_BASE}/products/productImage/${selId}/main`, { method: "PUT" }).catch(() => {});
                     }
                   }
+                  // Persist any edited image sequence numbers (bulk multi-variant endpoint)
+                  if (editVariantImages.length > 0) {
+                    const imagesPayload = {
+                      variants: [{
+                        variantId: editVariantId,
+                        images: editVariantImages.map((img: any, idx: number) => {
+                          const raw = editImageSeqEdits[img.id];
+                          const parsed = raw !== undefined && raw !== '' ? parseInt(raw, 10) : NaN;
+                          return { imageId: img.id, displayOrder: Number.isNaN(parsed) || parsed < 0 ? idx : parsed };
+                        }),
+                      }],
+                    };
+                    await fetch(`${API_BASE}/products/productsVariant/images/sequence/bulk`, {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(imagesPayload),
+                    }).catch(() => {});
+                  }
                   setEditVariantNewImages([]);
                   setEditVariantNewVideo(null);
                   // Refresh videoUrl from response
@@ -870,8 +942,8 @@ const DashboardProductTable = () => {
                     const key = `existing-${img.id}`;
                     const isMain = editVariantSelectedMain === key;
                     return (
+                      <div key={img.id} className="flex flex-col items-center gap-1 flex-shrink-0">
                       <div
-                        key={img.id}
                         onClick={() => setEditVariantSelectedMain(key)}
                         className={`relative cursor-pointer rounded-lg border-2 overflow-hidden w-24 h-24 flex-shrink-0 transition-all ${
                           isMain ? "border-yellow-400 ring-2 ring-yellow-300" : "border-gray-200 hover:border-blue-300"
@@ -912,6 +984,22 @@ const DashboardProductTable = () => {
                         <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-center text-xs text-white py-0.5 truncate px-1">
                           {isMain ? "Main" : "Click to set main"}
                         </div>
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        title="Image sequence number"
+                        placeholder="Seq"
+                        className="w-24 border rounded px-1 py-0.5 text-xs text-center"
+                        value={editImageSeqEdits[img.id] ?? ''}
+                        onClick={e => e.stopPropagation()}
+                        onChange={e => {
+                          const v = e.target.value;
+                          if (v !== '' && parseInt(v, 10) < 0) return;
+                          setEditImageSeqEdits(prev => ({ ...prev, [img.id]: v }));
+                        }}
+                      />
                       </div>
                     );
                   })}
@@ -1491,12 +1579,20 @@ const DashboardProductTable = () => {
               <button type="button" className="text-sm text-gray-500 hover:text-gray-700" onClick={() => setAttrDialog(null)}>Close</button>
             </div>
             <div className="flex flex-col gap-4">
-              <div className="flex justify-end">
+              <div className="flex justify-between items-center gap-2">
+                <button
+                  type="button"
+                  disabled={attrSeqSubmitting || attrDialog.attributes.length === 0}
+                  className="px-4 py-1.5 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 font-semibold disabled:opacity-60"
+                  onClick={handleUpdateAttributeSequence}
+                >
+                  {attrSeqSubmitting ? 'Updating Sequence...' : 'Update Attribute Sequence'}
+                </button>
                 <button
                   type="button"
                   className="px-4 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold"
                   onClick={() => {
-                    setAttrEditForm({ attributeName: '', attributeValue: '' });
+                    setAttrEditForm({ attributeName: '', attributeValue: '', displayOrder: String(attrDialog.attributes.length + 1) });
                     setAttrEditDialog({ open: true, mode: 'add' });
                   }}
                 >
@@ -1510,6 +1606,7 @@ const DashboardProductTable = () => {
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 text-gray-700">
                       <tr>
+                        <th className="text-left px-3 py-2 font-semibold">Seq</th>
                         <th className="text-left px-3 py-2 font-semibold">Attribute Name</th>
                         <th className="text-left px-3 py-2 font-semibold">Attribute Value</th>
                         <th className="text-left px-3 py-2 font-semibold">Action</th>
@@ -1518,6 +1615,20 @@ const DashboardProductTable = () => {
                     <tbody>
                       {attrDialog.attributes.map((a: any) => (
                         <tr key={a.id} className="border-t hover:bg-gray-50">
+                          <td className="px-3 py-2">
+                            <input
+                              type="number"
+                              min="1"
+                              step="1"
+                              className="w-16 border rounded px-2 py-1 text-sm"
+                              value={attrSeqEdits[a.id] ?? ''}
+                              onChange={e => {
+                                const v = e.target.value;
+                                if (v !== '' && parseInt(v, 10) < 1) return;
+                                setAttrSeqEdits(prev => ({ ...prev, [a.id]: v }));
+                              }}
+                            />
+                          </td>
                           <td className="px-3 py-2 font-medium text-gray-700">{a.attributeName}</td>
                           <td className="px-3 py-2 text-gray-600">{a.attributeValue}</td>
                           <td className="px-3 py-2 flex gap-2">
@@ -1525,7 +1636,7 @@ const DashboardProductTable = () => {
                               type="button"
                               className="text-xs text-indigo-600 font-semibold hover:underline"
                               onClick={() => {
-                                setAttrEditForm({ attributeName: a.attributeName, attributeValue: a.attributeValue });
+                                setAttrEditForm({ attributeName: a.attributeName, attributeValue: a.attributeValue, displayOrder: a.displayOrder != null ? String(a.displayOrder) : '' });
                                 setAttrEditDialog({ open: true, mode: 'edit', attribute: a });
                               }}
                             >
@@ -1574,6 +1685,7 @@ const DashboardProductTable = () => {
                         variantId: attrDialog!.variantId,
                         attributeName: attrEditForm.attributeName,
                         attributeValue: attrEditForm.attributeValue,
+                        displayOrder: attrEditForm.displayOrder.trim() !== '' ? parseInt(attrEditForm.displayOrder, 10) : undefined,
                       }),
                     });
                   } else if (attrEditDialog.mode === 'edit' && attrEditDialog.attribute) {
@@ -1584,6 +1696,7 @@ const DashboardProductTable = () => {
                         variantId: attrDialog!.variantId,
                         attributeName: attrEditForm.attributeName,
                         attributeValue: attrEditForm.attributeValue,
+                        displayOrder: attrEditForm.displayOrder.trim() !== '' ? parseInt(attrEditForm.displayOrder, 10) : undefined,
                       }),
                     });
                   }
@@ -1596,6 +1709,7 @@ const DashboardProductTable = () => {
                     newAttrs = newAttrs.map((a) => a.id === data.id ? data : a);
                   }
                   setAttrDialog(d => d ? { ...d, attributes: newAttrs } : d);
+                  setAttrSeqEdits(prev => ({ ...prev, [data.id]: data.displayOrder != null ? String(data.displayOrder) : '' }));
                   setAttrEditDialog(null);
                   toast.success('Attribute saved');
                 } catch (err: any) {
@@ -1624,6 +1738,22 @@ const DashboardProductTable = () => {
                   value={attrEditForm.attributeValue}
                   onChange={e => setAttrEditForm(f => ({ ...f, attributeValue: e.target.value }))}
                   placeholder="e.g. Dark Chocolate"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sequence No.</label>
+                <input
+                  type="number"
+                  min="1"
+                  step="1"
+                  className="border rounded px-3 py-2 w-full text-sm"
+                  value={attrEditForm.displayOrder}
+                  onChange={e => {
+                    const v = e.target.value;
+                    if (v !== '' && parseInt(v, 10) < 1) return;
+                    setAttrEditForm(f => ({ ...f, displayOrder: v }));
+                  }}
+                  placeholder="e.g. 1"
                 />
               </div>
               <div className="flex justify-end gap-3 pt-2">
