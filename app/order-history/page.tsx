@@ -73,6 +73,7 @@ const OrderHistoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [trackPopup, setTrackPopup] = useState<{ open: boolean; shippingTrackId: string | null }>({ open: false, shippingTrackId: null });
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [orderTimeFilter, setOrderTimeFilter] = useState<"all" | "last30" | "lastYear" | "older">("all");
@@ -580,8 +581,18 @@ const OrderHistoryPage = () => {
 
           {/* ── Filters sidebar ── */}
           <aside className="w-full lg:w-80 lg:flex-shrink-0 bg-white rounded-2xl border border-gray-200 overflow-hidden lg:sticky lg:top-4">
-            <p className="text-sm font-bold text-white uppercase tracking-widest px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-500 border-b border-blue-700">Filters</p>
-            <div className="p-5">
+            <button
+              type="button"
+              onClick={() => setIsFiltersOpen((isOpen) => !isOpen)}
+              aria-expanded={isFiltersOpen}
+              className="flex w-full items-center justify-between border-b border-blue-700 bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-3 text-sm font-bold uppercase tracking-widest text-white md:pointer-events-none"
+            >
+              Filters
+              <span className="text-base leading-none md:hidden" aria-hidden="true">
+                {isFiltersOpen ? "−" : "+"}
+              </span>
+            </button>
+            <div className={`${isFiltersOpen ? "block" : "hidden"} p-5 md:block`}>
 
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Status</p>
             <div className="space-y-2.5 mb-5">
@@ -617,10 +628,10 @@ const OrderHistoryPage = () => {
           </aside>
 
           {/* ── Order list ── */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 max-md:flex max-md:h-[70dvh] max-md:flex-col max-md:overflow-hidden max-md:rounded-2xl">
 
             {/* Search */}
-            <div className="flex gap-2 mb-6">
+            <div className="shrink-0 flex gap-2 mb-6">
               <div className="relative flex-1">
                 <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                   <circle cx="11" cy="11" r="8" /><path strokeLinecap="round" d="M21 21l-4.35-4.35" />
@@ -643,6 +654,7 @@ const OrderHistoryPage = () => {
               </button>
             </div>
 
+            <div className="min-h-0 max-md:flex-1 max-md:overflow-y-auto">
             {displayedOrders.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-2xl shadow-sm border border-gray-100">
                 <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
@@ -838,6 +850,7 @@ const OrderHistoryPage = () => {
                 </div>
               </div>
             )}
+            </div>
 
           </div>
         </div>
