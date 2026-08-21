@@ -148,6 +148,16 @@ const SHIPMENT_STATUS_OPTIONS = [
 
 const SHIPMENT_TYPE_OPTIONS = ["FORWARD", "RETURN_PICKUP"];
 
+const SHIPROCKET_STATUS_MAP: Record<string, string> = {
+  "3": "PICKUP_SCHEDULED",
+  "6": "IN_TRANSIT",
+  "7": "DELIVERED",
+  "17": "OUT_FOR_DELIVERY",
+};
+
+const normalizeShipmentStatus = (status: unknown) =>
+  status == null ? undefined : SHIPROCKET_STATUS_MAP[String(status)] ?? String(status);
+
 const emptyForm: ShippingForm = {
   warehouseId: "",
   shiprocketOrderId: "",
@@ -198,7 +208,7 @@ const recordToForm = (r: ShippingRecord): ShippingForm => ({
   awbCode:               r.awbCode ?? "",
   courierName:           r.courierName ?? "",
   courierCompanyId:      r.courierCompanyId != null ? String(r.courierCompanyId) : "",
-  shipmentStatus:        r.shipmentStatus ?? "CREATED",
+  shipmentStatus:        normalizeShipmentStatus(r.shipmentStatus) ?? "CREATED",
   shipmentType:          r.shipmentType ?? "FORWARD",
   trackingNumber:        r.trackingNumber ?? "",
   length:                r.length != null ? String(r.length) : "",
@@ -231,7 +241,7 @@ const buildPayload = (form: ShippingForm) => {
   set("awbCode",               str(form.awbCode));
   set("courierName",           str(form.courierName));
   set("courierCompanyId",      int(form.courierCompanyId));
-  set("shipmentStatus",        str(form.shipmentStatus));
+  set("shipmentStatus",        normalizeShipmentStatus(form.shipmentStatus));
   set("shipmentType",          str(form.shipmentType));
   set("trackingNumber",        str(form.trackingNumber));
   set("length",                num(form.length));
@@ -259,7 +269,7 @@ const applyShiprocketPayload = (payload: any, prev: ShippingForm): ShippingForm 
   awbCode:               payload.awbCode ?? prev.awbCode,
   courierName:           payload.courierName ?? prev.courierName,
   courierCompanyId:      payload.courierCompanyId != null ? String(payload.courierCompanyId) : prev.courierCompanyId,
-  shipmentStatus:        payload.shipmentStatus ?? prev.shipmentStatus,
+  shipmentStatus:        normalizeShipmentStatus(payload.shipmentStatus) ?? prev.shipmentStatus,
   shipmentType:          payload.shipmentType ?? prev.shipmentType,
   trackingNumber:        payload.trackingNumber ?? prev.trackingNumber,
   length:                payload.length != null ? String(payload.length) : prev.length,

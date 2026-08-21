@@ -145,6 +145,10 @@ const Filters = () => {
     });
   }, [inputCategory, sortBy, page, selectedCategories]);
 
+  useEffect(() => {
+    sessionStorage.setItem("lastProductSearch", searchParams.toString());
+  }, [searchParams]);
+
   return (
     <div className="rounded-2xl border border-gray-200 overflow-hidden">
       <div className="bg-blue-500 border-b border-blue-600 px-4 py-2.5">

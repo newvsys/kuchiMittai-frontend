@@ -108,7 +108,43 @@ const AdminOrders = () => {
   // Track which shipmentId is currently being resized
   const [resizingLabel, setResizingLabel] = useState<number | null>(null);
 
+  // Whether the shipments modal is currently refetching the latest data for the open order
+  const [modalRefreshing, setModalRefreshing] = useState(false);
+
   const BASE_URL = API_BASE;
+
+  // Fetches the latest shipment details for a single order (by orderNumber) and
+  // updates both the modal and the underlying orders list so the table stays in sync.
+  const refreshOrderShipments = async (orderNumber: string) => {
+    setModalRefreshing(true);
+    try {
+      const params = new URLSearchParams();
+      params.append("orderNumber", orderNumber);
+      const response = await apiClient.get(
+        `/api/order-shipment-details?${params.toString()}`
+      );
+      const data: OrderShipmentListResponse = await response.json();
+      const fresh = data?.orders?.find((o) => o.orderNumber === orderNumber);
+      if (fresh) {
+        setModalOrder(fresh);
+        setOrders((prev) =>
+          prev.map((o) => (o.orderNumber === orderNumber ? fresh : o))
+        );
+      }
+    } catch {
+      // Silently ignore - the modal will keep showing the last known data
+    } finally {
+      setModalRefreshing(false);
+    }
+  };
+
+  // Opens the shipments modal immediately with the (possibly stale) cached order,
+  // then kicks off a background refresh to pull the latest values (e.g. courier,
+  // AWB, status) so the popup always reflects the most recent update.
+  const openShipmentsModal = (order: Order) => {
+    setModalOrder(order);
+    refreshOrderShipments(order.orderNumber);
+  };
 
   const handlePrintLabel = async (shipmentId: number, labelUrl: string) => {
     setResizingLabel(shipmentId);
@@ -295,12 +331,23 @@ const AdminOrders = () => {
                   {modalOrder.customerName} &bull; {modalOrder.customerEmail}
                 </p>
               </div>
-              <button
-                className="btn btn-sm btn-ghost btn-circle text-lg"
-                onClick={closeModal}
-              >
-                ✕
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="btn btn-xs btn-ghost"
+                  disabled={modalRefreshing}
+                  onClick={() => refreshOrderShipments(modalOrder.orderNumber)}
+                  title="Refresh with latest shipment data"
+                >
+                  {modalRefreshing ? "Refreshing…" : "↻ Refresh"}
+                </button>
+                <button
+                  className="btn btn-sm btn-ghost btn-circle text-lg"
+                  onClick={closeModal}
+                >
+                  ✕
+                </button>
+              </div>
             </div>
             <div className="overflow-y-auto px-6 py-4 space-y-4">
               {modalOrder.shipments.map((shipment) => (
@@ -644,7 +691,7 @@ const AdminOrders = () => {
                       ) : (
                         <button
                           type="button"
-                          onClick={() => setModalOrder(order)}
+                          onClick={() => openShipmentsModal(order)}
                           className="text-blue-600 hover:underline text-sm font-medium"
                         >
                           {order.shipments.length} shipment

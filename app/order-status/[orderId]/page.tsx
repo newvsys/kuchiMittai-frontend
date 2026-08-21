@@ -54,6 +54,12 @@ const OrderStatusPage = () => {
   const [loading, setLoading] = useState(true);
   const [trackLoading, setTrackLoading] = useState(false);
 
+  const continueShopping = () => {
+    const filterQuery = sessionStorage.getItem("lastProductSearch");
+    const defaultSearch = "price=10000&minPrice=0&inStock=false&sort=lowPrice&page=1";
+    router.push(`/search?${filterQuery || defaultSearch}`);
+  };
+
   useEffect(() => {
     if (!orderId) {
       showToast("Order ID missing");
@@ -152,8 +158,9 @@ const OrderStatusPage = () => {
   const addressDisplay = order.deliveryAddressSummary ||
     [order.address1, order.address2, order.city, order.state, order.postalCode].filter(Boolean).join(", ");
   const estimatedDelivery = order.estimatedDelivery ?? null;  // already formatted string from API
-  const trackUrl = order.trackOrderUrl || (shipment?.trackUrl) || null;
   const awb = order.awbCode || shipment?.awbCode || null;
+  const trackUrl = order.trackOrderUrl || shipment?.trackUrl ||
+    (awb ? `https://shiprocket.co/tracking/${encodeURIComponent(awb)}` : null);
   const dateTime = fmt(order.paymentTime || order.orderDate);
 
   return (
@@ -392,9 +399,13 @@ const OrderStatusPage = () => {
             </svg>
             Print
           </button>
-          <Link href="/search?categoryId=0&price=10000&minPrice=0" className="rounded-lg border border-blue-500 px-5 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors">
+          <button
+            type="button"
+            onClick={continueShopping}
+            className="rounded-lg border border-blue-500 px-5 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+          >
             Continue Shopping
-          </Link>
+          </button>
         </div>
 
       </div>
