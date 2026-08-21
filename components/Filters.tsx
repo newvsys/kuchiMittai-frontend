@@ -74,6 +74,7 @@ const Filters = () => {
   });
   const { categories, fetchCategories } = useCategoryStore();
   const [showAllCategories, setShowAllCategories] = useState(false);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(() => {
     const cat = searchParams.getAll("categoryId");
     return cat.length > 0 ? cat : [];
@@ -147,9 +148,19 @@ const Filters = () => {
   return (
     <div className="rounded-2xl border border-gray-200 overflow-hidden">
       <div className="bg-blue-500 border-b border-blue-600 px-4 py-2.5">
-        <h3 className="text-sm font-bold text-white uppercase tracking-wide">Filters</h3>
+        <button
+          type="button"
+          onClick={() => setIsFiltersOpen((isOpen) => !isOpen)}
+          aria-expanded={isFiltersOpen}
+          className="flex w-full items-center justify-between text-sm font-bold text-white uppercase tracking-wide md:pointer-events-none"
+        >
+          Filters
+          <span className="text-base leading-none md:hidden" aria-hidden="true">
+            {isFiltersOpen ? "−" : "+"}
+          </span>
+        </button>
       </div>
-      <div className="p-4 bg-white">
+      <div className={`${isFiltersOpen ? "block" : "hidden"} p-4 bg-white md:block`}>
       <div className="border-t border-gray-100 pt-3 border-t-0 pt-0">
         <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Availability</h4>
         <div className="form-control">
