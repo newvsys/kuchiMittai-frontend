@@ -5,6 +5,7 @@ import SingleProductDynamicFields from "@/components/SingleProductDynamicFields"
 import { StarRatingWidget } from "@/components/StarRatingWidget";
 import Image from "next/image";
 import React, { useEffect, useState, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { FaSquareFacebook } from "react-icons/fa6";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import { FaSquarePinterest } from "react-icons/fa6";
@@ -32,6 +33,11 @@ const getMediaUrl = (path?: string | null): string | null => {
 
 const SingleProductPage = ({ params }: SingleProductPageProps) => {
   const unwrappedParams = React.use(params);
+  const searchParams = useSearchParams();
+  const filterQuery = searchParams.toString();
+  const productsHref = filterQuery
+    ? `/search?${filterQuery}`
+    : "/search?categoryId=0&price=10000&minPrice=0&inStock=false&sort=lowPrice&page=1";
   const [baseProduct, setBaseProduct] = useState<any>(null); // always the original product
   const [product, setProduct] = useState<any>(null); // currently selected product/variant
   const [isLoading, setIsLoading] = useState(true);
@@ -220,12 +226,12 @@ const ZOOM_PANEL_SIZE = 380;
       <div className="max-w-screen-2xl mx-auto overflow-x-hidden px-4 sm:px-6 lg:px-8 py-3">
         {/* Breadcrumb */}
         <nav className="mb-5 flex flex-wrap items-center gap-2 text-sm font-medium sm:text-base">
-          <a href="/search?categoryId=0&price=10000&minPrice=0" className="flex items-center gap-1.5 text-blue-600 transition-colors hover:text-blue-800">
+          <a href={productsHref} className="flex items-center gap-1.5 text-blue-600 transition-colors hover:text-blue-800">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H15.75a.75.75 0 01-.75-.75v-4.5h-6V21a.75.75 0 01-.75.75H3.75A.75.75 0 013 21V9.75z"/></svg>
             Home
           </a>
           <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
-          <a href="/search?categoryId=0&price=10000&minPrice=0" className="text-blue-600 transition-colors hover:text-blue-800">Products</a>
+          <a href={productsHref} className="text-blue-600 transition-colors hover:text-blue-800">Products</a>
           <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
           <span className="min-w-0 max-w-full truncate font-semibold text-gray-800 sm:max-w-sm">{sanitize(product?.title)}</span>
         </nav>

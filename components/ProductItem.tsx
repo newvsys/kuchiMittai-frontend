@@ -13,6 +13,7 @@
 import Image from "next/image";
 import React from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import { sanitize } from "@/lib/sanitize";
 import { StarRatingWidget } from "@/components/StarRatingWidget";
@@ -31,6 +32,9 @@ const ProductItem = ({
   ratingDistribution?: Record<string, number>;
 }) => {
   const [navigating, setNavigating] = React.useState(false);
+  const searchParams = useSearchParams();
+  const filterQuery = searchParams.toString();
+  const productHref = `/product/${product.slug}${filterQuery ? `?${filterQuery}` : ""}`;
 
   const handleClick = (e: React.MouseEvent) => {
     if (navigating) {
@@ -44,7 +48,7 @@ const ProductItem = ({
     <div className="group flex flex-col w-full h-full rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
 
       {/* Fixed-height image area */}
-      <Link href={`/product/${product.slug}`} onClick={handleClick} className="flex justify-center flex-shrink-0 px-3 pt-3">
+      <Link href={productHref} onClick={handleClick} className="flex justify-center flex-shrink-0 px-3 pt-3">
         <div className="relative h-40 w-full bg-gray-50 overflow-hidden rounded-xl">
           <Image
             src={
@@ -64,7 +68,7 @@ const ProductItem = ({
 
       {/* Content area grows to fill card height */}
       <div className="flex flex-col flex-1 px-3 pt-2 pb-3 items-center text-center">
-        <Link href={`/product/${product.slug}`} onClick={handleClick}>
+        <Link href={productHref} onClick={handleClick}>
           <h3 className="text-xs font-semibold text-gray-800 line-clamp-2 hover:text-blue-600 transition-colors leading-snug">
             {sanitize(product.title)}
           </h3>
@@ -80,7 +84,7 @@ const ProductItem = ({
         <div className="mt-auto pt-1.5 flex flex-col gap-1.5 w-full items-center">
           <p className="text-sm font-bold text-gray-900">₹{product.price}</p>
           <Link
-            href={`/product/${product?.slug}`}
+            href={productHref}
             onClick={handleClick}
             className="w-3/4 text-center py-1.5 px-3 rounded-lg border border-blue-500 text-blue-600 text-xs font-medium hover:bg-blue-600 hover:text-white transition-colors flex items-center justify-center gap-1.5"
           >
