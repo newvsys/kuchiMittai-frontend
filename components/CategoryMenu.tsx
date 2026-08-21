@@ -43,7 +43,7 @@ const CategoryMenu = ({ initialCategories = [] }: { initialCategories?: Category
               <CategoryItem
                 title={item.title.replace(/%20/g, ' ')}
                 key={item.id}
-                href={`/search?categoryId=${item.id}&price=10000&minPrice=0`}
+                href={`/search?categoryId=${item.id}&price=10000&minPrice=0&inStock=false`}
               >
                 <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 relative overflow-hidden rounded-lg">
                   <Image

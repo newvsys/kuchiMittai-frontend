@@ -24,7 +24,7 @@ const CategoryNavBar = () => {
             {categories.map((cat) => (
               <Link
                 key={cat.id}
-                href={`/search?categoryId=${cat.id}&price=10000&minPrice=0`}
+                href={`/search?categoryId=${cat.id}&price=10000&minPrice=0&inStock=false`}
                 className="whitespace-nowrap text-sm font-medium px-3 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition-colors text-white flex-shrink-0"
               >
                 {cat.title.replace(/%20/g, " ")}
