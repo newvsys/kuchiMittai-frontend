@@ -628,7 +628,7 @@ const OrderHistoryPage = () => {
           </aside>
 
           {/* ── Order list ── */}
-          <div className="flex-1 min-w-0 max-md:flex max-md:h-[70dvh] max-md:flex-col max-md:overflow-hidden max-md:rounded-2xl">
+          <div className="flex-1 min-w-0 max-md:flex max-md:min-h-[32rem] max-md:h-[70vh] max-md:h-[70dvh] max-md:flex-col max-md:overflow-hidden max-md:rounded-2xl">
 
             {/* Search */}
             <div className="shrink-0 flex gap-2 mb-6">
