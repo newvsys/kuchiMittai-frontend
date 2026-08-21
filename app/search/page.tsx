@@ -252,15 +252,15 @@ const SearchPage = async ({ searchParams }: Props) => {
               maxPrice={maxPrice}
             />
 
-            <aside className="sticky top-4 self-start">
+            <aside className="self-start md:sticky md:top-4">
               <Filters />
             </aside>
           </>
 
 
-          <div className="rounded-2xl border border-gray-200 overflow-hidden">
+          <div className="rounded-2xl border border-gray-200 overflow-hidden max-md:flex max-md:h-[70dvh] max-md:flex-col">
 
-            <div className="bg-gray-100 border-b border-gray-200 px-6 py-3 flex justify-between items-center gap-3 max-lg:flex-col max-lg:items-start">
+            <div className="shrink-0 bg-gray-100 border-b border-gray-200 px-6 py-3 flex justify-between items-center gap-3 max-lg:flex-col max-lg:items-start">
 
               <div>
                 <h1 className="text-base font-bold text-gray-900">
@@ -285,7 +285,7 @@ const SearchPage = async ({ searchParams }: Props) => {
             </div>
 
 
-            <div className="p-4 bg-white">
+            <div className="min-h-0 p-4 bg-white max-md:flex-1 max-md:overflow-y-auto">
 
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
 

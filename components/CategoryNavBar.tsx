@@ -11,7 +11,7 @@ const CategoryNavBar = () => {
   }, [fetchCategories]);
 
   return (
-    <nav className="bg-blue-500 w-full shadow-md">
+    <nav className="hidden w-full bg-blue-500 shadow-md md:block">
       <div className="max-w-screen-2xl mx-auto px-16 max-md:px-6 flex items-center gap-x-1 overflow-x-auto scrollbar-hide py-1.5">
         <Link
           href="/search?price=10000&minPrice=0&inStock=false&sort=lowPrice&page=1"
