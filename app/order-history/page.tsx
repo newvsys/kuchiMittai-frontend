@@ -669,7 +669,7 @@ const OrderHistoryPage = () => {
               <div className="space-y-3">
                 {paginatedOrders.map(order => {
                   const statusLabel = order.status === "P" ? "PENDING" : order.status;
-                  const canCancel = ["confirmed","submitted","created"].includes((order.status || "").toLowerCase());
+                  const canCancel = ["confirmed", "submitted", "created", "pickup_scheduled"].includes((order.status || "").toLowerCase());
                   const canReturn = (order.status || "").toLowerCase() === "delivered" && order.products.some(p => p.returnPolicy?.isReturnable === true);
                   const notReturnable = (order.status || "").toLowerCase() === "delivered" && !order.products.some(p => p.returnPolicy?.isReturnable === true);
 
