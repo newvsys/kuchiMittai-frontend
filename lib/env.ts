@@ -3,10 +3,15 @@
  *
  * HOW IT WORKS
  * ---------------------------------------------------------------------------
- * Production (Vercel)
- *   Leave NEXT_PUBLIC_API_BASE_URL empty (or unset).
- *   Browser requests use relative URLs (/api/...) which are proxied by
- *   Next.js rewrites to API_BASE_URL.
+ * Production
+ *   NEXT_PUBLIC_API_BASE_URL=/api
+ *   API_BASE_URL=https://api.kuchimittai.com/api
+ *
+ *   The browser only ever issues same-origin requests to /api/... which the
+ *   Next.js rewrite in next.config.mjs proxies to API_BASE_URL. Pointing
+ *   NEXT_PUBLIC_API_BASE_URL at the backend host directly makes every browser
+ *   call cross-origin and it will be blocked unless the backend sends
+ *   Access-Control-Allow-Origin.
  *
  * Local Development
  *   Browser (Client Components):

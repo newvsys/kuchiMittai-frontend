@@ -1,3 +1,12 @@
+/** Parse a URL only when it is absolute; relative values (e.g. "/api") have no host. */
+const toAbsoluteUrl = (value) => {
+  try {
+    return value ? new URL(value) : null;
+  } catch {
+    return null;
+  }
+};
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     async rewrites() {
@@ -30,22 +39,28 @@ const nextConfig = {
             port: '',
             pathname: '/efmugjt7/**',
           },
-          // Allow image URLs from the backend API server
-          // The hostname is derived from NEXT_PUBLIC_API_BASE_URL at build time
-          ...(process.env.NEXT_PUBLIC_API_BASE_URL
-            ? [{
-                protocol: /** @type {'http'|'https'} */ (new URL(process.env.NEXT_PUBLIC_API_BASE_URL).protocol.replace(':', '')),
-                hostname: new URL(process.env.NEXT_PUBLIC_API_BASE_URL).hostname,
-                port: new URL(process.env.NEXT_PUBLIC_API_BASE_URL).port || '',
-                pathname: '/**',
-              }]
-            : [{
-                protocol: 'http',
+          // Allow image URLs from the backend API server.
+          // Hostname comes from whichever backend URL is absolute; when the
+          // browser uses the relative proxy path there is no extra host.
+          ...(() => {
+            const backend =
+              toAbsoluteUrl(process.env.NEXT_PUBLIC_API_BASE_URL) ??
+              toAbsoluteUrl(process.env.API_BASE_URL);
+            if (!backend) {
+              return [{
+                protocol: /** @type {'http'} */ ('http'),
                 hostname: 'localhost',
                 port: '8080',
                 pathname: '/**',
-              }]
-          ),
+              }];
+            }
+            return [{
+              protocol: /** @type {'http'|'https'} */ (backend.protocol.replace(':', '')),
+              hostname: backend.hostname,
+              port: backend.port || '',
+              pathname: '/**',
+            }];
+          })(),
         ],
       },
     async headers() {
