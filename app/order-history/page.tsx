@@ -8,6 +8,17 @@ import { API_BASE } from "@/lib/env";
 interface Order {
   orderNumber: string;
   status: string;
+  paymentStatus?: string;
+  paymentMethod?: string;
+  paymentTime?: string;
+  paymentId?: string;
+  paymentOrderId?: string;
+  razorpayPaymentId?: string;
+  razorpayOrderId?: string;
+  transactionId?: string;
+  paymentGateway?: string;
+  payment?: PaymentDetails;
+  paymentDetails?: PaymentDetails;
   totalAmount: number;
   currency: string;
   orderId: string;
@@ -53,6 +64,26 @@ interface Order {
   }>;
 }
 
+interface PaymentDetails {
+  paymentStatus?: string;
+  status?: string;
+  paymentMethod?: string;
+  method?: string;
+  paymentTime?: string;
+  paidAt?: string;
+  createdAt?: string;
+  paymentId?: string;
+  paymentOrderId?: string;
+  orderId?: string;
+  razorpayPaymentId?: string;
+  razorpayOrderId?: string;
+  transactionId?: string;
+  gateway?: string;
+  paymentGateway?: string;
+  amount?: number | string;
+  currency?: string;
+}
+
 interface CancelReason {
   reasonCode: string;
   reasonDescription: string;
@@ -90,6 +121,10 @@ const OrderHistoryPage = () => {
   const [cancelReasonInlineError, setCancelReasonInlineError] = useState("");
   const [cancelComment, setCancelComment] = useState("");
   const [detailsDialog, setDetailsDialog] = useState<{
+    open: boolean;
+    order: Order | null;
+  }>({ open: false, order: null });
+  const [paymentDetailsDialog, setPaymentDetailsDialog] = useState<{
     open: boolean;
     order: Order | null;
   }>({ open: false, order: null });
@@ -431,6 +466,34 @@ const OrderHistoryPage = () => {
     fetchOrders({ search: searchTerm, statuses: selectedStatuses });
   };
 
+  const getPaymentRows = (order: Order) => {
+    const payment = order.paymentDetails || order.payment || {};
+    const formatDateTime = (value?: string) => {
+      if (!value) return null;
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    };
+    const formatAmount = (value?: number | string) => {
+      if (value == null || value === "") return null;
+      const amount = Number(value);
+      if (Number.isNaN(amount)) return String(value);
+      return `₹${amount.toFixed(2)}`;
+    };
+
+    return [
+      { label: "Payment Status", value: order.paymentStatus || payment.paymentStatus || payment.status || (order.status === "P" ? "PENDING" : null) },
+      { label: "Payment Method", value: order.paymentMethod || payment.paymentMethod || payment.method },
+      { label: "Amount", value: formatAmount(payment.amount ?? order.totalAmount) },
+      { label: "Currency", value: payment.currency || order.currency },
+      { label: "Transaction ID", value: order.transactionId || payment.transactionId },
+      { label: "Payment ID", value: order.paymentId || order.razorpayPaymentId || payment.paymentId || payment.razorpayPaymentId },
+      { label: "Payment Order ID", value: order.paymentOrderId || order.razorpayOrderId || payment.paymentOrderId || payment.razorpayOrderId || payment.orderId },
+      { label: "Gateway", value: order.paymentGateway || payment.paymentGateway || payment.gateway },
+      { label: "Paid At", value: formatDateTime(order.paymentTime || payment.paymentTime || payment.paidAt || payment.createdAt) },
+    ].filter((row): row is { label: string; value: string | number } => row.value != null && row.value !== "");
+  };
+
   if (status === "loading" || !session || loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -718,6 +781,13 @@ const OrderHistoryPage = () => {
                         </div>
                         <div className="flex items-center gap-3">
                           {getStatusBadge(order.status)}
+                          <button
+                            type="button"
+                            className="text-xs text-emerald-700 hover:text-emerald-800 font-semibold border border-emerald-200 rounded-lg px-3 py-1 hover:bg-emerald-50 transition-colors"
+                            onClick={() => setPaymentDetailsDialog({ open: true, order })}
+                          >
+                            Payment Details
+                          </button>
                           <button
                             type="button"
                             className="text-xs text-blue-600 hover:text-blue-800 font-semibold border border-blue-200 rounded-lg px-3 py-1 hover:bg-blue-50 transition-colors"
@@ -1113,6 +1183,60 @@ const OrderHistoryPage = () => {
               </div>
             </div>
           )}
+          {paymentDetailsDialog.open && paymentDetailsDialog.order && (() => {
+            const selectedOrder = paymentDetailsDialog.order;
+            const paymentRows = getPaymentRows(selectedOrder);
+            return (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                onClick={() => setPaymentDetailsDialog({ open: false, order: null })}
+              >
+                <div
+                  className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden"
+                  onClick={event => event.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-emerald-600 to-teal-500">
+                    <div>
+                      <h3 className="text-base font-bold text-white">Payment Details</h3>
+                      <p className="text-emerald-50 text-xs mt-0.5 font-mono">{selectedOrder.orderNumber}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentDetailsDialog({ open: false, order: null })}
+                      className="text-white/70 hover:text-white text-2xl leading-none"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                  <div className="px-6 py-5">
+                    {paymentRows.length > 0 ? (
+                      <dl className="divide-y divide-gray-100 rounded-xl border border-gray-100 overflow-hidden">
+                        {paymentRows.map(row => (
+                          <div key={row.label} className="grid grid-cols-1 gap-1 px-4 py-3 text-sm sm:grid-cols-5 sm:gap-4">
+                            <dt className="font-medium text-gray-500 sm:col-span-2">{row.label}</dt>
+                            <dd className="font-semibold text-gray-900 break-all sm:col-span-3">{row.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    ) : (
+                      <p className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-5 text-sm text-gray-500">
+                        Payment details are not available for this order yet.
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex justify-end px-6 py-4 border-t bg-gray-50">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentDetailsDialog({ open: false, order: null })}
+                      className="px-5 py-2 text-sm font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
           {detailsDialog.open && detailsDialog.order && (() => {
             const o = detailsDialog.order;
             const addr = o.shippingAddress;

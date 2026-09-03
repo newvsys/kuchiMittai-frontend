@@ -391,29 +391,37 @@ const ZOOM_PANEL_SIZE = 380;
                 size="lg"
               />
             )}
-            {product?.isReturnable === "Y" ? (
-              <div className="flex items-center justify-center gap-2 text-sm">
-                <span className="text-green-600">✔</span>
-                <button
-                  type="button"
-                  className="text-blue-600 font-semibold hover:underline text-sm"
-                  onClick={() => setReturnPolicyDialog(true)}
-                >
-                  Easy doorstep return
-                </button>
+            {(product?.isReturnable === "Y" || product?.isReturnable === "N") && (
+              <div className="flex items-center justify-between gap-2 text-sm">
+                {product.isReturnable === "Y" ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-600">✔</span>
+                    <button
+                      type="button"
+                      className="text-blue-600 font-semibold hover:underline text-sm"
+                      onClick={() => setReturnPolicyDialog(true)}
+                    >
+                      Easy doorstep return
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-800">✖</span>
+                    <button
+                      type="button"
+                      className="text-gray-800 font-semibold hover:underline text-sm"
+                      onClick={() => setReturnPolicyDialog(true)}
+                    >
+                      No Returns
+                    </button>
+                  </div>
+                )}
+                <a href={productsHref} className="flex items-center gap-1 text-blue-600 font-medium hover:underline text-sm">
+                  Continue Shopping
+                  <span aria-hidden="true">→</span>
+                </a>
               </div>
-            ) : product?.isReturnable === "N" ? (
-              <div className="flex items-center justify-center gap-2 text-sm">
-                <span className="text-gray-800">✖</span>
-                <button
-                  type="button"
-                  className="text-gray-800 font-semibold hover:underline text-sm"
-                  onClick={() => setReturnPolicyDialog(true)}
-                >
-                  No Returns
-                </button>
-              </div>
-            ) : null}
+            )}
             <div className="flex flex-col gap-y-2 max-[500px]:items-center">
               {/* Size Option Buttons - Always show all sizes from baseProduct */}
               {Array.isArray(baseProduct?.productvarlist) && baseProduct.productvarlist.length > 0 && (() => {

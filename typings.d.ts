@@ -102,6 +102,7 @@ interface Order {
 interface SingleProductBtnProps {
   product: Product;
   quantityCount: number;
+  disabled?: boolean;
 }
 
 

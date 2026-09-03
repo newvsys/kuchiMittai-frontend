@@ -13,20 +13,28 @@ import React, { useState } from "react";
 import QuantityInput from "./QuantityInput";
 import AddToCartSingleProductBtn from "./AddToCartSingleProductBtn";
 import BuyNowSingleProductBtn from "./BuyNowSingleProductBtn";
+import { useProductStore } from "@/app/_zustand/store";
 
 const SingleProductDynamicFields = ({ product, maxQty }: { product: Product; maxQty?: number }) => {
   const [quantityCount, setQuantityCount] = useState<number>(1);
-  const atMaxQty = maxQty !== undefined && maxQty > 0 && quantityCount >= maxQty;
+  const cartItems = useProductStore((state) => state.products);
+  const inCartQty = cartItems.find((item) => item.id === product.id.toString())?.amount ?? 0;
+  // Stock still available to add, after accounting for what's already in the cart
+  const remainingQty = maxQty !== undefined ? Math.max(0, maxQty - inCartQty) : undefined;
+  const atMaxQty = remainingQty !== undefined && quantityCount >= remainingQty;
+  const soldOut = remainingQty === 0;
   return (
     <>
       <QuantityInput
         quantityCount={quantityCount}
         setQuantityCount={setQuantityCount}
-        maxQty={maxQty}
+        maxQty={remainingQty}
       />
       {atMaxQty && (
         <p className="text-sm text-amber-600 font-medium">
-          ⚠ Only {maxQty} unit{maxQty === 1 ? "" : "s"} available — you&apos;ve reached the maximum quantity.
+          {soldOut
+            ? "⚠ You already have the maximum available quantity in your cart."
+            : `⚠ Only ${remainingQty} unit${remainingQty === 1 ? "" : "s"} available — you've reached the maximum quantity.`}
         </p>
       )}
       {Boolean(product.inStock) && (
@@ -34,6 +42,7 @@ const SingleProductDynamicFields = ({ product, maxQty }: { product: Product; max
           <AddToCartSingleProductBtn
             quantityCount={quantityCount}
             product={product}
+            disabled={soldOut}
           />
           <BuyNowSingleProductBtn
             quantityCount={quantityCount}
