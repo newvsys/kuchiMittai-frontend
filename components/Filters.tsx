@@ -181,7 +181,7 @@ const Filters = () => {
                   },
                 })
               }
-              className="w-5 h-5 rounded border-gray-300 text-blue-600 cursor-pointer"
+              className="w-5 h-5 rounded border-gray-400 text-blue-600 cursor-pointer"
             />
             <span className="text-sm text-gray-700">In stock</span>
           </label>
@@ -210,7 +210,7 @@ const Filters = () => {
                             : [...prev, catId]
                         );
                       }}
-                      className="w-5 h-5 rounded border-gray-300 text-blue-600 cursor-pointer"
+                      className="w-5 h-5 rounded border-gray-400 text-blue-600 cursor-pointer"
                     />
                     <span className="text-sm text-gray-700 truncate">{label}</span>
                   </label>

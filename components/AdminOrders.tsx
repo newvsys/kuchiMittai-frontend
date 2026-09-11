@@ -40,6 +40,15 @@ interface Shipment {
   shipmentHistory: ShipmentHistory[];
 }
 
+interface Payment {
+  paymentMethod: string | null;
+  paymentProvider: string | null;
+  transactionId: string | null;
+  amount: number | null;
+  paymentStatus: string | null;
+  paymentTime: string | null;
+}
+
 interface Order {
   orderId: number;
   orderNumber: string;
@@ -52,11 +61,49 @@ interface Order {
   customerEmail: string;
   customerPhone: string;
   shipments: Shipment[];
+  payment: Payment | null;
 }
 
 interface OrderShipmentListResponse {
   totalCount: number;
   orders: Order[];
+}
+
+interface ShiprocketOrderItem {
+  name: string;
+  sku: string;
+  units: string;
+  selling_price: string;
+}
+
+interface ShiprocketFormState {
+  order_id: string;
+  order_date: string;
+  pickup_location: string;
+  billing_customer_name: string;
+  billing_address: string;
+  billing_city: string;
+  billing_pincode: string;
+  billing_state: string;
+  billing_country: string;
+  billing_email: string;
+  billing_phone: string;
+  shipping_is_billing: boolean;
+  payment_method: string;
+  sub_total: string;
+  length: string;
+  breadth: string;
+  height: string;
+  weight: string;
+  order_items: ShiprocketOrderItem[];
+}
+
+const emptyShiprocketItem: ShiprocketOrderItem = { name: "", sku: "", units: "1", selling_price: "" };
+
+function toShiprocketOrderDate(dateStr: string | null): string {
+  const d = dateStr ? new Date(dateStr) : new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 const STATUS_OPTIONS = [
@@ -95,6 +142,12 @@ const AdminOrders = () => {
   const [error, setError] = useState<string | null>(null);
   const [modalOrder, setModalOrder] = useState<Order | null>(null);
   const [trackingModal, setTrackingModal] = useState<{ orderNumber: string; history: ShipmentHistory[] } | null>(null);
+  const [paymentModalOrder, setPaymentModalOrder] = useState<Order | null>(null);
+
+  const [shiprocketModalOrder, setShiprocketModalOrder] = useState<Order | null>(null);
+  const [shiprocketForm, setShiprocketForm] = useState<ShiprocketFormState | null>(null);
+  const [shiprocketCreating, setShiprocketCreating] = useState(false);
+  const [shiprocketError, setShiprocketError] = useState<string | null>(null);
 
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
@@ -246,7 +299,128 @@ const AdminOrders = () => {
   };
 
   const closeModal = () => setModalOrder(null);
+
+  const closePaymentModal = () => setPaymentModalOrder(null);
   const closeTrackingModal = () => setTrackingModal(null);
+
+  const openShiprocketModal = (order: Order) => {
+    setShiprocketError(null);
+    setShiprocketModalOrder(order);
+    setShiprocketForm({
+      order_id: order.orderNumber,
+      order_date: toShiprocketOrderDate(order.orderCreatedAt),
+      pickup_location: "",
+      billing_customer_name: order.customerName || "",
+      billing_address: "",
+      billing_city: "",
+      billing_pincode: "",
+      billing_state: "",
+      billing_country: "India",
+      billing_email: order.customerEmail || "",
+      billing_phone: order.customerPhone || "",
+      shipping_is_billing: true,
+      payment_method: order.paymentStatus === "PAID" ? "Prepaid" : "COD",
+      sub_total: String(order.totalAmount ?? ""),
+      length: "",
+      breadth: "",
+      height: "",
+      weight: "",
+      order_items: [{ ...emptyShiprocketItem }],
+    });
+  };
+
+  const closeShiprocketModal = () => {
+    setShiprocketModalOrder(null);
+    setShiprocketForm(null);
+    setShiprocketError(null);
+  };
+
+  const handleShiprocketFieldChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
+    setShiprocketForm((prev) => {
+      if (!prev) return prev;
+      if (type === "checkbox") {
+        return { ...prev, [name]: (e.target as HTMLInputElement).checked };
+      }
+      return { ...prev, [name]: value };
+    });
+  };
+
+  const handleShiprocketItemChange = (
+    index: number,
+    field: keyof ShiprocketOrderItem,
+    value: string
+  ) => {
+    setShiprocketForm((prev) => {
+      if (!prev) return prev;
+      const items = prev.order_items.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      );
+      return { ...prev, order_items: items };
+    });
+  };
+
+  const addShiprocketItem = () => {
+    setShiprocketForm((prev) =>
+      prev ? { ...prev, order_items: [...prev.order_items, { ...emptyShiprocketItem }] } : prev
+    );
+  };
+
+  const removeShiprocketItem = (index: number) => {
+    setShiprocketForm((prev) =>
+      prev ? { ...prev, order_items: prev.order_items.filter((_, i) => i !== index) } : prev
+    );
+  };
+
+  const handleCreateShiprocketOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!shiprocketForm) return;
+    setShiprocketError(null);
+    setShiprocketCreating(true);
+    try {
+      const payload = {
+        order_id: shiprocketForm.order_id,
+        order_date: shiprocketForm.order_date,
+        pickup_location: shiprocketForm.pickup_location,
+        billing_customer_name: shiprocketForm.billing_customer_name,
+        billing_address: shiprocketForm.billing_address,
+        billing_city: shiprocketForm.billing_city,
+        billing_pincode: shiprocketForm.billing_pincode,
+        billing_state: shiprocketForm.billing_state,
+        billing_country: shiprocketForm.billing_country,
+        billing_email: shiprocketForm.billing_email,
+        billing_phone: shiprocketForm.billing_phone,
+        shipping_is_billing: shiprocketForm.shipping_is_billing,
+        payment_method: shiprocketForm.payment_method,
+        sub_total: parseFloat(shiprocketForm.sub_total) || 0,
+        length: parseFloat(shiprocketForm.length) || 0,
+        breadth: parseFloat(shiprocketForm.breadth) || 0,
+        height: parseFloat(shiprocketForm.height) || 0,
+        weight: parseFloat(shiprocketForm.weight) || 0,
+        order_items: shiprocketForm.order_items.map((item) => ({
+          name: item.name,
+          sku: item.sku,
+          units: parseInt(item.units, 10) || 0,
+          selling_price: parseFloat(item.selling_price) || 0,
+        })),
+      };
+      const res = await apiClient.post("/api/shipping/create-order", payload);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.message || "Failed to create Shiprocket order");
+      }
+      closeShiprocketModal();
+      if (shiprocketModalOrder) {
+        refreshOrderShipments(shiprocketModalOrder.orderNumber);
+      }
+    } catch (err: any) {
+      setShiprocketError(err.message || "Failed to create Shiprocket order");
+    } finally {
+      setShiprocketCreating(false);
+    }
+  };
 
   return (
     <div className="xl:ml-5 w-full max-xl:mt-5 p-4">
@@ -482,6 +656,420 @@ const AdminOrders = () => {
         </div>
       )}
 
+      {/* Payment Details Modal */}
+      {paymentModalOrder && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={closePaymentModal}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <div>
+                <h2 className="text-lg font-bold">
+                  Payment Details &mdash; {paymentModalOrder.orderNumber}
+                </h2>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {paymentModalOrder.customerName} &bull; {paymentModalOrder.customerEmail}
+                </p>
+              </div>
+              <button
+                className="btn btn-sm btn-ghost btn-circle text-lg"
+                onClick={closePaymentModal}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="overflow-y-auto px-6 py-4">
+              {paymentModalOrder.payment ? (
+                <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                  <div>
+                    <p className="text-xs text-gray-400">Payment Method</p>
+                    <p>{paymentModalOrder.payment.paymentMethod || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Payment Provider</p>
+                    <p>{paymentModalOrder.payment.paymentProvider || "-"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Transaction ID</p>
+                    <p className="font-mono text-xs break-all">
+                      {paymentModalOrder.payment.transactionId || "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Amount</p>
+                    <p className="font-semibold">
+                      {paymentModalOrder.payment.amount != null
+                        ? `${paymentModalOrder.currency || "INR"} ${paymentModalOrder.payment.amount.toLocaleString("en-IN")}`
+                        : "-"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Payment Status</p>
+                    <span
+                      className={`badge badge-sm ${
+                        paymentModalOrder.payment.paymentStatus === "PAID"
+                          ? "badge-success text-white"
+                          : "badge-warning"
+                      }`}
+                    >
+                      {paymentModalOrder.payment.paymentStatus || "-"}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Payment Time</p>
+                    <p className="text-xs">
+                      {paymentModalOrder.payment.paymentTime
+                        ? new Date(paymentModalOrder.payment.paymentTime).toLocaleString("en-IN")
+                        : "-"}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400">No payment record found for this order.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create Shiprocket Order Modal */}
+      {shiprocketModalOrder && shiprocketForm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={closeShiprocketModal}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <div>
+                <h2 className="text-lg font-bold">
+                  Create Shiprocket Order &mdash; {shiprocketModalOrder.orderNumber}
+                </h2>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {shiprocketModalOrder.customerName} &bull; {shiprocketModalOrder.customerEmail}
+                </p>
+              </div>
+              <button
+                className="btn btn-sm btn-ghost btn-circle text-lg"
+                onClick={closeShiprocketModal}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateShiprocketOrder} className="overflow-y-auto px-6 py-4 space-y-4">
+              {shiprocketError && (
+                <div className="alert alert-error text-sm py-2">
+                  <span>{shiprocketError}</span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Order ID</label>
+                  <input
+                    name="order_id"
+                    value={shiprocketForm.order_id}
+                    onChange={handleShiprocketFieldChange}
+                    required
+                    className="input input-bordered input-sm w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Order Date</label>
+                  <input
+                    name="order_date"
+                    value={shiprocketForm.order_date}
+                    onChange={handleShiprocketFieldChange}
+                    placeholder="yyyy-MM-dd HH:mm"
+                    required
+                    className="input input-bordered input-sm w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Pickup Location</label>
+                  <input
+                    name="pickup_location"
+                    value={shiprocketForm.pickup_location}
+                    onChange={handleShiprocketFieldChange}
+                    required
+                    className="input input-bordered input-sm w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Payment Method</label>
+                  <select
+                    name="payment_method"
+                    value={shiprocketForm.payment_method}
+                    onChange={handleShiprocketFieldChange}
+                    className="select select-bordered select-sm w-full"
+                  >
+                    <option value="Prepaid">Prepaid</option>
+                    <option value="COD">COD</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Sub Total</label>
+                  <input
+                    type="number"
+                    name="sub_total"
+                    value={shiprocketForm.sub_total}
+                    onChange={handleShiprocketFieldChange}
+                    min="0"
+                    step="0.01"
+                    required
+                    className="input input-bordered input-sm w-full"
+                  />
+                </div>
+                <div className="flex items-center gap-2 pt-5">
+                  <input
+                    type="checkbox"
+                    name="shipping_is_billing"
+                    checked={shiprocketForm.shipping_is_billing}
+                    onChange={handleShiprocketFieldChange}
+                    className="checkbox checkbox-sm"
+                    id="shipping_is_billing"
+                  />
+                  <label htmlFor="shipping_is_billing" className="text-xs text-gray-600">
+                    Shipping same as billing
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Billing Details</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Customer Name</label>
+                    <input
+                      name="billing_customer_name"
+                      value={shiprocketForm.billing_customer_name}
+                      onChange={handleShiprocketFieldChange}
+                      required
+                      className="input input-bordered input-sm w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Email</label>
+                    <input
+                      type="email"
+                      name="billing_email"
+                      value={shiprocketForm.billing_email}
+                      onChange={handleShiprocketFieldChange}
+                      required
+                      className="input input-bordered input-sm w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Phone</label>
+                    <input
+                      name="billing_phone"
+                      value={shiprocketForm.billing_phone}
+                      onChange={handleShiprocketFieldChange}
+                      required
+                      className="input input-bordered input-sm w-full"
+                    />
+                  </div>
+                  <div className="col-span-2 md:col-span-3">
+                    <label className="block text-xs text-gray-500 mb-1">Address</label>
+                    <input
+                      name="billing_address"
+                      value={shiprocketForm.billing_address}
+                      onChange={handleShiprocketFieldChange}
+                      required
+                      className="input input-bordered input-sm w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">City</label>
+                    <input
+                      name="billing_city"
+                      value={shiprocketForm.billing_city}
+                      onChange={handleShiprocketFieldChange}
+                      required
+                      className="input input-bordered input-sm w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">State</label>
+                    <input
+                      name="billing_state"
+                      value={shiprocketForm.billing_state}
+                      onChange={handleShiprocketFieldChange}
+                      required
+                      className="input input-bordered input-sm w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Pincode</label>
+                    <input
+                      name="billing_pincode"
+                      value={shiprocketForm.billing_pincode}
+                      onChange={handleShiprocketFieldChange}
+                      required
+                      className="input input-bordered input-sm w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Country</label>
+                    <input
+                      name="billing_country"
+                      value={shiprocketForm.billing_country}
+                      onChange={handleShiprocketFieldChange}
+                      required
+                      className="input input-bordered input-sm w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Package Dimensions</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Length (cm)</label>
+                    <input
+                      type="number"
+                      name="length"
+                      value={shiprocketForm.length}
+                      onChange={handleShiprocketFieldChange}
+                      min="0"
+                      step="0.1"
+                      required
+                      className="input input-bordered input-sm w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Breadth (cm)</label>
+                    <input
+                      type="number"
+                      name="breadth"
+                      value={shiprocketForm.breadth}
+                      onChange={handleShiprocketFieldChange}
+                      min="0"
+                      step="0.1"
+                      required
+                      className="input input-bordered input-sm w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Height (cm)</label>
+                    <input
+                      type="number"
+                      name="height"
+                      value={shiprocketForm.height}
+                      onChange={handleShiprocketFieldChange}
+                      min="0"
+                      step="0.1"
+                      required
+                      className="input input-bordered input-sm w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Weight (kg)</label>
+                    <input
+                      type="number"
+                      name="weight"
+                      value={shiprocketForm.weight}
+                      onChange={handleShiprocketFieldChange}
+                      min="0"
+                      step="0.01"
+                      required
+                      className="input input-bordered input-sm w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Order Items</p>
+                  <button
+                    type="button"
+                    onClick={addShiprocketItem}
+                    className="btn btn-xs btn-ghost"
+                  >
+                    + Add Item
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {shiprocketForm.order_items.map((item, idx) => (
+                    <div key={idx} className="grid grid-cols-12 gap-2 items-center">
+                      <input
+                        placeholder="Name"
+                        value={item.name}
+                        onChange={(e) => handleShiprocketItemChange(idx, "name", e.target.value)}
+                        required
+                        className="input input-bordered input-sm col-span-4"
+                      />
+                      <input
+                        placeholder="SKU"
+                        value={item.sku}
+                        onChange={(e) => handleShiprocketItemChange(idx, "sku", e.target.value)}
+                        required
+                        className="input input-bordered input-sm col-span-3"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Units"
+                        value={item.units}
+                        onChange={(e) => handleShiprocketItemChange(idx, "units", e.target.value)}
+                        min="1"
+                        required
+                        className="input input-bordered input-sm col-span-2"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Price"
+                        value={item.selling_price}
+                        onChange={(e) => handleShiprocketItemChange(idx, "selling_price", e.target.value)}
+                        min="0"
+                        step="0.01"
+                        required
+                        className="input input-bordered input-sm col-span-2"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeShiprocketItem(idx)}
+                        disabled={shiprocketForm.order_items.length === 1}
+                        className="btn btn-xs btn-ghost col-span-1 disabled:opacity-40"
+                        title="Remove item"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2 border-t">
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={closeShiprocketModal}
+                  disabled={shiprocketCreating}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-sm"
+                  disabled={shiprocketCreating}
+                >
+                  {shiprocketCreating ? "Creating..." : "Create"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Filters */}
       <form
         onSubmit={handleSearch}
@@ -634,6 +1222,7 @@ const AdminOrders = () => {
                 <th>Total</th>
                 <th>Created At</th>
                 <th>Shipments</th>
+                <th>Payment Details</th>
                 <th>Labels</th>
                 <th>Internal Tracking</th>
               </tr>
@@ -641,7 +1230,7 @@ const AdminOrders = () => {
             <tbody>
               {displayedOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="text-center py-10 text-gray-400">
+                  <td colSpan={10} className="text-center py-10 text-gray-400">
                     No orders found.
                   </td>
                 </tr>
@@ -697,6 +1286,19 @@ const AdminOrders = () => {
                           {order.shipments.length} shipment
                           {order.shipments.length !== 1 ? "s" : ""}
                         </button>
+                      )}
+                    </td>
+                    <td>
+                      {order.payment ? (
+                        <button
+                          type="button"
+                          onClick={() => setPaymentModalOrder(order)}
+                          className="text-blue-600 hover:underline text-sm font-medium"
+                        >
+                          View Details
+                        </button>
+                      ) : (
+                        <span className="text-xs text-gray-400">No payment</span>
                       )}
                     </td>
                     <td>

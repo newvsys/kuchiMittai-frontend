@@ -343,13 +343,6 @@ const LoginPage = () => {
                   {fieldErrors.password && <p className="mt-1.5 text-xs text-red-500">{fieldErrors.password}</p>}
                 </div>
 
-                {/* Forgot password */}
-                <div className="flex justify-end -mt-1">
-                  <a href="/forgot-password" className={`text-xs font-medium ${isLoading ? "text-gray-400 pointer-events-none" : "text-blue-600 hover:text-blue-700 hover:underline"}`}>
-                    Forgot password?
-                  </a>
-                </div>
-
                 {/* Submit */}
                 <button type="submit" disabled={isLoading}
                   className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed mt-2">
@@ -381,6 +374,13 @@ const LoginPage = () => {
                       </svg>
                       Login with OTP
                     </button>
+
+                    {/* Forgot password */}
+                    <div className="flex justify-end -mt-1">
+                      <Link href="/forgot-password" className={`text-xs font-medium ${isLoading ? "text-gray-400 pointer-events-none" : "text-blue-600 hover:text-blue-700 hover:underline"}`}>
+                        Forgot password?
+                      </Link>
+                    </div>
 
                     <p className="text-sm text-center text-gray-500 pt-1">
                       Don&apos;t have an account?{" "}

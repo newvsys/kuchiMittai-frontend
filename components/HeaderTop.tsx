@@ -56,7 +56,7 @@ const HeaderTop = () => {
           <li>
             <div className="flex flex-col select-none leading-none">
               <span className="text-lg sm:text-2xl lg:text-3xl font-extrabold tracking-tight">
-                <span style={{ color: "#16a34a" }}>Kuchi</span><span style={{ color: "#ca8a04" }}>Mit</span><span style={{ color: "#dc2626" }}>tai</span>
+                <span style={{ color: "#fb923c" }}>Try</span> <span style={{ color: "#22d3ee" }}>Nat</span><span style={{ color: "#818cf8" }}>ural</span>
               </span>
               <span className="mt-1 text-xs font-medium tracking-[0.2em] uppercase text-gray-500 whitespace-nowrap">
                 Let Food Be Your Medicine

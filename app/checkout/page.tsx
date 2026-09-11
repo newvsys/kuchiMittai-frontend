@@ -57,7 +57,7 @@ const CheckoutPage = () => {
         key: orderResponse.paymentGatewayKey, // From backend
         amount: Number(orderResponse.amount) * 100, // Amount in paise
         currency: orderResponse.currency || "INR",
-        name: orderResponse.storeName || "Your Store Name",
+        name: orderResponse.storeName || "Try Nat",
         image: logoBase64,
         description: orderResponse.description || `Order #${orderResponse.orderNumber}`,
         order_id: orderResponse.paymentOrderId, // Razorpay order_id from backend

@@ -1,1101 +1,1445 @@
 "use client";
 
 import { DashboardSidebar } from "@/components";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { showToast, showError } from "@/lib/toast";
 import apiClient from "@/lib/api";
 
-// Pending Orders Types
+// Types — per shipping-api-docs.md, Section 10 "Failed Shiprocket Step Orders"
 
-interface PendingShipment {
-  shipmentId: number;
-  awb: string | null;
-  labelUrl: string | null;
-  shipmentStatus: string;
-  shipmentType: string | null;
-}
-
-interface PendingOrder {
+interface OrderDetails {
   orderId: number;
   orderNumber: string;
   orderStatus: string;
   paymentStatus: string;
   totalAmount: number;
-  currency: string | null;
   orderCreatedAt: string | null;
   customerName: string;
   customerEmail: string;
-  customerPhone: string;
-  shipments: PendingShipment[];
+  customerMobile: string;
 }
 
-interface OrderListResponse {
-  totalCount: number;
-  orders: PendingOrder[];
-}
-
-const ORDER_STATUS_OPTIONS = [
-  "Confirmed",
-  "delivered",
-  "CANCELLED",
-  "RETURN_IN_PROGRESS",
-  "Return Requested",
-  "OUT FOR PICKUP",
-  "P",
-];
-
-function getStatusBadge(status: string) {
-  const s = (status || "").toLowerCase();
-  if (s.includes("cancel")) return "bg-red-100 text-red-700";
-  if (s === "delivered" || s.includes("deliver")) return "bg-green-100 text-green-700";
-  if (s.includes("confirm")) return "bg-blue-100 text-blue-700";
-  if (s.includes("return")) return "bg-yellow-100 text-yellow-700";
-  return "bg-gray-100 text-gray-600";
-}
-
-function formatDate(d: string | null) {
-  if (!d) return "—";
-  return new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-}
-
-// Types
-
-interface Warehouse {
-  warehouseId: number;
-  warehouseName: string;
-  warehouseCode: string;
+interface StepLog {
+  id: number;
   status: string;
+  remarks: string | null;
+  createdAt: string;
+  updatedAt: string | null;
 }
 
-interface TrackingHistory {
-  status: string;
-  location: string;
-  remarks: string;
-  date: string;
-}
-
-interface ShippingRecord {
+interface ShipmentLog {
+  id: number;
   shipmentId: number;
-  orderNumber: string;
   orderId: number;
+  warehouseId: number | null;
+  step: string;
+  status: string;
   shiprocketOrderId: number | null;
   shiprocketShipmentId: number | null;
   awbCode: string | null;
+  labelUrl: string | null;
+  errorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ShippingDetails {
+  shipmentId: number;
+  trackingNumber: string | null;
+  shipmentType: string | null;
+  shipmentStatus: string | null;
+  awb: string | null;
   courierName: string | null;
   courierCompanyId: number | null;
-  shipmentStatus: string;
-  shipmentType: string;
-  trackingNumber: string | null;
+  shippingPrice: number | null;
+  shippedDate: string | null;
+  deliveredDate: string | null;
+  shipmentCreatedAt: string | null;
+  shipmentUpdatedAt: string | null;
+  shiprocketOrderStatus: string | null;
+  generateAwbStatus: string | null;
+  requestPickupStatus: string | null;
+  generateLabelStatus: string | null;
+  trackShipmentStatus: string | null;
+  estimateStatus: string | null;
+  cartonId: number | null;
   length: number | null;
   breadth: number | null;
   height: number | null;
   weight: number | null;
-  shippingPrice: number | null;
   labelUrl: string | null;
-  trackUrl: string | null;
-  warehouseId: number | null;
-  warehouseName: string | null;
-  pickupScheduledDate: string | null;
-  estimatedDeliveryDate: string | null;
-  expectedDeliveryDate: string | null;
-  shippedDate: string | null;
-  deliveredDate: string | null;
+  shipOrderId: number | null;
+  shipShipmentId: number | null;
   pickupId: number | null;
   pickupToken: string | null;
-  createdAt: string;
-  updatedAt: string;
-  trackingHistory: TrackingHistory[];
+  estimatedDeliveryDate: string | null;
+  expectedDeliveryDate: string | null;
+  trackUrl: string | null;
+  shiprocketOrderStatuslog?: StepLog[];
+  generateAwbStatuslog?: StepLog[];
+  requestPickupStatuslog?: StepLog[];
+  generateLabelStatuslog?: StepLog[];
+  trackShipmentStatuslog?: StepLog[];
+  estimateStatuslog?: StepLog[];
+  shipmentlogs?: ShipmentLog[];
 }
 
-interface ShippingForm {
-  warehouseId: string;
-  shiprocketOrderId: string;
-  shiprocketShipmentId: string;
-  awbCode: string;
+interface FailedStepOrder {
+  orderDetails: OrderDetails;
+  shippingDetails: ShippingDetails | null;
+  failedSteps: string[];
+}
+
+interface FailedStepOrdersResponse {
+  responseStatus: string;
+  responseMessage: string;
+  totalCount: number;
+  orders: FailedStepOrder[];
+}
+
+// Types — per shiprocket-api-docs.md, Section 5 "Get Available Courier Services"
+
+interface CourierService {
+  courierId: number;
   courierName: string;
-  courierCompanyId: string;
-  shipmentStatus: string;
-  shipmentType: string;
-  trackingNumber: string;
+  price: number;
+  codCharges: number;
+  otherCharges: number;
+  estimatedDeliveryDays: number;
+  estimatedDeliveryDate: string;
+  rating: number;
+  codAvailable: boolean;
+  isAir: boolean;
+  isSurface: boolean;
+}
+
+interface CourierServicesResponse {
+  responseStatus: string;
+  responseMessage: string;
+  totalCount: number;
+  currentlyUsedCourierId: number | null;
+  courierServices: CourierService[];
+}
+
+// Types — per shipping-api-docs.md, Section 9 "Order ID Based Shipment Management"
+
+interface OrderShippingRecord {
+  shipmentId: number;
+  orderId: number;
+  orderNumber: string;
+  cartonId: number | null;
+  cartonNo: string | null;
+  trackingNumber: string | null;
+  courierName: string | null;
+  type: string | null;
+  shipmentStatus: string | null;
+  shippedDate: string | null;
+  deliveredDate: string | null;
+  length: number | null;
+  breadth: number | null;
+  height: number | null;
+  weight: number | null;
+  awb: string | null;
+  labelUrl: string | null;
+  shipOrderId: number | null;
+  shipShipmentId: number | null;
+  pickupId: number | null;
+  pickupScheduledDate: string | null;
+  pickupToken: string | null;
+  courierCompanyId: number | null;
+  estimatedDeliveryDate: string | null;
+  expectedDeliveryDate: string | null;
+  trackUrl: string | null;
+  shippingPrice: number | null;
+  shiprocketOrderStatus: string | null;
+  generateAwbStatus: string | null;
+  requestPickupStatus: string | null;
+  generateLabelStatus: string | null;
+  trackShipmentStatus: string | null;
+  estimateStatus: string | null;
+  warehouseId: number | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+interface OrderShippingRecordsResponse {
+  responseStatus: string;
+  responseMessage: string;
+  data: OrderShippingRecord[];
+  count: number;
+}
+
+type ShippingModalMode = "process" | "manual";
+
+type EditableShipmentFields = {
+  awb: string;
+  shippingPrice: string;
   length: string;
   breadth: string;
   height: string;
   weight: string;
-  shippingPrice: string;
-  labelUrl: string;
-  trackUrl: string;
+  shipOrderId: string;
+  shipShipmentId: string;
+  pickupId: string;
+  pickupToken: string;
+  pickupScheduledDate: string;
   estimatedDeliveryDate: string;
   expectedDeliveryDate: string;
-  historyStatus: string;
-  historyLocation: string;
-  historyRemarks: string;
-  notes: string;
-}
-
-// Constants
-
-const SHIPMENT_STATUS_OPTIONS = [
-  "CREATED",
-  "PICKUP_SCHEDULED",
-  "IN_TRANSIT",
-  "OUT_FOR_DELIVERY",
-  "DELIVERED",
-  "CANCELLED",
-  "RETURN_REQUESTED",
-  "RETURN_PICKUP_INITIATED",
-  "RECEIVED",
-];
-
-const SHIPMENT_TYPE_OPTIONS = ["FORWARD", "RETURN_PICKUP"];
-
-const SHIPROCKET_STATUS_MAP: Record<string, string> = {
-  "3": "PICKUP_SCHEDULED",
-  "6": "IN_TRANSIT",
-  "7": "DELIVERED",
-  "17": "OUT_FOR_DELIVERY",
+  shippedDate: string;
+  deliveredDate: string;
+  labelUrl: string;
+  trackUrl: string;
+  shiprocketOrderStatus: string;
+  generateAwbStatus: string;
+  requestPickupStatus: string;
+  generateLabelStatus: string;
+  trackShipmentStatus: string;
+  estimateStatus: string;
 };
 
-const normalizeShipmentStatus = (status: unknown) =>
-  status == null ? undefined : SHIPROCKET_STATUS_MAP[String(status)] ?? String(status);
+// Cartons — per cartons admin API (GET /api/cartons)
 
-const emptyForm: ShippingForm = {
-  warehouseId: "",
-  shiprocketOrderId: "",
-  shiprocketShipmentId: "",
-  awbCode: "",
-  courierName: "",
-  courierCompanyId: "",
-  shipmentStatus: "CREATED",
-  shipmentType: "FORWARD",
-  trackingNumber: "",
+interface Carton {
+  id: number;
+  name: string;
+  length: number;
+  breadth: number;
+  height: number;
+  maxWeight: number;
+  emptyWeight: number;
+  status: string;
+}
+
+const STEP_COLUMNS: { key: keyof ShippingDetails; label: string }[] = [
+  { key: "shiprocketOrderStatus", label: "Create Order" },
+  { key: "generateAwbStatus", label: "Generate AWB" },
+  { key: "requestPickupStatus", label: "Request Pickup" },
+  { key: "generateLabelStatus", label: "Generate Label" },
+  { key: "trackShipmentStatus", label: "Track Shipment" },
+  { key: "estimateStatus", label: "Estimate" },
+];
+
+const ORDER_STATUS_OPTIONS = [
+  "Confirmed",
+  "Payment Failed",
+  "Delivered",
+  "Cancelled",
+  "Returned",
+  "Out for Delivery",
+  "Ready to Ship",
+  "Pickup scheduled",
+];
+
+function formatDateTime(d: string | null | undefined) {
+  if (!d) return "—";
+  const date = new Date(d);
+  if (isNaN(date.getTime())) return String(d);
+  return date.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" });
+}
+
+// Collapsed to a strict binary: SUCCESS stays SUCCESS, everything else
+// (FAILED, SKIPPED, or null/not-yet-run) is displayed and colored as FAILED.
+function stepBadgeClass(status: string | null) {
+  if (status === "SUCCESS") return "bg-green-100 text-green-700";
+  return "bg-red-100 text-red-700";
+}
+
+function stepDisplayLabel(status: string | null) {
+  return status === "SUCCESS" ? "SUCCESS" : "FAILED";
+}
+
+function getOrderStatusBadge(status: string) {
+  const s = (status || "").toLowerCase();
+  if (s.includes("ready to ship")) return "bg-cyan-100 text-cyan-700";
+  if (s.includes("confirm")) return "bg-blue-100 text-blue-700";
+  return "bg-gray-100 text-gray-600";
+}
+
+function getOrderStatusOptions(currentStatus: string) {
+  return currentStatus && !ORDER_STATUS_OPTIONS.includes(currentStatus)
+    ? [currentStatus, ...ORDER_STATUS_OPTIONS]
+    : ORDER_STATUS_OPTIONS;
+}
+
+function compactPayload(payload: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(payload).filter(([, value]) => value !== undefined && value !== null && value !== "")
+  );
+}
+
+function toDateInputValue(value: string | null | undefined) {
+  if (!value) return "";
+  return value.split(/[T ]/)[0];
+}
+
+function toShiprocketStatusValue(value: string | null | undefined) {
+  const status = (value || "").toUpperCase();
+  if (status === "SUCCESS") return "SUCCESS";
+  if (status === "FAILED" || status === "FAILURE") return "FAILED";
+  if (status === "SKIPPED") return "SKIPPED";
+  return "";
+}
+
+const EMPTY_EDITABLE_SHIPMENT_FIELDS: EditableShipmentFields = {
+  awb: "",
+  shippingPrice: "",
   length: "",
   breadth: "",
   height: "",
   weight: "",
-  shippingPrice: "",
-  labelUrl: "",
-  trackUrl: "",
+  shipOrderId: "",
+  shipShipmentId: "",
+  pickupId: "",
+  pickupToken: "",
+  pickupScheduledDate: "",
   estimatedDeliveryDate: "",
   expectedDeliveryDate: "",
-  historyStatus: "",
-  historyLocation: "",
-  historyRemarks: "",
-  notes: "",
+  shippedDate: "",
+  deliveredDate: "",
+  labelUrl: "",
+  trackUrl: "",
+  shiprocketOrderStatus: "",
+  generateAwbStatus: "",
+  requestPickupStatus: "",
+  generateLabelStatus: "",
+  trackShipmentStatus: "",
+  estimateStatus: "",
 };
 
-// Helpers
+function editableShipmentFieldsFromRecord(record: OrderShippingRecord | null | undefined): EditableShipmentFields {
+  return {
+    awb: record?.awb || "",
+    shippingPrice: record?.shippingPrice != null ? String(record.shippingPrice) : "",
+    length: record?.length != null ? String(record.length) : "",
+    breadth: record?.breadth != null ? String(record.breadth) : "",
+    height: record?.height != null ? String(record.height) : "",
+    weight: record?.weight != null ? String(record.weight) : "",
+    shipOrderId: record?.shipOrderId != null ? String(record.shipOrderId) : "",
+    shipShipmentId: record?.shipShipmentId != null ? String(record.shipShipmentId) : "",
+    pickupId: record?.pickupId != null ? String(record.pickupId) : "",
+    pickupToken: record?.pickupToken || "",
+    pickupScheduledDate: toDateInputValue(record?.pickupScheduledDate),
+    estimatedDeliveryDate: toDateInputValue(record?.estimatedDeliveryDate),
+    expectedDeliveryDate: toDateInputValue(record?.expectedDeliveryDate),
+    shippedDate: toDateInputValue(record?.shippedDate),
+    deliveredDate: toDateInputValue(record?.deliveredDate),
+    labelUrl: record?.labelUrl || "",
+    trackUrl: record?.trackUrl || "",
+    shiprocketOrderStatus: toShiprocketStatusValue(record?.shiprocketOrderStatus),
+    generateAwbStatus: toShiprocketStatusValue(record?.generateAwbStatus),
+    requestPickupStatus: toShiprocketStatusValue(record?.requestPickupStatus),
+    generateLabelStatus: toShiprocketStatusValue(record?.generateLabelStatus),
+    trackShipmentStatus: toShiprocketStatusValue(record?.trackShipmentStatus),
+    estimateStatus: toShiprocketStatusValue(record?.estimateStatus),
+  };
+}
 
-const statusBadgeClass = (status: string) => {
-  switch (status?.toUpperCase()) {
-    case "DELIVERED":              return "bg-green-100 text-green-800";
-    case "IN_TRANSIT":             return "bg-blue-100 text-blue-800";
-    case "OUT_FOR_DELIVERY":       return "bg-indigo-100 text-indigo-800";
-    case "PICKUP_SCHEDULED":       return "bg-purple-100 text-purple-800";
-    case "RECEIVED":               return "bg-teal-100 text-teal-800";
-    case "RETURN_PICKUP_INITIATED": return "bg-orange-100 text-orange-800";
-    case "RETURN_REQUESTED":       return "bg-yellow-100 text-yellow-800";
-    case "FAILED":
-    case "CANCELLED":              return "bg-red-100 text-red-800";
-    case "CREATED":
-    default:                       return "bg-gray-100 text-gray-700";
-  }
-};
-
-const recordToForm = (r: ShippingRecord): ShippingForm => ({
-  warehouseId:           r.warehouseId != null ? String(r.warehouseId) : "",
-  shiprocketOrderId:     r.shiprocketOrderId != null ? String(r.shiprocketOrderId) : "",
-  shiprocketShipmentId:  r.shiprocketShipmentId != null ? String(r.shiprocketShipmentId) : "",
-  awbCode:               r.awbCode ?? "",
-  courierName:           r.courierName ?? "",
-  courierCompanyId:      r.courierCompanyId != null ? String(r.courierCompanyId) : "",
-  shipmentStatus:        normalizeShipmentStatus(r.shipmentStatus) ?? "CREATED",
-  shipmentType:          r.shipmentType ?? "FORWARD",
-  trackingNumber:        r.trackingNumber ?? "",
-  length:                r.length != null ? String(r.length) : "",
-  breadth:               r.breadth != null ? String(r.breadth) : "",
-  height:                r.height != null ? String(r.height) : "",
-  weight:                r.weight != null ? String(r.weight) : "",
-  shippingPrice:         r.shippingPrice != null ? String(r.shippingPrice) : "",
-  labelUrl:              r.labelUrl ?? "",
-  trackUrl:              r.trackUrl ?? "",
-  estimatedDeliveryDate: r.estimatedDeliveryDate ? r.estimatedDeliveryDate.slice(0, 10) : "",
-  expectedDeliveryDate:  r.expectedDeliveryDate ? r.expectedDeliveryDate.slice(0, 10) : "",
-  historyStatus:         "",
-  historyLocation:       "",
-  historyRemarks:        "",
-  notes:                 "",
-});
-
-/** Builds the request payload, omitting blank string fields. */
-const buildPayload = (form: ShippingForm) => {
-  const payload: Record<string, unknown> = {};
-  const num = (v: string) => (v.trim() !== "" ? parseFloat(v) : undefined);
-  const int = (v: string) => (v.trim() !== "" ? parseInt(v, 10) : undefined);
-  const str = (v: string) => (v.trim() !== "" ? v.trim() : undefined);
-
-  const set = (key: string, val: unknown) => { if (val !== undefined) payload[key] = val; };
-
-  set("warehouseId",           int(form.warehouseId));
-  set("shiprocketOrderId",     int(form.shiprocketOrderId));
-  set("shiprocketShipmentId",  int(form.shiprocketShipmentId));
-  set("awbCode",               str(form.awbCode));
-  set("courierName",           str(form.courierName));
-  set("courierCompanyId",      int(form.courierCompanyId));
-  set("shipmentStatus",        normalizeShipmentStatus(form.shipmentStatus));
-  set("shipmentType",          str(form.shipmentType));
-  set("trackingNumber",        str(form.trackingNumber));
-  set("length",                num(form.length));
-  set("breadth",               num(form.breadth));
-  set("height",                num(form.height));
-  set("weight",                num(form.weight));
-  set("shippingPrice",         num(form.shippingPrice));
-  set("labelUrl",              str(form.labelUrl));
-  set("trackUrl",              str(form.trackUrl));
-  set("estimatedDeliveryDate", str(form.estimatedDeliveryDate));
-  set("expectedDeliveryDate",  str(form.expectedDeliveryDate));
-  set("historyStatus",         str(form.historyStatus));
-  set("historyLocation",       str(form.historyLocation));
-  set("historyRemarks",        str(form.historyRemarks));
-  set("notes",                 str(form.notes));
-
-  return payload;
-};
-
-/** Merges the live Shiprocket payload (GET .../shiprocket-payload) into the form, keeping existing values for fields the payload doesn't populate. */
-const applyShiprocketPayload = (payload: any, prev: ShippingForm): ShippingForm => ({
-  ...prev,
-  shiprocketOrderId:     payload.shiprocketOrderId != null ? String(payload.shiprocketOrderId) : prev.shiprocketOrderId,
-  shiprocketShipmentId:  payload.shiprocketShipmentId != null ? String(payload.shiprocketShipmentId) : prev.shiprocketShipmentId,
-  awbCode:               payload.awbCode ?? prev.awbCode,
-  courierName:           payload.courierName ?? prev.courierName,
-  courierCompanyId:      payload.courierCompanyId != null ? String(payload.courierCompanyId) : prev.courierCompanyId,
-  shipmentStatus:        normalizeShipmentStatus(payload.shipmentStatus) ?? prev.shipmentStatus,
-  shipmentType:          payload.shipmentType ?? prev.shipmentType,
-  trackingNumber:        payload.trackingNumber ?? prev.trackingNumber,
-  length:                payload.length != null ? String(payload.length) : prev.length,
-  breadth:               payload.breadth != null ? String(payload.breadth) : prev.breadth,
-  height:                payload.height != null ? String(payload.height) : prev.height,
-  weight:                payload.weight != null ? String(payload.weight) : prev.weight,
-  shippingPrice:         payload.shippingPrice != null ? String(payload.shippingPrice) : prev.shippingPrice,
-  labelUrl:              payload.labelUrl ?? prev.labelUrl,
-  trackUrl:              payload.trackUrl ?? prev.trackUrl,
-  estimatedDeliveryDate: payload.estimatedDeliveryDate ? String(payload.estimatedDeliveryDate).slice(0, 10) : prev.estimatedDeliveryDate,
-  expectedDeliveryDate:  payload.expectedDeliveryDate ? String(payload.expectedDeliveryDate).slice(0, 10) : prev.expectedDeliveryDate,
-});
-
-// Sub-components
-
-const Field = ({
-  label, name, type = "text", value, onChange, placeholder, required, hint,
-}: {
-  label: string; name: string; type?: string; value: string;
-  onChange: React.ChangeEventHandler<HTMLInputElement>;
-  placeholder?: string; required?: boolean; hint?: string;
-}) => (
-  <div>
-    <label className="block text-xs font-medium text-gray-600 mb-1">
-      {label}{required && <span className="text-red-500 ml-0.5">*</span>}
-      {hint && <span className="text-gray-400 font-normal ml-1">({hint})</span>}
-    </label>
-    <input
-      type={type} name={name} value={value} onChange={onChange}
-      placeholder={placeholder}
-      className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-    />
-  </div>
-);
-
-const SelectField = ({
-  label, name, value, onChange, options, required,
-}: {
-  label: string; name: string; value: string;
-  onChange: React.ChangeEventHandler<HTMLSelectElement>;
-  options: string[]; required?: boolean;
-}) => (
-  <div>
-    <label className="block text-xs font-medium text-gray-600 mb-1">
-      {label}{required && <span className="text-red-500 ml-0.5">*</span>}
-    </label>
-    <select
-      name={name} value={value} onChange={onChange}
-      className="w-full border rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
-    >
-      {options.map(o => <option key={o} value={o}>{o}</option>)}
-    </select>
-  </div>
-);
-
-const SectionTitle = ({ children }: { children: React.ReactNode }) => (
-  <h3 className="text-xs font-semibold text-blue-700 uppercase tracking-wide border-b border-blue-100 pb-1 mb-3">
-    {children}
-  </h3>
-);
-
-// Page
+function numberOrUndefined(value: string) {
+  if (!value.trim()) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
 
 const AdminShippingManagementPage = () => {
-  const [searchInput, setSearchInput]     = useState("");
-  const [orderNumber, setOrderNumber]     = useState("");
-  const [mode, setMode]                   = useState<"idle" | "create" | "update">("idle");
-  const [fetchLoading, setFetchLoading]   = useState(false);
-  const [submitLoading, setSubmitLoading] = useState(false);
-  const [record, setRecord]               = useState<ShippingRecord | null>(null);
-  const [form, setForm]                   = useState<ShippingForm>(emptyForm);
-  const [submitError, setSubmitError]     = useState("");
-  const [warehouses, setWarehouses]       = useState<Warehouse[]>([]);
-  const [shiprocketFetchLoading, setShiprocketFetchLoading] = useState(false);
-  const [retriggerLoading, setRetriggerLoading] = useState(false);
-  const [retriggerResult, setRetriggerResult]   = useState<{ ok: boolean; data: any } | null>(null);
+  const [orders, setOrders] = useState<FailedStepOrder[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [retriggeringOrder, setRetriggeringOrder] = useState<string | null>(null);
 
-  // Pending orders list state
-  const [pendingOrders, setPendingOrders]         = useState<PendingOrder[]>([]);
-  const [pendingTotal, setPendingTotal]           = useState(0);
-  const [pendingLoading, setPendingLoading]       = useState(false);
-  const [pendingError, setPendingError]           = useState<string | null>(null);
-  const [listOrderNumber, setListOrderNumber]     = useState("");
-  const [listDateFrom, setListDateFrom]           = useState("");
-  const [listDateTo, setListDateTo]               = useState("");
-  const [listStatuses, setListStatuses]           = useState<string[]>([]);
-  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
-  const statusDropdownRef = useRef<HTMLDivElement>(null);
-  const [listPage, setListPage]                   = useState(0);
-  const LIST_PAGE_SIZE = 15;
-  const [noShipmentFilter, setNoShipmentFilter]   = useState(false);
-  const [modalOpen, setModalOpen]                 = useState(false);
+  // Retrigger modal — courier services lookup
+  const [retriggerModalOrder, setRetriggerModalOrder] = useState<FailedStepOrder | null>(null);
+  const [svcLoading, setSvcLoading] = useState(false);
+  const [svcError, setSvcError] = useState<string | null>(null);
+  const [courierServices, setCourierServices] = useState<CourierService[]>([]);
+  const [currentlyUsedCourierId, setCurrentlyUsedCourierId] = useState<number | null>(null);
+  const [selectedCourierId, setSelectedCourierId] = useState("");
 
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (statusDropdownRef.current && !statusDropdownRef.current.contains(e.target as Node))
-        setStatusDropdownOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  // Existing cartons — for the modal's carton selection dropdown
+  const [cartons, setCartons] = useState<Carton[]>([]);
+  const [cartonId, setCartonId] = useState("");
+  const [shipmentType, setShipmentType] = useState("");
+  const [orderStatus, setOrderStatus] = useState("");
 
-  const fetchPendingOrders = async (overrides?: { orderNumber?: string; from?: string; to?: string }) => {
-    setPendingLoading(true);
-    setPendingError(null);
-    try {
-      const params = new URLSearchParams();
-      const on   = overrides?.orderNumber ?? listOrderNumber;
-      const from = overrides?.from ?? listDateFrom;
-      const to   = overrides?.to  ?? listDateTo;
-      if (on)   params.append("orderNumber", on);
-      if (from) params.append("orderCreatedFrom", from);
-      if (to)   params.append("orderCreatedTo", to);
-      const qs = params.toString();
-      const res  = await apiClient.get(`/api/order-shipment-details${qs ? `?${qs}` : ""}`);
-      const data: OrderListResponse = await res.json();
-      const all = data?.orders || [];
-      setPendingOrders(all);
-      setPendingTotal(all.length);
-    } catch {
-      setPendingError("Failed to fetch orders. Please try again.");
-    } finally {
-      setPendingLoading(false);
-    }
-  };
+  // New-carton fields — used as requestCreateCartonDTO when no existing carton is selected
+  const [newCarton, setNewCarton] = useState({
+    name: "",
+    length: "",
+    breadth: "",
+    height: "",
+    maxWeight: "",
+    emptyWeight: "",
+    who: "admin",
+  });
+  const [creatingShipment, setCreatingShipment] = useState(false);
+  const [createShipmentError, setCreateShipmentError] = useState<string | null>(null);
+  const [showShippingDetails, setShowShippingDetails] = useState(false);
+  const [shippingModalMode, setShippingModalMode] = useState<ShippingModalMode>("process");
+  const [orderShippingRecords, setOrderShippingRecords] = useState<Record<number, OrderShippingRecord[]>>({});
+  const [orderShippingRecordsLoading, setOrderShippingRecordsLoading] = useState(false);
+  const [orderShippingRecordsError, setOrderShippingRecordsError] = useState<string | null>(null);
+  const [expandedOrderId, setExpandedOrderId] = useState<number | null>(null);
+  const [stepLogModal, setStepLogModal] = useState<{ shippingDetails: ShippingDetails; stepKey: string; stepLabel: string; logs: StepLog[] } | null>(null);
+  const [shipmentLogsModal, setShipmentLogsModal] = useState<{ shippingDetails: ShippingDetails; logs: ShipmentLog[] } | null>(null);
+  const [createUpdateModalOrder, setCreateUpdateModalOrder] = useState<FailedStepOrder | null>(null);
+  const [editableShipmentFields, setEditableShipmentFields] = useState<EditableShipmentFields>(EMPTY_EDITABLE_SHIPMENT_FIELDS);
 
   useEffect(() => {
-    const t = setTimeout(() => fetchPendingOrders(), 0);
-    return () => clearTimeout(t);
-  }, []);
-
-  const handleListSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setListPage(0);
-    fetchPendingOrders();
-  };
-
-  const handleListReset = () => {
-    setListStatuses([]);
-    setListOrderNumber("");
-    setListDateFrom("");
-    setListDateTo("");
-    setNoShipmentFilter(false);
-    setListPage(0);
-    fetchPendingOrders({ orderNumber: "", from: "", to: "" });
-  };
-
-  const toggleStatus = (s: string) =>
-    setListStatuses(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
-
-  const noAwbFilter = (orders: PendingOrder[]) =>
-    orders.filter(o => o.shipments.length === 0 || o.shipments.every(s => !s.awb && !s.labelUrl));
-
-  const filteredPending = (() => {
-    let orders = listStatuses.length === 0
-      ? pendingOrders
-      : pendingOrders.filter(o => listStatuses.includes(o.orderStatus));
-    if (noShipmentFilter && !listOrderNumber.trim()) orders = noAwbFilter(orders);
-    return orders;
-  })();
-  const totalListPages = Math.ceil(filteredPending.length / LIST_PAGE_SIZE);
-  const displayedPending = filteredPending.slice(listPage * LIST_PAGE_SIZE, (listPage + 1) * LIST_PAGE_SIZE);
-
-  const loadOrderIntoForm = (on: string) => {
-    setModalOpen(true);
-    handleFetchByOrderNumber(on);
-  };
-
-  const closeModal = () => {
-    setModalOpen(false);
-    setMode("idle");
-    setRecord(null);
-    setOrderNumber("");
-    setSearchInput("");
-    setSubmitError("");
-  };
-
-  useEffect(() => {
-    apiClient.get("/api/Get-All-Warehouses")
+    apiClient.get("/api/cartons?status=A")
       .then(r => r.json())
-      .then(data => setWarehouses(Array.isArray(data) ? data : []))
+      .then(data => setCartons(data?.cartons || []))
       .catch(() => {});
   }, []);
 
-  // Fetch by order number (shared by form search + list row click)
+  // An INITIALIZED shipment record means Shiprocket processing never really started — treat it as no shipment yet
+  const hasShipment = (o: FailedStepOrder) => !!o.shippingDetails && o.shippingDetails.shipmentStatus !== "INITIALIZED";
 
-  const handleFetchByOrderNumber = async (on: string) => {
-    if (!on.trim()) return;
-    setFetchLoading(true);
-    setMode("idle");
-    setRecord(null);
-    setSubmitError("");
-    setSearchInput(on);
-
+  const fetchFailedStepOrders = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const res  = await apiClient.get(`/api/shipment/order/${encodeURIComponent(on.trim())}`);
-      const data = await res.json();
-
-      if (res.status === 404 || data.responseStatus === "FAILURE") {
-        setOrderNumber(on.trim());
-        setForm({ ...emptyForm });
-        setMode("create");
-        showToast("No shipping record found. Fill in the form to create one.");
-      } else if (!res.ok) {
-        throw new Error(data.responseMessage || `Request failed (${res.status})`);
-      } else {
-        setOrderNumber(on.trim());
-        setRecord(data as ShippingRecord);
-        setForm(recordToForm(data as ShippingRecord));
-        setMode("update");
-      }
-    } catch (err: any) {
-      showError(err.message || "Failed to fetch shipping details");
-    } finally {
-      setFetchLoading(false);
-    }
-  };
-
-  // Fetch (form search bar submit)
-
-  const handleFetch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await handleFetchByOrderNumber(searchInput);
-  };
-
-  // Fetch the live Shiprocket PUT payload and pre-fill the form with it
-
-  const handleFetchFromShiprocket = async () => {
-    if (!orderNumber) return;
-    setShiprocketFetchLoading(true);
-    try {
-      const res  = await apiClient.get(`/api/shipment/order/${encodeURIComponent(orderNumber)}/shiprocket-payload`);
-      const data = await res.json();
-
+      const res = await apiClient.get("/api/orders/failed-shiprocket-steps");
+      const data: FailedStepOrdersResponse = await res.json();
       if (!res.ok || data.responseStatus === "FAILURE") {
-        throw new Error(data.responseMessage || "Failed to fetch Shiprocket payload");
+        throw new Error(data.responseMessage || "Failed to fetch eligible orders");
       }
-
-      setForm(prev => applyShiprocketPayload(data, prev));
-      showToast(data.responseMessage || "Fetched live Shiprocket data");
+      setOrders(data.orders || []);
     } catch (err: any) {
-      showError(err.message || "Failed to fetch Shiprocket payload");
+      setError(err.message || "Failed to fetch eligible orders. Please try again.");
     } finally {
-      setShiprocketFetchLoading(false);
+      setLoading(false);
     }
   };
 
-  // Retrigger the Shiprocket shipping process for the order (e.g. after a failed order-creation attempt)
+  useEffect(() => {
+    fetchFailedStepOrders();
+  }, []);
 
-  const handleRetriggerShipping = async () => {
-    if (!orderNumber) return;
-    setRetriggerLoading(true);
+  const handleRetrigger = async (orderNumber: string) => {
+    setRetriggeringOrder(orderNumber);
     try {
-      const res  = await apiClient.post(`/api/order/${encodeURIComponent(orderNumber)}/retrigger-shipping`);
+      const res = await apiClient.post(`/api/order/${encodeURIComponent(orderNumber)}/retrigger-shipping`);
       const data = await res.json().catch(() => null);
-      setRetriggerResult({ ok: res.ok && data?.responseStatus !== "FAILURE", data });
+      if (!res.ok || data?.responseStatus === "FAILURE") {
+        throw new Error(data?.responseMessage || "Retrigger failed");
+      }
+      showToast(data?.responseMessage || "Shipping process retriggered");
+      fetchFailedStepOrders();
     } catch (err: any) {
-      setRetriggerResult({ ok: false, data: { responseStatus: "FAILURE", responseMessage: err.message || "Failed to retrigger shipping process" } });
+      showError(err.message || "Failed to retrigger shipping process");
     } finally {
-      setRetriggerLoading(false);
+      setRetriggeringOrder(null);
     }
   };
 
-  // Submit
+  const openRetriggerModal = (order: FailedStepOrder, mode: ShippingModalMode = "process") => {
+    setRetriggerModalOrder(order);
+    setShippingModalMode(mode);
+    setCourierServices([]);
+    setCurrentlyUsedCourierId(null);
+    setSelectedCourierId("");
+    setSvcError(null);
+    setCreateShipmentError(null);
+    setShowShippingDetails(false);
+    setOrderShippingRecordsError(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!orderNumber || mode === "idle") return;
-    setSubmitLoading(true);
-    setSubmitError("");
+    // Preselect carton and prefill dimensions if available in the API response
+    if (order.shippingDetails?.cartonId) {
+      setCartonId(String(order.shippingDetails.cartonId));
+      setNewCarton({ name: "", length: "", breadth: "", height: "", maxWeight: "", emptyWeight: "", who: "admin" });
+    } else {
+      setCartonId("");
+      // Prefill new carton fields with dimensions/weight from the API response if available
+      setNewCarton({
+        name: "",
+        length: order.shippingDetails?.length ? String(order.shippingDetails.length) : "",
+        breadth: order.shippingDetails?.breadth ? String(order.shippingDetails.breadth) : "",
+        height: order.shippingDetails?.height ? String(order.shippingDetails.height) : "",
+        maxWeight: order.shippingDetails?.weight ? String(order.shippingDetails.weight * 1000) : "", // Convert kg to g
+        emptyWeight: "",
+        who: "admin",
+      });
+    }
 
+    handleCheckCourierServices(order.orderDetails.orderId);
+    if (mode === "manual") handleFetchOrderShippingRecords(order.orderDetails.orderId);
+  };
+
+  const closeRetriggerModal = () => setRetriggerModalOrder(null);
+
+  const openCreateUpdateShipmentModal = (order: FailedStepOrder) => {
+    setCreateUpdateModalOrder(order);
+    setOrderShippingRecordsError(null);
+    setCreateShipmentError(null);
+    setCartonId("");
+    setShipmentType("");
+    setOrderStatus(order.orderDetails.orderStatus || "");
+    setSelectedCourierId("");
+    setCourierServices([]);
+    setCurrentlyUsedCourierId(null);
+    setSvcError(null);
+    setEditableShipmentFields(EMPTY_EDITABLE_SHIPMENT_FIELDS);
+    setOrderShippingRecords(prev => ({ ...prev, [order.orderDetails.orderId]: [] }));
+    handleFetchOrderShippingRecords(order.orderDetails.orderId, true);
+  };
+
+  const closeCreateUpdateShipmentModal = () => setCreateUpdateModalOrder(null);
+
+  const handleFetchOrderShippingRecords = async (orderId: number, refreshCourierServices = false) => {
+    setOrderShippingRecordsLoading(true);
+    setOrderShippingRecordsError(null);
     try {
-      const payload = buildPayload(form);
-      const endpoint = `/api/shipment/order/${encodeURIComponent(orderNumber)}`;
-      const res  = mode === "create"
-        ? await apiClient.post(endpoint, payload)
-        : await apiClient.put(endpoint, payload);
-      const data = await res.json();
-
-      if (!res.ok || data.responseStatus === "FAILURE") {
-        throw new Error(data.responseMessage || "Operation failed");
+      const res = await apiClient.get(`/api/order/${orderId}/shipping`);
+      const data: OrderShippingRecordsResponse | null = await res.json().catch(() => null);
+      if (res.status === 404) {
+        setOrderShippingRecords(prev => ({ ...prev, [orderId]: [] }));
+        setCartonId("");
+        setShipmentType("");
+        setEditableShipmentFields(EMPTY_EDITABLE_SHIPMENT_FIELDS);
+        if (refreshCourierServices) await handleCheckCourierServices(orderId);
+        return;
       }
-
-      showToast(data.responseMessage || (mode === "create" ? "Shipping record created" : "Shipping record updated"));
-
-      // Refresh the record after success
-      const refreshRes  = await apiClient.get(`/api/shipment/order/${encodeURIComponent(orderNumber)}`);
-      const refreshData = await refreshRes.json();
-      if (refreshRes.ok && refreshData.responseStatus !== "FAILURE") {
-        setRecord(refreshData as ShippingRecord);
-        setForm(recordToForm(refreshData as ShippingRecord));
-        setMode("update");
+      if (!res.ok || data?.responseStatus === "FAILURE") {
+        throw new Error(data?.responseMessage || "Failed to fetch order shipping records");
       }
+      const records = data?.data || [];
+      setOrderShippingRecords(prev => ({ ...prev, [orderId]: records }));
+      const firstRecord = records[0];
+      setCartonId(firstRecord?.cartonId ? String(firstRecord.cartonId) : "");
+      setShipmentType(firstRecord?.type || "");
+      setEditableShipmentFields(editableShipmentFieldsFromRecord(firstRecord));
+      const preferredCourierId = firstRecord?.courierCompanyId ? String(firstRecord.courierCompanyId) : "";
+      setSelectedCourierId(preferredCourierId);
+      if (refreshCourierServices) await handleCheckCourierServices(orderId, preferredCourierId);
     } catch (err: any) {
-      setSubmitError(err.message || "Operation failed");
+      setOrderShippingRecordsError(err.message || "Failed to fetch order shipping records");
     } finally {
-      setSubmitLoading(false);
+      setOrderShippingRecordsLoading(false);
     }
   };
 
-  // Field change
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleCheckCourierServices = async (orderId: number, preferredCourierId = "") => {
+    setSvcLoading(true);
+    setSvcError(null);
+    setCourierServices([]);
+    setSelectedCourierId("");
+    try {
+      const res = await apiClient.get(`/api/shipping/available-courier-services/${orderId}`);
+      const data: CourierServicesResponse = await res.json();
+      if (!res.ok || data.responseStatus === "FAILURE") {
+        throw new Error(data.responseMessage || "Failed to fetch courier services");
+      }
+      setCourierServices(data.courierServices || []);
+      setCurrentlyUsedCourierId(data.currentlyUsedCourierId ?? null);
+      setSelectedCourierId(preferredCourierId || (data.currentlyUsedCourierId != null ? String(data.currentlyUsedCourierId) : ""));
+    } catch (err: any) {
+      setSvcError(err.message || "Failed to fetch courier services");
+    } finally {
+      setSvcLoading(false);
+    }
   };
 
-  // Render
+  const handleConfirmRetrigger = async () => {
+    if (!retriggerModalOrder) return;
+    const orderNumber = retriggerModalOrder.orderDetails.orderNumber;
+    await handleRetrigger(orderNumber);
+    closeRetriggerModal();
+  };
+
+  const handleNewCartonFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewCarton(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditableShipmentFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditableShipmentFields(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCreateShipment = async () => {
+    if (!retriggerModalOrder) return;
+    setCreateShipmentError(null);
+
+    const payload: Record<string, unknown> = { orderId: retriggerModalOrder.orderDetails.orderId };
+    if (cartonId) {
+      payload.cartonNo = cartonId;
+    } else {
+      const { name, length, breadth, height, maxWeight, emptyWeight, who } = newCarton;
+      if (!name.trim() || !length.trim() || !breadth.trim() || !height.trim() || !maxWeight.trim() || !emptyWeight.trim()) {
+        setCreateShipmentError("Select an existing carton, or fill in all new carton fields (name, length, breadth, height, max weight, empty weight)");
+        return;
+      }
+      payload.requestCreateCartonDTO = {
+        name: name.trim(),
+        length: parseFloat(length),
+        breadth: parseFloat(breadth),
+        height: parseFloat(height),
+        maxWeight: parseFloat(maxWeight),
+        emptyWeight: parseFloat(emptyWeight),
+        who: who.trim() || "admin",
+      };
+    }
+    if (selectedCourierId) payload.bestCourierId = parseInt(selectedCourierId, 10);
+
+    setCreatingShipment(true);
+    try {
+      const res = await apiClient.post("/api/shipment/create", payload);
+      const data = await res.json().catch(() => null);
+      if (!res.ok || data?.responseStatus === "FAILURE") {
+        throw new Error(data?.responseMessage || "Failed to create shipment");
+      }
+      showToast(data?.responseMessage || "Shipment created and Shiprocket processing triggered");
+      closeRetriggerModal();
+      fetchFailedStepOrders();
+    } catch (err: any) {
+      setCreateShipmentError(err.message || "Failed to create shipment");
+    } finally {
+      setCreatingShipment(false);
+    }
+  };
+
+  const handleCreateOrUpdateShipment = async () => {
+    if (!createUpdateModalOrder) return;
+    setCreateShipmentError(null);
+
+    if (!cartonId) {
+      setCreateShipmentError("Select an existing carton before creating or updating the shipment record");
+      return;
+    }
+
+    const orderId = createUpdateModalOrder.orderDetails.orderId;
+    const existingRecord = orderShippingRecords[orderId]?.[0];
+    const shippingDetails = createUpdateModalOrder.shippingDetails;
+    const selectedCourier = courierServices.find(c => String(c.courierId) === String(selectedCourierId));
+
+    const payload = compactPayload({
+      cartonId: parseInt(cartonId, 10),
+      trackingNumber: existingRecord?.trackingNumber ?? shippingDetails?.trackingNumber,
+      courierName: selectedCourier?.courierName ?? existingRecord?.courierName ?? shippingDetails?.courierName,
+      type: shipmentType || existingRecord?.type || shippingDetails?.shipmentType || "FORWARD",
+      orderStatus,
+      shipmentStatus: existingRecord?.shipmentStatus ?? shippingDetails?.shipmentStatus ?? "CREATED",
+      shippedDate: editableShipmentFields.shippedDate,
+      deliveredDate: editableShipmentFields.deliveredDate,
+      length: numberOrUndefined(editableShipmentFields.length),
+      breadth: numberOrUndefined(editableShipmentFields.breadth),
+      height: numberOrUndefined(editableShipmentFields.height),
+      weight: numberOrUndefined(editableShipmentFields.weight),
+      awb: editableShipmentFields.awb,
+      labelUrl: editableShipmentFields.labelUrl,
+      shipOrderId: numberOrUndefined(editableShipmentFields.shipOrderId),
+      shipShipmentId: numberOrUndefined(editableShipmentFields.shipShipmentId),
+      pickupId: numberOrUndefined(editableShipmentFields.pickupId),
+      pickupScheduledDate: editableShipmentFields.pickupScheduledDate,
+      pickupToken: editableShipmentFields.pickupToken,
+      courierCompanyId: selectedCourierId ? parseInt(selectedCourierId, 10) : existingRecord?.courierCompanyId ?? shippingDetails?.courierCompanyId,
+      estimatedDeliveryDate: editableShipmentFields.estimatedDeliveryDate,
+      expectedDeliveryDate: editableShipmentFields.expectedDeliveryDate,
+      trackUrl: editableShipmentFields.trackUrl,
+      shippingPrice: numberOrUndefined(editableShipmentFields.shippingPrice) ?? selectedCourier?.price,
+      shiprocketOrderStatus: editableShipmentFields.shiprocketOrderStatus,
+      generateAwbStatus: editableShipmentFields.generateAwbStatus,
+      requestPickupStatus: editableShipmentFields.requestPickupStatus,
+      generateLabelStatus: editableShipmentFields.generateLabelStatus,
+      trackShipmentStatus: editableShipmentFields.trackShipmentStatus,
+      estimateStatus: editableShipmentFields.estimateStatus,
+      warehouseId: existingRecord?.warehouseId,
+    });
+
+    setCreatingShipment(true);
+    try {
+      const res = await apiClient.post(`/api/order/${orderId}/shipping`, payload);
+      const data = await res.json().catch(() => null);
+      if (!res.ok || data?.responseStatus === "FAILURE") {
+        throw new Error(data?.responseMessage || "Failed to create or update shipment");
+      }
+      showToast(data?.responseMessage || "Shipment record created or updated successfully");
+      closeCreateUpdateShipmentModal();
+      fetchFailedStepOrders();
+    } catch (err: any) {
+      setCreateShipmentError(err.message || "Failed to create or update shipment");
+    } finally {
+      setCreatingShipment(false);
+    }
+  };
+
+  const createUpdateShippingRecord = createUpdateModalOrder
+    ? orderShippingRecords[createUpdateModalOrder.orderDetails.orderId]?.[0]
+    : null;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <DashboardSidebar />
 
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
-
-        {/* SECTION 1: Pending Shipping Orders list */}
-        <div>
-          <div className="mb-4">
-            <h1 className="text-2xl font-bold text-gray-800">Shipping Management</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Orders below have no AWB number or label URL assigned yet.
-            </p>
-          </div>
-
-          {/* List search/filter bar */}
-          <form onSubmit={handleListSearch} className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
-            <div className="flex flex-wrap items-end gap-3">
-              {/* Status dropdown */}
-              <div ref={statusDropdownRef} className="relative w-56">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <button type="button" onClick={() => setStatusDropdownOpen(o => !o)}
-                  className="w-full flex items-center justify-between border border-gray-300 rounded px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-300">
-                  <span className="truncate">
-                    {listStatuses.length === 0 ? "All Statuses" : listStatuses.length === 1 ? listStatuses[0] : `${listStatuses.length} selected`}
-                  </span>
-                  <svg className={`w-4 h-4 ml-1 shrink-0 transition-transform ${statusDropdownOpen ? "rotate-180" : ""}`} viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                  </svg>
-                </button>
-                {statusDropdownOpen && (
-                  <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg py-1">
-                    <label className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer text-sm">
-                      <input type="checkbox" className="rounded" checked={listStatuses.length === 0} onChange={() => setListStatuses([])} />
-                      All Statuses
-                    </label>
-                    <hr className="my-1" />
-                    {ORDER_STATUS_OPTIONS.map(s => (
-                      <label key={s} className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer text-sm">
-                        <input type="checkbox" className="rounded" checked={listStatuses.includes(s)} onChange={() => toggleStatus(s)} />
-                        {s}
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Order Number */}
-              <div className="w-64">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Order Number</label>
-                <input type="text" value={listOrderNumber} onChange={e => setListOrderNumber(e.target.value)}
-                  placeholder="e.g. ORD-260511..." className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
-              </div>
-
-              {/* Date From */}
-              <div className="w-44">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Created From</label>
-                <input type="date" value={listDateFrom} onChange={e => setListDateFrom(e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
-              </div>
-
-              {/* Date To */}
-              <div className="w-44">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Created To</label>
-                <input type="date" value={listDateTo} onChange={e => setListDateTo(e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
-              </div>
-
-              {/* No Shipment filter */}
-              <div className="flex items-center gap-2 pt-5">
-                <label className="flex items-center gap-1.5 cursor-pointer select-none text-sm text-gray-700 whitespace-nowrap">
-                  <input
-                    type="checkbox"
-                    className="rounded"
-                    checked={noShipmentFilter}
-                    onChange={e => setNoShipmentFilter(e.target.checked)}
-                  />
-                  No Shipment
-                </label>
-              </div>
-
-              <div className="flex gap-2 pt-5">
-                <button type="submit" disabled={pendingLoading}
-                  className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-60">
-                  {pendingLoading ? "Searching…" : "Search"}
-                </button>
-                <button type="button" onClick={handleListReset} disabled={pendingLoading}
-                  className="px-4 py-1.5 border border-gray-300 text-gray-700 text-sm rounded hover:bg-gray-50 disabled:opacity-60">
-                  Reset
-                </button>
-              </div>
-            </div>
-          </form>
-
-          <p className="text-sm text-gray-500 mb-3">
-            Total orders: <span className="font-semibold">{pendingTotal}</span>
-            {(listStatuses.length > 0 || noShipmentFilter) && (
-              <span className="ml-2">— Showing <span className="font-semibold">{filteredPending.length}</span> filtered</span>
-            )}
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">Shipping Management</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Confirmed / Ready-to-Ship orders with a failed Shiprocket pipeline step, or no shipment created yet.
           </p>
-
-          {pendingError && (
-            <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">{pendingError}</div>
-          )}
-
-          {pendingLoading ? (
-            <div className="flex justify-center py-10">
-              <svg className="animate-spin h-7 w-7 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-              </svg>
-            </div>
-          ) : (
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
-              <table className="w-full text-sm">
-                <thead className="bg-gray-100 text-gray-600">
-                  <tr>
-                    <th className="text-left px-4 py-2.5 font-medium">Order Number</th>
-                    <th className="text-left px-4 py-2.5 font-medium">Customer</th>
-                    <th className="text-left px-4 py-2.5 font-medium">Order Status</th>
-                    <th className="text-left px-4 py-2.5 font-medium">Payment</th>
-                    <th className="text-right px-4 py-2.5 font-medium">Total</th>
-                    <th className="text-left px-4 py-2.5 font-medium">Created At</th>
-                    <th className="text-left px-4 py-2.5 font-medium">Shipments</th>
-                    <th className="text-center px-4 py-2.5 font-medium">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayedPending.length === 0 ? (
-                    <tr>
-                      <td colSpan={8} className="text-center py-10 text-gray-400">No orders found.</td>
-                    </tr>
-                  ) : (
-                    displayedPending.map(order => (
-                      <tr key={order.orderId} className="border-t border-gray-100 hover:bg-blue-50/30 transition-colors">
-                        <td className="px-4 py-2.5 font-mono text-xs font-semibold text-gray-800">{order.orderNumber}</td>
-                        <td className="px-4 py-2.5">
-                          <div className="font-medium text-gray-800">{order.customerName}</div>
-                          <div className="text-xs text-gray-500">{order.customerEmail}</div>
-                          <div className="text-xs text-gray-400">{order.customerPhone}</div>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${getStatusBadge(order.orderStatus)}`}>
-                            {order.orderStatus}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${order.paymentStatus === "PAID" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
-                            {order.paymentStatus}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2.5 text-right font-semibold whitespace-nowrap">
-                          {order.currency || "INR"} {order.totalAmount?.toLocaleString("en-IN")}
-                        </td>
-                        <td className="px-4 py-2.5 whitespace-nowrap text-gray-600">{formatDate(order.orderCreatedAt)}</td>
-                        <td className="px-4 py-2.5 text-gray-500 text-xs">
-                          {order.shipments.length === 0 ? "No shipments" : `${order.shipments.length} shipment${order.shipments.length !== 1 ? "s" : ""} (no AWB)`}
-                        </td>
-                        <td className="px-4 py-2.5 text-center">
-                          <button type="button" onClick={() => loadOrderIntoForm(order.orderNumber)}
-                            className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors">
-                            {order.shipments.length > 0 ? "Edit Shipping" : "Add Shipping"}
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Pagination */}
-          {!pendingLoading && totalListPages > 1 && (
-            <div className="flex items-center justify-between mt-4">
-              <p className="text-sm text-gray-500">
-                Page <span className="font-semibold">{listPage + 1}</span> of <span className="font-semibold">{totalListPages}</span>
-                {" "}- records {listPage * LIST_PAGE_SIZE + 1}-{Math.min((listPage + 1) * LIST_PAGE_SIZE, filteredPending.length)} of {filteredPending.length}
-              </p>
-              <div className="flex items-center gap-1">
-                <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(0)} disabled={listPage === 0}>«</button>
-                <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(p => Math.max(0, p - 1))} disabled={listPage === 0}>‹</button>
-                {Array.from({ length: totalListPages }, (_, i) => i).filter(i => Math.abs(i - listPage) <= 2).map(i => (
-                  <button key={i} onClick={() => setListPage(i)}
-                    className={`px-2.5 py-1 rounded border text-sm ${i === listPage ? "bg-blue-500 text-white border-blue-500" : "hover:bg-gray-50"}`}>
-                    {i + 1}
-                  </button>
-                ))}
-                <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(p => Math.min(totalListPages - 1, p + 1))} disabled={listPage === totalListPages - 1}>›</button>
-                <button className="px-2 py-1 rounded border text-sm hover:bg-gray-50 disabled:opacity-40" onClick={() => setListPage(totalListPages - 1)} disabled={listPage === totalListPages - 1}>»</button>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* SECTION 2: Modal */}
-        {modalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={e => { if (e.target === e.currentTarget) closeModal(); }}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] flex flex-col">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-sm text-gray-500">
+            Total: <span className="font-semibold">{orders.length}</span>
+          </p>
+          <button
+            type="button"
+            onClick={fetchFailedStepOrders}
+            disabled={loading}
+            className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-60"
+          >
+            {loading ? "Refreshing…" : "Refresh"}
+          </button>
+        </div>
 
-              {/* Modal header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b bg-blue-500 rounded-t-2xl">
-                <div className="flex items-center gap-3">
-                  <h2 className="text-base font-bold text-white">Create / Update Shipping Record</h2>
-                  {mode !== "idle" && (
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded ${mode === "create" ? "bg-green-100 text-green-700" : "bg-white/20 text-white"}`}>
-                      {mode === "create" ? "CREATE" : "UPDATE"} — {orderNumber}
+        {error && (
+          <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded text-sm text-red-600">{error}</div>
+        )}
+
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <svg className="animate-spin h-7 w-7 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+            </svg>
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="text-center py-16 text-gray-400 text-sm bg-white rounded-lg border border-gray-200">
+            No orders currently eligible for the shipment process.
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {orders.map(o => (
+              <div key={o.orderDetails.orderId} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+                  <div>
+                    <p className="font-mono text-sm font-semibold text-gray-800">{o.orderDetails.orderNumber}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {o.orderDetails.customerName} &bull; {o.orderDetails.customerEmail} &bull; {o.orderDetails.customerMobile}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2 py-0.5 rounded text-xs font-semibold ${getOrderStatusBadge(o.orderDetails.orderStatus)}`}>
+                      {o.orderDetails.orderStatus}
                     </span>
-                  )}
+                    <span className={`px-2 py-0.5 rounded text-xs font-semibold ${o.orderDetails.paymentStatus === "PAID" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
+                      {o.orderDetails.paymentStatus}
+                    </span>
+                  </div>
                 </div>
-                <button onClick={closeModal} className="text-white/80 hover:text-white transition-colors">
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
 
-              {/* Scrollable body */}
-              <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2 text-sm mb-3">
+                  <div><p className="text-xs text-gray-400">Total Amount</p><p className="font-semibold">₹{o.orderDetails.totalAmount?.toLocaleString("en-IN")}</p></div>
+                  <div><p className="text-xs text-gray-400">Order Created</p><p>{formatDateTime(o.orderDetails.orderCreatedAt)}</p></div>
+                  <div><p className="text-xs text-gray-400">Shipment Status</p><p>{o.shippingDetails?.shipmentStatus || "—"}</p></div>
+                  <div><p className="text-xs text-gray-400">AWB / Courier</p><p>{o.shippingDetails?.awb || "—"} {o.shippingDetails?.courierName ? `(${o.shippingDetails.courierName})` : ""}</p></div>
+                </div>
 
-                {/* Loading state */}
-                {fetchLoading && (
-                  <div className="flex justify-center py-10">
-                    <svg className="animate-spin h-7 w-7 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
+                {!hasShipment(o) && (
+                  <div className="mb-3">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Failed Steps</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(o.shippingDetails?.shipmentStatus === "INITIALIZED" && !o.failedSteps.includes("no_shipment")
+                        ? ["no_shipment", ...o.failedSteps]
+                        : o.failedSteps
+                      ).map(step => (
+                        <span key={step} className="px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700">
+                          {step === "no_shipment" ? "No shipment created" : step}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
 
-        {/* Existing record summary card */}
-        {!fetchLoading && mode === "update" && record && (
-          <div className="bg-gray-50 border rounded-lg p-4">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <p className="text-xs text-gray-400 mb-0.5">Order</p>
-                <p className="font-semibold text-gray-800">{record.orderNumber}</p>
-                {record.warehouseName && (
-                  <p className="text-xs text-gray-500 mt-0.5">Warehouse: {record.warehouseName}</p>
+                {hasShipment(o) && (
+                  <div className="mb-3">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Pipeline Steps</p>
+                    <div className="flex flex-wrap gap-3">
+                      {STEP_COLUMNS.map(({ key, label }) => {
+                        const status = o.shippingDetails![key] as string | null;
+                        const logKey = `${key}log` as keyof ShippingDetails;
+                        const logs = (o.shippingDetails![logKey] as StepLog[] | undefined) || [];
+                        return (
+                          <button
+                            key={key}
+                            onClick={() => {
+                              if (logs.length > 0) {
+                                setStepLogModal({ shippingDetails: o.shippingDetails!, stepKey: key, stepLabel: label, logs });
+                              }
+                            }}
+                            disabled={logs.length === 0}
+                            className={`text-xs font-semibold underline transition-colors ${
+                              status === "SUCCESS" ? "text-green-600 hover:text-green-800" :
+                              status === "FAILURE" ? "text-red-600 hover:text-red-800" :
+                              "text-gray-600 hover:text-gray-800"
+                            } ${
+                              logs.length > 0 ? "cursor-pointer" : "cursor-not-allowed opacity-60"
+                            }`}
+                            title={logs.length > 0 ? `Click to view ${label} logs` : `No logs available for ${label}`}
+                          >
+                            {label}: {stepDisplayLabel(status)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
+
+                {hasShipment(o) && (
+                  <div className="mb-3">
+                    <div className="flex items-center gap-4 mb-2">
+                      <button
+                        onClick={() => setExpandedOrderId(expandedOrderId === o.orderDetails.orderId ? null : o.orderDetails.orderId)}
+                        className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                      >
+                        {expandedOrderId === o.orderDetails.orderId ? "Hide existing shipping details" : "View existing shipping details"}
+                      </button>
+                      {o.shippingDetails.shipmentlogs && o.shippingDetails.shipmentlogs.length > 0 && (
+                        <button
+                          onClick={() => setShipmentLogsModal({ shippingDetails: o.shippingDetails!, logs: o.shippingDetails.shipmentlogs! })}
+                          className="text-xs font-semibold text-green-600 hover:text-green-800 hover:underline transition-colors"
+                        >
+                          View Shipment Logs
+                        </button>
+                      )}
+                    </div>
+
+                    {expandedOrderId === o.orderDetails.orderId && (
+                      <div className="border border-blue-200 rounded-lg p-3 bg-blue-50 mb-3 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-3">
+                          <div><span className="text-xs text-gray-500">Shipment ID</span><p className="font-mono text-gray-800">{o.shippingDetails.shipmentId}</p></div>
+                          <div><span className="text-xs text-gray-500">Tracking Number</span><p className="font-mono text-gray-800">{o.shippingDetails.trackingNumber || "—"}</p></div>
+                          <div><span className="text-xs text-gray-500">Shipment Status</span><p className="font-semibold text-gray-800">{o.shippingDetails.shipmentStatus || "—"}</p></div>
+                          <div><span className="text-xs text-gray-500">Shipment Type</span><p className="font-semibold text-gray-800">{o.shippingDetails.shipmentType || "—"}</p></div>
+                          <div><span className="text-xs text-gray-500">AWB</span><p className="font-mono text-gray-800">{o.shippingDetails.awb || "—"}</p></div>
+                          <div><span className="text-xs text-gray-500">Courier Name</span><p className="text-gray-800">{o.shippingDetails.courierName || "—"}</p></div>
+                          <div><span className="text-xs text-gray-500">Shipping Price</span><p className="font-semibold text-gray-800">₹{o.shippingDetails.shippingPrice?.toFixed(2) || "—"}</p></div>
+                          <div><span className="text-xs text-gray-500">Carton ID</span><p className="font-mono text-gray-800">{o.shippingDetails.cartonId || "—"}</p></div>
+                          <div><span className="text-xs text-gray-500">Length (cm)</span><p className="font-mono text-gray-800">{o.shippingDetails.length || "—"}</p></div>
+                          <div><span className="text-xs text-gray-500">Breadth (cm)</span><p className="font-mono text-gray-800">{o.shippingDetails.breadth || "—"}</p></div>
+                          <div><span className="text-xs text-gray-500">Height (cm)</span><p className="font-mono text-gray-800">{o.shippingDetails.height || "—"}</p></div>
+                          <div><span className="text-xs text-gray-500">Weight (kg)</span><p className="font-mono text-gray-800">{o.shippingDetails.weight || "—"}</p></div>
+                          <div><span className="text-xs text-gray-500">Shiprocket Order ID</span><p className="font-mono text-gray-800">{o.shippingDetails.shipOrderId || "—"}</p></div>
+                          <div><span className="text-xs text-gray-500">Shiprocket Shipment ID</span><p className="font-mono text-gray-800">{o.shippingDetails.shipShipmentId || "—"}</p></div>
+                          <div><span className="text-xs text-gray-500">Estimated Delivery</span><p className="font-mono text-gray-800">{o.shippingDetails.estimatedDeliveryDate || "—"}</p></div>
+                          <div><span className="text-xs text-gray-500">Expected Delivery</span><p className="font-mono text-gray-800">{o.shippingDetails.expectedDeliveryDate || "—"}</p></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => openCreateUpdateShipmentModal(o)}
+                    disabled={retriggeringOrder === o.orderDetails.orderNumber}
+                    className="px-4 py-1.5 text-sm font-semibold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-60"
+                  >
+                    Create / Update Shipment
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openRetriggerModal(o)}
+                    disabled={retriggeringOrder === o.orderDetails.orderNumber}
+                    title={!hasShipment(o) ? "No shipment record exists yet for this order — the server will report if retrigger isn't possible" : undefined}
+                    className="px-4 py-1.5 text-sm font-semibold bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-60"
+                  >
+                    {retriggeringOrder === o.orderDetails.orderNumber ? "Processing…" : "Process Shipping"}
+                  </button>
+                </div>
               </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Shipping action modal — courier service lookup */}
+      {retriggerModalOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={e => { if (e.target === e.currentTarget) closeRetriggerModal(); }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b bg-blue-500 rounded-t-2xl">
               <div>
-                <span className={`px-2 py-1 rounded text-xs font-semibold ${statusBadgeClass(record.shipmentStatus)}`}>
-                  {record.shipmentStatus}
-                </span>
-                <p className="text-xs text-gray-400 mt-1 text-right">
-                  {record.shipmentType}
+                <h2 className="text-base font-bold text-white">
+                  {shippingModalMode === "manual" ? "Create / Update Shipment" : "Shipping Process"} &mdash; {retriggerModalOrder.orderDetails.orderNumber}
+                </h2>
+                <p className="text-xs text-white/80 mt-0.5">{retriggerModalOrder.orderDetails.customerName}</p>
+              </div>
+              <button onClick={closeRetriggerModal} className="text-white/80 hover:text-white transition-colors">✕</button>
+            </div>
+
+            <div className="overflow-y-auto px-6 py-4 space-y-4">
+              {shippingModalMode === "manual" && (
+                <div className="border border-emerald-200 rounded-lg p-3 bg-emerald-50 text-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-emerald-900">Order ID shipping record</p>
+                      <p className="text-xs text-emerald-700 mt-0.5">Fetched from /api/order/{retriggerModalOrder.orderDetails.orderId}/shipping</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleFetchOrderShippingRecords(retriggerModalOrder.orderDetails.orderId)}
+                      disabled={orderShippingRecordsLoading}
+                      className="text-xs font-semibold text-emerald-700 hover:text-emerald-900 disabled:opacity-60"
+                    >
+                      {orderShippingRecordsLoading ? "Loading…" : "Refresh"}
+                    </button>
+                  </div>
+                  {orderShippingRecordsError ? (
+                    <p className="mt-2 text-xs text-red-600">{orderShippingRecordsError}</p>
+                  ) : orderShippingRecordsLoading ? (
+                    <p className="mt-2 text-xs text-emerald-700">Loading existing shipping records…</p>
+                  ) : (orderShippingRecords[retriggerModalOrder.orderDetails.orderId]?.length || 0) > 0 ? (
+                    <p className="mt-2 text-xs text-emerald-700">
+                      Existing record found. The selected carton and courier are prefilled when available.
+                    </p>
+                  ) : (
+                    <p className="mt-2 text-xs text-emerald-700">No existing order-id shipping record found yet.</p>
+                  )}
+                </div>
+              )}
+
+              {showShippingDetails && retriggerModalOrder.shippingDetails && (
+                <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
+                  <h3 className="text-sm font-bold text-gray-800 mb-3">Current Shipping Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                    <div><span className="text-xs text-gray-500">Shipment ID</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.shipmentId}</p></div>
+                    <div><span className="text-xs text-gray-500">Tracking Number</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.trackingNumber || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Shipment Status</span><p className="font-semibold text-gray-800">{retriggerModalOrder.shippingDetails.shipmentStatus || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Shipment Type</span><p className="font-semibold text-gray-800">{retriggerModalOrder.shippingDetails.shipmentType || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">AWB</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.awb || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Courier Name</span><p className="text-gray-800">{retriggerModalOrder.shippingDetails.courierName || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Courier Company ID</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.courierCompanyId || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Shipping Price</span><p className="font-semibold text-gray-800">₹{retriggerModalOrder.shippingDetails.shippingPrice?.toFixed(2) || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Carton ID</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.cartonId || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Length (cm)</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.length || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Breadth (cm)</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.breadth || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Height (cm)</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.height || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Weight (kg)</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.weight || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Shiprocket Order ID</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.shipOrderId || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Shiprocket Shipment ID</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.shipShipmentId || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Pickup ID</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.pickupId || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Pickup Token</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.pickupToken || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Estimated Delivery Date</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.estimatedDeliveryDate || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Expected Delivery Date</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.expectedDeliveryDate || "—"}</p></div>
+                    <div className="md:col-span-2"><span className="text-xs text-gray-500">Shipment Created At</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.shipmentCreatedAt || "—"}</p></div>
+                    <div className="md:col-span-2"><span className="text-xs text-gray-500">Shipment Updated At</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.shipmentUpdatedAt || "—"}</p></div>
+                    <div className="md:col-span-2"><span className="text-xs text-gray-500">Label URL</span><p className="font-mono text-blue-600 break-all">{retriggerModalOrder.shippingDetails.labelUrl ? <a href={retriggerModalOrder.shippingDetails.labelUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">{retriggerModalOrder.shippingDetails.labelUrl}</a> : "—"}</p></div>
+                    <div className="md:col-span-2"><span className="text-xs text-gray-500">Track URL</span><p className="font-mono text-blue-600 break-all">{retriggerModalOrder.shippingDetails.trackUrl ? <a href={retriggerModalOrder.shippingDetails.trackUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">{retriggerModalOrder.shippingDetails.trackUrl}</a> : "—"}</p></div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-blue-200">
+                    <p className="text-xs font-semibold text-gray-600 mb-2">Pipeline Step Status</p>
+                    <div className="flex flex-wrap gap-3">
+                      {[
+                        { key: "shiprocketOrderStatus", label: "Create Order", logKey: "shiprocketOrderStatuslog" },
+                        { key: "generateAwbStatus", label: "Generate AWB", logKey: "generateAwbStatuslog" },
+                        { key: "requestPickupStatus", label: "Request Pickup", logKey: "requestPickupStatuslog" },
+                        { key: "generateLabelStatus", label: "Generate Label", logKey: "generateLabelStatuslog" },
+                        { key: "trackShipmentStatus", label: "Track Shipment", logKey: "trackShipmentStatuslog" },
+                        { key: "estimateStatus", label: "Estimate", logKey: "estimateStatuslog" }
+                      ].map(({ key, label, logKey }) => {
+                        const status = retriggerModalOrder.shippingDetails[key as keyof ShippingDetails] as string | null;
+                        const logs = (retriggerModalOrder.shippingDetails[logKey as keyof ShippingDetails] as StepLog[] | undefined) || [];
+                        return (
+                          <button
+                            key={key}
+                            onClick={() => {
+                              if (logs.length > 0) {
+                                setStepLogModal({ shippingDetails: retriggerModalOrder.shippingDetails, stepKey: key, stepLabel: label, logs });
+                              }
+                            }}
+                            disabled={logs.length === 0}
+                            className={`text-xs font-semibold underline transition-colors ${
+                              status === "SUCCESS" ? "text-green-600 hover:text-green-800" :
+                              status === "FAILURE" ? "text-red-600 hover:text-red-800" :
+                              "text-gray-600 hover:text-gray-800"
+                            } ${
+                              logs.length > 0 ? "cursor-pointer" : "cursor-not-allowed opacity-60"
+                            }`}
+                            title={logs.length > 0 ? `Click to view ${label} logs` : `No logs available for ${label}`}
+                          >
+                            {label}: {status || "—"}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {retriggerModalOrder.shippingDetails && (
+                <button
+                  onClick={() => setShowShippingDetails(!showShippingDetails)}
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                >
+                  {showShippingDetails ? "Hide existing shipping details" : "View existing shipping details"}
+                </button>
+              )}
+
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Carton</label>
+                <select value={cartonId} onChange={e => setCartonId(e.target.value)}
+                  className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-300">
+                  <option value="">Select an existing carton…</option>
+                  {cartons.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} ({c.length}×{c.breadth}×{c.height} cm, max {c.maxWeight}g)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {shippingModalMode === "manual" && !cartonId && (
+                <div className="px-3 py-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-700">
+                  The order-id shipping API requires an existing carton. Select one before using Create / Update Shipment.
+                </div>
+              )}
+
+              {!cartonId && shippingModalMode === "process" && (
+                <div className="border border-gray-200 rounded p-3">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Or create a new carton</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="col-span-2 md:col-span-3">
+                      <label className="block text-xs text-gray-500 mb-1">Name *</label>
+                      <input name="name" value={newCarton.name} onChange={handleNewCartonFieldChange}
+                        className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Length (cm) *</label>
+                      <input type="number" name="length" value={newCarton.length} onChange={handleNewCartonFieldChange}
+                        className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Breadth (cm) *</label>
+                      <input type="number" name="breadth" value={newCarton.breadth} onChange={handleNewCartonFieldChange}
+                        className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Height (cm) *</label>
+                      <input type="number" name="height" value={newCarton.height} onChange={handleNewCartonFieldChange}
+                        className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Max Weight (g) *</label>
+                      <input type="number" name="maxWeight" value={newCarton.maxWeight} onChange={handleNewCartonFieldChange}
+                        className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Empty Weight (g) *</label>
+                      <input type="number" name="emptyWeight" value={newCarton.emptyWeight} onChange={handleNewCartonFieldChange}
+                        className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Who</label>
+                      <input name="who" value={newCarton.who} onChange={handleNewCartonFieldChange}
+                        className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide">Available Courier Services</label>
+                <button type="button" onClick={() => handleCheckCourierServices(retriggerModalOrder.orderDetails.orderId)} disabled={svcLoading}
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-800 disabled:opacity-60">
+                  {svcLoading ? "Refreshing…" : "Refresh"}
+                </button>
+              </div>
+
+              {svcLoading ? (
+                <div className="flex items-center gap-2 text-sm text-gray-500 py-4">
+                  <svg className="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                  Loading eligible courier services for this order…
+                </div>
+              ) : svcError ? (
+                <div className="px-3 py-2 bg-red-50 border border-red-200 rounded text-xs text-red-600">{svcError}</div>
+              ) : courierServices.length === 0 ? (
+                <p className="text-xs text-gray-400">No courier services available for this order.</p>
+              ) : (
+                <div className="space-y-2">
+                  {courierServices.map(c => (
+                    <label key={c.courierId} className="flex items-center gap-3 border border-gray-200 rounded px-3 py-2 text-sm cursor-pointer hover:bg-blue-50/40 has-[:checked]:border-blue-400 has-[:checked]:bg-blue-50/60">
+                      <input
+                        type="radio"
+                        name="selectedCourier"
+                        value={c.courierId}
+                        checked={String(selectedCourierId) === String(c.courierId)}
+                        onChange={e => setSelectedCourierId(e.target.value)}
+                        className="shrink-0"
+                      />
+                      <span className="flex-1 font-medium text-gray-800">{c.courierName}</span>
+                      <span className="text-gray-600">₹{c.price?.toFixed(2)}</span>
+                      <span className="text-gray-400">{c.estimatedDeliveryDays} day(s)</span>
+                      {c.codAvailable && <span className="text-xs text-green-700 bg-green-100 px-1.5 py-0.5 rounded">COD</span>}
+                      {currentlyUsedCourierId === c.courierId && (
+                        <span className="text-xs text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded">Currently used</span>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {createShipmentError && (
+              <div className="mx-6 mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded text-xs text-red-600">{createShipmentError}</div>
+            )}
+
+            <div className="px-6 py-3 border-t bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+              <button onClick={closeRetriggerModal} disabled={retriggeringOrder === retriggerModalOrder.orderDetails.orderNumber || creatingShipment}
+                className="px-4 py-1.5 text-sm border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-60">
+                Cancel
+              </button>
+              <button
+                onClick={shippingModalMode === "manual" ? handleCreateOrUpdateShipment : handleCreateShipment}
+                disabled={creatingShipment || (shippingModalMode === "manual" && orderShippingRecordsLoading)}
+                className="px-4 py-1.5 text-sm border border-blue-300 text-blue-700 rounded-xl hover:bg-blue-50 transition-colors disabled:opacity-60">
+                {creatingShipment
+                  ? (shippingModalMode === "manual" ? "Saving…" : "Creating…")
+                  : (shippingModalMode === "manual" ? "Create / Update Shipment" : "Create Shipment")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Create / Update Shipment Details Modal */}
+      {createUpdateModalOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={e => { if (e.target === e.currentTarget) closeCreateUpdateShipmentModal(); }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b bg-blue-500 rounded-t-2xl">
+              <div>
+                <h2 className="text-base font-bold text-white">Create / Update Shipment — {createUpdateModalOrder.orderDetails.orderNumber}</h2>
+                <p className="text-xs text-white/80 mt-0.5">
+                  GET /api/order/{createUpdateModalOrder.orderDetails.orderId}/shipping
                 </p>
               </div>
+              <button onClick={closeCreateUpdateShipmentModal} className="text-white/80 hover:text-white transition-colors">✕</button>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1 mt-3 text-xs text-gray-600">
-              {record.awbCode      && <span><span className="font-medium">AWB:</span> {record.awbCode}</span>}
-              {record.courierName  && <span><span className="font-medium">Courier:</span> {record.courierName}</span>}
-              {record.trackingNumber && <span><span className="font-medium">Tracking:</span> {record.trackingNumber}</span>}
-              {record.shippingPrice != null && <span><span className="font-medium">Price:</span> ₹{record.shippingPrice}</span>}
-              {record.shippedDate  && <span><span className="font-medium">Shipped:</span> {record.shippedDate.slice(0, 10)}</span>}
-              {record.deliveredDate && <span><span className="font-medium">Delivered:</span> {record.deliveredDate.slice(0, 10)}</span>}
-            </div>
+            <div className="overflow-y-auto px-6 py-4 space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">Shipping Details</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {orderShippingRecordsLoading
+                      ? "Fetching shipping details…"
+                      : createUpdateShippingRecord
+                        ? "Record found"
+                        : "No record found"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleFetchOrderShippingRecords(createUpdateModalOrder.orderDetails.orderId, true)}
+                  disabled={orderShippingRecordsLoading}
+                  className="px-3 py-1.5 text-xs font-semibold border border-emerald-300 text-emerald-700 rounded-lg hover:bg-emerald-50 disabled:opacity-60"
+                >
+                  {orderShippingRecordsLoading ? "Refreshing…" : "Refresh"}
+                </button>
+              </div>
 
-            {/* Tracking history */}
-            {record.trackingHistory?.length > 0 && (
-              <div className="mt-4">
-                <p className="text-xs font-semibold text-gray-600 mb-2">Tracking History</p>
-                <div className="space-y-1.5">
-                  {record.trackingHistory.map((h, i) => (
-                    <div key={i} className="flex items-start gap-3 text-xs">
-                      <span className={`shrink-0 px-1.5 py-0.5 rounded font-semibold ${statusBadgeClass(h.status)}`}>
-                        {h.status}
-                      </span>
-                      <span className="text-gray-600">
-                        {h.location && <span className="font-medium">{h.location} — </span>}
-                        {h.remarks}
-                      </span>
-                      <span className="ml-auto shrink-0 text-gray-400">{h.date?.slice(0, 16).replace("T", " ")}</span>
-                    </div>
+              {orderShippingRecordsError && (
+                <div className="px-3 py-2 bg-red-50 border border-red-200 rounded text-xs text-red-600">{orderShippingRecordsError}</div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                <label className="block">
+                  <span className="block text-xs text-gray-500 mb-1">Carton ID</span>
+                  <select
+                    value={cartonId}
+                    onChange={e => setCartonId(e.target.value)}
+                    className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                  >
+                    <option value="">Select carton</option>
+                    {cartons.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.id} - {c.name} ({c.length}×{c.breadth}×{c.height} cm)
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="block text-xs text-gray-500 mb-1">Type</span>
+                  <select
+                    value={shipmentType}
+                    onChange={e => setShipmentType(e.target.value)}
+                    className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                  >
+                    <option value="">Select type</option>
+                    <option value="FORWARD">FORWARD</option>
+                    <option value="RETURN_PICKUP">RETURN_PICKUP</option>
+                  </select>
+                </label>
+                <label className="block md:col-span-2">
+                  <span className="block text-xs text-gray-500 mb-1">Courier Service</span>
+                  <select
+                    value={selectedCourierId}
+                    onChange={e => setSelectedCourierId(e.target.value)}
+                    disabled={svcLoading}
+                    className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-300 disabled:opacity-60"
+                  >
+                    <option value="">{svcLoading ? "Loading courier services…" : "Select courier service"}</option>
+                    {courierServices.map(c => (
+                      <option key={c.courierId} value={c.courierId}>
+                        {c.courierId} - {c.courierName} - ₹{c.price?.toFixed(2)} - {c.estimatedDeliveryDays} day(s)
+                      </option>
+                    ))}
+                  </select>
+                  {svcError && <p className="mt-1 text-xs text-red-600">{svcError}</p>}
+                </label>
+                <label className="block">
+                  <span className="block text-xs text-gray-500 mb-1">Courier Company ID</span>
+                  <input
+                    readOnly
+                    value={selectedCourierId}
+                    className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm bg-gray-50 text-gray-800 focus:outline-none"
+                  />
+                </label>
+                {[
+                  { label: "Order Number", value: createUpdateShippingRecord?.orderNumber },
+                  { label: "Shipment Status", value: createUpdateShippingRecord?.shipmentStatus },
+                ].map(field => (
+                  <label key={field.label} className="block">
+                    <span className="block text-xs text-gray-500 mb-1">{field.label}</span>
+                    <input
+                      readOnly
+                      value={field.value ?? ""}
+                      className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm bg-gray-50 text-gray-800 focus:outline-none"
+                    />
+                  </label>
+                ))}
+                <label className="block">
+                  <span className="block text-xs text-gray-500 mb-1">Order Status</span>
+                  <select
+                    value={orderStatus}
+                    onChange={e => setOrderStatus(e.target.value)}
+                    className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                  >
+                    <option value="">Select order status</option>
+                    {getOrderStatusOptions(createUpdateModalOrder.orderDetails.orderStatus || orderStatus).map(status => (
+                      <option key={status} value={status}>{status}</option>
+                    ))}
+                  </select>
+                </label>
+                {[
+                  { label: "AWB", name: "awb", type: "text" },
+                  { label: "Shipping Price", name: "shippingPrice", type: "number" },
+                  { label: "Length (cm)", name: "length", type: "number" },
+                  { label: "Breadth (cm)", name: "breadth", type: "number" },
+                  { label: "Height (cm)", name: "height", type: "number" },
+                  { label: "Weight (kg)", name: "weight", type: "number" },
+                  { label: "Shiprocket Order ID", name: "shipOrderId", type: "number" },
+                  { label: "Shiprocket Shipment ID", name: "shipShipmentId", type: "number" },
+                  { label: "Pickup ID", name: "pickupId", type: "number" },
+                  { label: "Pickup Token", name: "pickupToken", type: "text" },
+                  { label: "Pickup Scheduled Date", name: "pickupScheduledDate", type: "date" },
+                  { label: "Estimated Delivery Date", name: "estimatedDeliveryDate", type: "date" },
+                  { label: "Expected Delivery Date", name: "expectedDeliveryDate", type: "date" },
+                  { label: "Shipped Date", name: "shippedDate", type: "date" },
+                  { label: "Delivered Date", name: "deliveredDate", type: "date" },
+                  { label: "Label URL", name: "labelUrl", type: "text", className: "md:col-span-3" },
+                  { label: "Track URL", name: "trackUrl", type: "text", className: "md:col-span-3" },
+                ].map(field => (
+                  <label key={field.name} className={`block ${field.className || ""}`}>
+                    <span className="block text-xs text-gray-500 mb-1">{field.label}</span>
+                    <input
+                      type={field.type}
+                      name={field.name}
+                      value={editableShipmentFields[field.name as keyof EditableShipmentFields]}
+                      onChange={handleEditableShipmentFieldChange}
+                      className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-300"
+                    />
+                  </label>
+                ))}
+              </div>
+
+              <div className="border border-blue-100 rounded-lg p-3 bg-blue-50/40">
+                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-3">Shiprocket Step Status</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                  {[
+                    { label: "Shiprocket Order Status", name: "shiprocketOrderStatus" },
+                    { label: "Generate AWB Status", name: "generateAwbStatus" },
+                    { label: "Request Pickup Status", name: "requestPickupStatus" },
+                    { label: "Generate Label Status", name: "generateLabelStatus" },
+                    { label: "Track Shipment Status", name: "trackShipmentStatus" },
+                    { label: "Estimate Status", name: "estimateStatus" },
+                  ].map(field => (
+                    <label key={field.name} className="block">
+                      <span className="block text-xs text-gray-500 mb-1">{field.label}</span>
+                      <select
+                        name={field.name}
+                        value={editableShipmentFields[field.name as keyof EditableShipmentFields]}
+                        onChange={e => setEditableShipmentFields(prev => ({ ...prev, [field.name]: e.target.value }))}
+                        className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      >
+                        <option value="">Select status</option>
+                        <option value="SUCCESS">SUCCESS</option>
+                        <option value="FAILED">FAILED</option>
+                        <option value="SKIPPED">SKIPPED</option>
+                      </select>
+                    </label>
                   ))}
                 </div>
               </div>
-            )}
-          </div>
-        )}
-
-        {/* Create / Update form */}
-        {!fetchLoading && mode !== "idle" && (
-          <div className="bg-white">
-            <div className="flex items-center gap-3 mb-5">
-              <span className={`text-xs font-semibold px-2 py-1 rounded ${mode === "create" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}>
-                {mode === "create" ? "CREATE" : "UPDATE"}
-              </span>
-              <p className="text-sm font-medium text-gray-700">{orderNumber}</p>
-              <button
-                type="button"
-                onClick={handleFetchFromShiprocket}
-                disabled={shiprocketFetchLoading}
-                className="ml-auto flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-60"
-                title="Fetch live shipment data from Shiprocket and pre-fill the form below"
-              >
-                {shiprocketFetchLoading && (
-                  <svg className="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                  </svg>
-                )}
-                {shiprocketFetchLoading ? "Fetching…" : "Fetch from Shiprocket"}
-              </button>
-              <button
-                type="button"
-                onClick={handleRetriggerShipping}
-                disabled={retriggerLoading || mode !== "update"}
-                className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-lg border border-orange-300 text-orange-700 hover:bg-orange-50 disabled:opacity-60"
-                title="Retrigger the Shiprocket shipping process (e.g. after a failed order-creation attempt)"
-              >
-                {retriggerLoading && (
-                  <svg className="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                  </svg>
-                )}
-                {retriggerLoading ? "Retriggering…" : "Retrigger Shipping"}
-              </button>
             </div>
 
-            {submitError && (
-              <div className="mb-4 px-3 py-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
-                {submitError}
-              </div>
+            {createShipmentError && (
+              <div className="mx-6 mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded text-xs text-red-600">{createShipmentError}</div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-
-              {/* Warehouse & Shiprocket IDs */}
-              <div>
-                <SectionTitle>Warehouse & Shiprocket IDs</SectionTitle>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Warehouse</label>
-                    <select
-                      name="warehouseId"
-                      value={form.warehouseId}
-                      onChange={handleChange}
-                      className="w-full border rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
-                    >
-                      <option value="">— select warehouse —</option>
-                      {warehouses
-                        .filter(w => w.status === "A")
-                        .map(w => (
-                          <option key={w.warehouseId} value={String(w.warehouseId)}>
-                            {w.warehouseName} ({w.warehouseCode})
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-                  <Field label="Shiprocket Order ID"    name="shiprocketOrderId"    type="number" value={form.shiprocketOrderId}    onChange={handleChange} />
-                  <Field label="Shiprocket Shipment ID" name="shiprocketShipmentId" type="number" value={form.shiprocketShipmentId} onChange={handleChange} />
-                </div>
-              </div>
-
-              {/* Courier & AWB */}
-              <div>
-                <SectionTitle>Courier & AWB</SectionTitle>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <Field label="AWB Code"       name="awbCode"          value={form.awbCode}         onChange={handleChange} placeholder="AWBXYZ123" />
-                  <Field label="Courier Name"   name="courierName"      value={form.courierName}     onChange={handleChange} placeholder="Delhivery" />
-                  <Field label="Courier Company ID" name="courierCompanyId" type="number" value={form.courierCompanyId} onChange={handleChange} />
-                </div>
-              </div>
-
-              {/* Shipment */}
-              <div>
-                <SectionTitle>Shipment Details</SectionTitle>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <SelectField label="Status" name="shipmentStatus" value={form.shipmentStatus} onChange={handleChange} options={SHIPMENT_STATUS_OPTIONS} />
-                  <SelectField label="Type"   name="shipmentType"   value={form.shipmentType}   onChange={handleChange} options={SHIPMENT_TYPE_OPTIONS} />
-                  <Field label="Tracking Number" name="trackingNumber" value={form.trackingNumber} onChange={handleChange} placeholder="TRK-ORD-..." />
-                </div>
-              </div>
-
-              {/* Dimensions */}
-              <div>
-                <SectionTitle>Dimensions & Weight</SectionTitle>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <Field label="Length (cm)"  name="length"  type="number" value={form.length}  onChange={handleChange} placeholder="20" />
-                  <Field label="Breadth (cm)" name="breadth" type="number" value={form.breadth} onChange={handleChange} placeholder="15" />
-                  <Field label="Height (cm)"  name="height"  type="number" value={form.height}  onChange={handleChange} placeholder="10" />
-                  <Field label="Weight (kg)"  name="weight"  type="number" value={form.weight}  onChange={handleChange} placeholder="1.2" />
-                </div>
-              </div>
-
-              {/* Pricing & URLs */}
-              <div>
-                <SectionTitle>Pricing & URLs</SectionTitle>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <Field label="Shipping Price (₹)" name="shippingPrice" type="number" value={form.shippingPrice} onChange={handleChange} placeholder="48.50" />
-                  <Field label="Label URL" name="labelUrl" value={form.labelUrl} onChange={handleChange} placeholder="https://..." />
-                  <Field label="Track URL" name="trackUrl" value={form.trackUrl} onChange={handleChange} placeholder="https://..." />
-                </div>
-              </div>
-
-              {/* Dates */}
-              <div>
-                <SectionTitle>Dates</SectionTitle>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  <Field label="Estimated Delivery"  name="estimatedDeliveryDate" type="date" value={form.estimatedDeliveryDate} onChange={handleChange} />
-                  <Field label="Expected Delivery"   name="expectedDeliveryDate"  type="date" value={form.expectedDeliveryDate}  onChange={handleChange} />
-
-                </div>
-              </div>
-
-              {/* Actions — inside form, sticky at bottom */}
-              <div className="flex justify-end gap-3 pt-3 border-t mt-4">
-                <button
-                  type="submit"
-                  disabled={submitLoading}
-                  className="px-6 py-2 text-sm font-semibold rounded-xl bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-60 flex items-center gap-2"
-                >
-                  {submitLoading && (
-                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
-                  )}
-                  {submitLoading
-                    ? (mode === "create" ? "Creating..." : "Updating...")
-                    : (mode === "create" ? "Create Shipping Record" : "Update Shipping Record")}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-              </div>{/* /scrollable body */}
-
-              {/* Modal footer */}
-              <div className="px-6 py-3 border-t bg-gray-50 rounded-b-2xl flex justify-end">
-                <button onClick={closeModal} className="px-4 py-2 text-sm border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors">
-                  Close
-                </button>
-              </div>
-
+            <div className="px-6 py-3 border-t bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+              <button onClick={closeCreateUpdateShipmentModal} disabled={creatingShipment}
+                className="px-4 py-1.5 text-sm border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors">
+                Close
+              </button>
+              <button onClick={handleCreateOrUpdateShipment} disabled={creatingShipment || orderShippingRecordsLoading || svcLoading}
+                className="px-4 py-1.5 text-sm border border-blue-300 text-blue-700 rounded-xl hover:bg-blue-50 transition-colors disabled:opacity-60">
+                {creatingShipment ? "Saving…" : "Create / Update Shipment"}
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Retrigger Shipping — result popup */}
-        {retriggerResult && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 px-4" onClick={e => { if (e.target === e.currentTarget) setRetriggerResult(null); }}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
-              <div className={`flex items-center justify-between px-6 py-4 border-b rounded-t-2xl ${retriggerResult.ok ? "bg-green-500" : "bg-red-500"}`}>
-                <h2 className="text-base font-bold text-white">Retrigger Shipping Result</h2>
-                <button onClick={() => setRetriggerResult(null)} className="text-white/80 hover:text-white transition-colors">
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+      {/* Step Log Modal */}
+      {stepLogModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={e => { if (e.target === e.currentTarget) setStepLogModal(null); }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b bg-blue-500 rounded-t-2xl">
+              <div>
+                <h2 className="text-base font-bold text-white">{stepLogModal.stepLabel} — Log Details</h2>
+                <p className="text-xs text-white/80 mt-0.5">Order {stepLogModal.shippingDetails.trackingNumber || `(Shipment ${stepLogModal.shippingDetails.shipmentId})`}</p>
               </div>
-              <div className="overflow-y-auto flex-1 px-6 py-5 space-y-4">
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs font-semibold px-2 py-1 rounded ${retriggerResult.ok ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                    {retriggerResult.data?.responseStatus || (retriggerResult.ok ? "SUCCESS" : "FAILURE")}
-                  </span>
-                  <p className="text-sm text-gray-700">{retriggerResult.data?.responseMessage || "No response message received."}</p>
+              <button onClick={() => setStepLogModal(null)} className="text-white/80 hover:text-white transition-colors">✕</button>
+            </div>
+
+            <div className="overflow-y-auto px-6 py-4">
+              {stepLogModal.logs.length === 0 ? (
+                <p className="text-sm text-gray-500">No logs available for this step.</p>
+              ) : (
+                <div className="space-y-3">
+                  {stepLogModal.logs.map((log, idx) => (
+                    <div key={log.id} className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <p className="text-xs text-gray-500">Attempt {idx + 1}</p>
+                          <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold mt-1 ${log.status === "SUCCESS" ? "bg-green-100 text-green-700" : log.status === "FAILURE" ? "bg-red-100 text-red-700" : log.status === "SKIPPED" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-600"}`}>
+                            {log.status}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-gray-500">Created</p>
+                          <p className="text-xs font-mono text-gray-700">{new Date(log.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</p>
+                        </div>
+                      </div>
+                      {log.remarks && (
+                        <div className="mt-2 p-2 bg-white rounded border border-gray-200">
+                          <p className="text-xs text-gray-600"><span className="font-semibold">Remarks:</span> {log.remarks}</p>
+                        </div>
+                      )}
+                      {log.updatedAt && (
+                        <p className="text-xs text-gray-400 mt-2">Updated: {new Date(log.updatedAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</p>
+                      )}
+                    </div>
+                  ))}
                 </div>
+              )}
+            </div>
 
-                {Array.isArray(retriggerResult.data?.results) && retriggerResult.data.results.length > 0 && (
-                  <div className="overflow-x-auto rounded border">
-                    <table className="w-full text-xs">
-                      <thead className="bg-gray-50 text-gray-700">
-                        <tr>
-                          <th className="text-left px-3 py-2 font-semibold">Shipment</th>
-                          <th className="text-left px-3 py-2 font-semibold">Previous → Current Status</th>
-                          <th className="text-left px-3 py-2 font-semibold">Action</th>
-                          <th className="text-left px-3 py-2 font-semibold">Message</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {retriggerResult.data.results.map((r: any, idx: number) => (
-                          <tr key={r.shipmentId ?? idx} className="border-t align-top">
-                            <td className="px-3 py-2">
-                              <p className="font-medium text-gray-800">#{r.shipmentId}</p>
-                              {r.trackingNumber && <p className="text-gray-400">{r.trackingNumber}</p>}
-                            </td>
-                            <td className="px-3 py-2 text-gray-600">
-                              <span className={statusBadgeClass(r.previousStatus) + " px-1.5 py-0.5 rounded font-semibold"}>{r.previousStatus}</span>
-                              {" → "}
-                              <span className={statusBadgeClass(r.currentStatus) + " px-1.5 py-0.5 rounded font-semibold"}>{r.currentStatus}</span>
-                            </td>
-                            <td className="px-3 py-2">
-                              <span className={`px-1.5 py-0.5 rounded font-semibold ${
-                                r.action === "RETRIGGERED" ? "bg-green-100 text-green-700"
-                                  : r.action === "SKIPPED"  ? "bg-gray-100 text-gray-700"
-                                  : "bg-red-100 text-red-700"
-                              }`}>
-                                {r.action}
-                              </span>
-                            </td>
-                            <td className="px-3 py-2 text-gray-600">
-                              <p>{r.message}</p>
-                              {r.failedStep && <p className="text-red-500 mt-1"><span className="font-medium">Failed step:</span> {r.failedStep}</p>}
-                              {r.failureReason && <p className="text-red-500">{r.failureReason}</p>}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-              <div className="px-6 py-3 border-t bg-gray-50 rounded-b-2xl flex justify-end">
-                <button onClick={() => setRetriggerResult(null)} className="px-4 py-2 text-sm border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors">
-                  Close
-                </button>
-              </div>
+            <div className="px-6 py-3 border-t bg-gray-50 rounded-b-2xl flex justify-end">
+              <button onClick={() => setStepLogModal(null)}
+                className="px-4 py-1.5 text-sm border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors">
+                Close
+              </button>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-      </div>{/* /max-w-6xl */}
+      {/* Shipment Logs Modal */}
+      {shipmentLogsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" onClick={e => { if (e.target === e.currentTarget) setShipmentLogsModal(null); }}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b bg-green-500 rounded-t-2xl">
+              <div>
+                <h2 className="text-base font-bold text-white">Shipment Logs</h2>
+                <p className="text-xs text-white/80 mt-0.5">Tracking: {shipmentLogsModal.shippingDetails.trackingNumber || `Shipment ${shipmentLogsModal.shippingDetails.shipmentId}`}</p>
+              </div>
+              <button onClick={() => setShipmentLogsModal(null)} className="text-white/80 hover:text-white transition-colors">✕</button>
+            </div>
+
+            <div className="overflow-y-auto px-6 py-4">
+              {shipmentLogsModal.logs.length === 0 ? (
+                <p className="text-sm text-gray-500">No shipment logs available.</p>
+              ) : (
+                <div className="space-y-3">
+                  {shipmentLogsModal.logs.map((log, idx) => (
+                    <div key={log.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-semibold text-gray-800">{log.step}</p>
+                            <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                              log.status === "SUCCESS" ? "bg-green-100 text-green-700" :
+                              log.status === "FAILURE" ? "bg-red-100 text-red-700" :
+                              log.status === "SKIPPED" ? "bg-yellow-100 text-yellow-700" :
+                              log.status === "ATTEMPT_FAILED" ? "bg-orange-100 text-orange-700" :
+                              log.status === "IN_PROGRESS" ? "bg-blue-100 text-blue-700" :
+                              "bg-gray-100 text-gray-600"
+                            }`}>
+                              {log.status}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">Log ID: {log.id}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-gray-500">Created</p>
+                          <p className="text-xs font-mono text-gray-700">{new Date(log.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 mb-3 text-sm">
+                        {log.shiprocketOrderId && (
+                          <div><span className="text-xs text-gray-500">Shiprocket Order ID</span><p className="font-mono text-gray-700">{log.shiprocketOrderId}</p></div>
+                        )}
+                        {log.shiprocketShipmentId && (
+                          <div><span className="text-xs text-gray-500">Shiprocket Shipment ID</span><p className="font-mono text-gray-700">{log.shiprocketShipmentId}</p></div>
+                        )}
+                        {log.awbCode && (
+                          <div><span className="text-xs text-gray-500">AWB Code</span><p className="font-mono text-gray-700">{log.awbCode}</p></div>
+                        )}
+                        {log.labelUrl && (
+                          <div><span className="text-xs text-gray-500">Label URL</span><p className="font-mono text-blue-600"><a href={log.labelUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">View Label</a></p></div>
+                        )}
+                      </div>
+
+                      {log.errorMessage && (
+                        <div className="mt-2 p-2 bg-red-50 rounded border border-red-200">
+                          <p className="text-xs text-red-700"><span className="font-semibold">Error/Remarks:</span> {log.errorMessage}</p>
+                        </div>
+                      )}
+
+                      {log.updatedAt && (
+                        <p className="text-xs text-gray-400 mt-2">Updated: {new Date(log.updatedAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-3 border-t bg-gray-50 rounded-b-2xl flex justify-end">
+              <button onClick={() => setShipmentLogsModal(null)}
+                className="px-4 py-1.5 text-sm border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

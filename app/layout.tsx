@@ -11,8 +11,8 @@ import SessionTimeoutWrapper from "@/components/SessionTimeoutWrapper";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Kuchi Mittai",
-  description: "Kuchi Mittai - Traditional Sweets, Snacks & More",
+  title: "TryNat",
+  description: "TryNat - try nat ",
   icons: {
     icon: "/companyLogo/CompanyLogo.png",
   },

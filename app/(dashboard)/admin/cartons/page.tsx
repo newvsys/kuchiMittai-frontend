@@ -58,6 +58,12 @@ const AdminCartonsPage = () => {
   }>({ open: false, carton: null });
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  const [reenableDialog, setReenableDialog] = useState<{
+    open: boolean;
+    carton: Carton | null;
+  }>({ open: false, carton: null });
+  const [reenableLoading, setReenableLoading] = useState(false);
+
   const fetchCartons = async () => {
     setLoading(true);
     try {
@@ -163,6 +169,28 @@ const AdminCartonsPage = () => {
     }
   };
 
+  const handleReenable = async () => {
+    if (!reenableDialog.carton) return;
+    setReenableLoading(true);
+    try {
+      const res = await apiClient.request(`/api/carton/${reenableDialog.carton.id}`, {
+        method: "DELETE",
+        body: JSON.stringify({ status: "A", who: "admin" }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.responseStatus === "FAILURE") {
+        throw new Error(data.responseMessage || "Reenable failed");
+      }
+      showToast(data.responseMessage || "Carton reenabled");
+      setReenableDialog({ open: false, carton: null });
+      fetchCartons();
+    } catch (err: any) {
+      showError(err.message || "Reenable failed");
+    } finally {
+      setReenableLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <DashboardSidebar />
@@ -249,18 +277,28 @@ const AdminCartonsPage = () => {
                       <div className="flex items-center justify-center gap-2">
                         <button
                           type="button"
-                          className="text-xs px-3 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 font-medium"
+                          className="text-xs px-3 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-100"
                           onClick={() => openEdit(c)}
+                          disabled={c.status !== "A"}
+                          title={c.status !== "A" ? "Reenable this carton to edit it" : undefined}
                         >
                           Edit
                         </button>
-                        {c.status === "A" && (
+                        {c.status === "A" ? (
                           <button
                             type="button"
                             className="text-xs px-3 py-1 rounded bg-red-100 text-red-600 hover:bg-red-200 font-medium"
                             onClick={() => setDeleteDialog({ open: true, carton: c })}
                           >
                             Deactivate
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="text-xs px-3 py-1 rounded bg-green-100 text-green-700 hover:bg-green-200 font-medium"
+                            onClick={() => setReenableDialog({ open: true, carton: c })}
+                          >
+                            Reenable
                           </button>
                         )}
                       </div>
@@ -428,6 +466,40 @@ const AdminCartonsPage = () => {
                 disabled={deleteLoading}
               >
                 {deleteLoading ? "Deactivating..." : "Deactivate"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reenable Confirmation Dialog */}
+      {reenableDialog.open && reenableDialog.carton && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded shadow-xl w-full max-w-sm p-6">
+            <h3 className="text-lg font-semibold mb-2">Reenable Carton</h3>
+            <p className="text-sm text-gray-700 mb-1">
+              Are you sure you want to reenable carton{" "}
+              <span className="font-semibold">{reenableDialog.carton.name}</span>?
+            </p>
+            <p className="text-xs text-gray-500 mb-5">
+              This will set its status back to Active and allow it to be used and edited again.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                className="px-4 py-1.5 text-sm rounded border border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+                onClick={() => setReenableDialog({ open: false, carton: null })}
+                disabled={reenableLoading}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="px-4 py-1.5 text-sm rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
+                onClick={handleReenable}
+                disabled={reenableLoading}
+              >
+                {reenableLoading ? "Reenabling..." : "Reenable"}
               </button>
             </div>
           </div>

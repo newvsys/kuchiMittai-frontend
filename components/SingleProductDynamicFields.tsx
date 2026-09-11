@@ -47,6 +47,7 @@ const SingleProductDynamicFields = ({ product, maxQty }: { product: Product; max
           <BuyNowSingleProductBtn
             quantityCount={quantityCount}
             product={product}
+            disabled={soldOut}
           />
         </div>
       )}

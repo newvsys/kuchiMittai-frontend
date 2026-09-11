@@ -124,10 +124,6 @@ const OrderHistoryPage = () => {
     open: boolean;
     order: Order | null;
   }>({ open: false, order: null });
-  const [paymentDetailsDialog, setPaymentDetailsDialog] = useState<{
-    open: boolean;
-    order: Order | null;
-  }>({ open: false, order: null });
   const [returnPolicyDialog, setReturnPolicyDialog] = useState<{
     open: boolean;
     policies: Array<{
@@ -282,7 +278,7 @@ const OrderHistoryPage = () => {
         key: paymentGatewayKey,
         amount: Number(payload?.amount ?? order.totalAmount) * 100,
         currency: payload?.currency || "INR",
-        name: payload?.storeName || "KuchiMittai",
+        name: payload?.storeName || "Try Nat",
         image: logoBase64,
         description: `Payment for Order #${order.orderNumber}`,
         order_id: paymentOrderId,
@@ -481,7 +477,7 @@ const OrderHistoryPage = () => {
       return `₹${amount.toFixed(2)}`;
     };
 
-    return [
+    const rows: { label: string; value: string | number | null | undefined }[] = [
       { label: "Payment Status", value: order.paymentStatus || payment.paymentStatus || payment.status || (order.status === "P" ? "PENDING" : null) },
       { label: "Payment Method", value: order.paymentMethod || payment.paymentMethod || payment.method },
       { label: "Amount", value: formatAmount(payment.amount ?? order.totalAmount) },
@@ -491,7 +487,9 @@ const OrderHistoryPage = () => {
       { label: "Payment Order ID", value: order.paymentOrderId || order.razorpayOrderId || payment.paymentOrderId || payment.razorpayOrderId || payment.orderId },
       { label: "Gateway", value: order.paymentGateway || payment.paymentGateway || payment.gateway },
       { label: "Paid At", value: formatDateTime(order.paymentTime || payment.paymentTime || payment.paidAt || payment.createdAt) },
-    ].filter((row): row is { label: string; value: string | number } => row.value != null && row.value !== "");
+    ];
+
+    return rows.filter((row): row is { label: string; value: string | number } => row.value != null && row.value !== "");
   };
 
   if (status === "loading" || !session || loading) {
@@ -615,17 +613,13 @@ const OrderHistoryPage = () => {
 
   const getStatusBadge = (status: string) => {
     const s = (status || "").toLowerCase();
-    if (s === "delivered")
-      return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">✓ Delivered</span>;
-    if (["cancelled", "canceled"].includes(s))
-      return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">✕ Cancelled</span>;
-    if (s === "returned")
-      return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-600">↩ Returned</span>;
-    if (s === "p" || s === "pending")
-      return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">⏳ Pending</span>;
-    if (["confirmed", "submitted", "created"].includes(s))
-      return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">● {status}</span>;
-    return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600">{status === "P" ? "PENDING" : status}</span>;
+    const statusLabel = s === "p" ? "pending" : s || status;
+    return <span className="text-xs font-normal text-gray-700"> Status : {statusLabel}</span>;
+  };
+
+  const getStatusLabel = (status: string) => {
+    const s = (status || "").toLowerCase();
+    return s === "p" ? "pending" : s || status;
   };
 
   return (
@@ -781,13 +775,6 @@ const OrderHistoryPage = () => {
                         </div>
                         <div className="flex items-center gap-3">
                           {getStatusBadge(order.status)}
-                          <button
-                            type="button"
-                            className="text-xs text-emerald-700 hover:text-emerald-800 font-semibold border border-emerald-200 rounded-lg px-3 py-1 hover:bg-emerald-50 transition-colors"
-                            onClick={() => setPaymentDetailsDialog({ open: true, order })}
-                          >
-                            Payment Details
-                          </button>
                           <button
                             type="button"
                             className="text-xs text-blue-600 hover:text-blue-800 font-semibold border border-blue-200 rounded-lg px-3 py-1 hover:bg-blue-50 transition-colors"
@@ -1183,66 +1170,13 @@ const OrderHistoryPage = () => {
               </div>
             </div>
           )}
-          {paymentDetailsDialog.open && paymentDetailsDialog.order && (() => {
-            const selectedOrder = paymentDetailsDialog.order;
-            const paymentRows = getPaymentRows(selectedOrder);
-            return (
-              <div
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-                onClick={() => setPaymentDetailsDialog({ open: false, order: null })}
-              >
-                <div
-                  className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden"
-                  onClick={event => event.stopPropagation()}
-                >
-                  <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-emerald-600 to-teal-500">
-                    <div>
-                      <h3 className="text-base font-bold text-white">Payment Details</h3>
-                      <p className="text-emerald-50 text-xs mt-0.5 font-mono">{selectedOrder.orderNumber}</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentDetailsDialog({ open: false, order: null })}
-                      className="text-white/70 hover:text-white text-2xl leading-none"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                  <div className="px-6 py-5">
-                    {paymentRows.length > 0 ? (
-                      <dl className="divide-y divide-gray-100 rounded-xl border border-gray-100 overflow-hidden">
-                        {paymentRows.map(row => (
-                          <div key={row.label} className="grid grid-cols-1 gap-1 px-4 py-3 text-sm sm:grid-cols-5 sm:gap-4">
-                            <dt className="font-medium text-gray-500 sm:col-span-2">{row.label}</dt>
-                            <dd className="font-semibold text-gray-900 break-all sm:col-span-3">{row.value}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                    ) : (
-                      <p className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-5 text-sm text-gray-500">
-                        Payment details are not available for this order yet.
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex justify-end px-6 py-4 border-t bg-gray-50">
-                    <button
-                      type="button"
-                      onClick={() => setPaymentDetailsDialog({ open: false, order: null })}
-                      className="px-5 py-2 text-sm font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
           {detailsDialog.open && detailsDialog.order && (() => {
             const o = detailsDialog.order;
             const addr = o.shippingAddress;
             const addressLine = [addr?.address1, addr?.address2, addr?.landmark, addr?.city, addr?.state, addr?.postalCode]
               .filter(Boolean).join(", ");
             const trackingNumber = o.shippingProducts?.[0]?.trackingNumber;
+            const paymentRows = getPaymentRows(o);
             return (
               <div
                 className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
@@ -1277,7 +1211,7 @@ const OrderHistoryPage = () => {
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="bg-gray-50 rounded-xl p-4">
                         <p className="text-xs text-gray-500 mb-1.5 font-medium uppercase tracking-wide">Status</p>
-                        <div>{getStatusBadge(o.status)}</div>
+                        <p className="text-xs font-normal text-gray-700">{getStatusLabel(o.status)}</p>
                       </div>
                       <div className="bg-gray-50 rounded-xl p-4">
                         <p className="text-xs text-gray-500 mb-1 font-medium uppercase tracking-wide">Order Total</p>
@@ -1305,6 +1239,21 @@ const OrderHistoryPage = () => {
                           {addr?.name && <p className="font-semibold text-gray-900">{addr.name}</p>}
                           <p>{addressLine}</p>
                         </div>
+                      </div>
+                    )}
+
+                    {/* Payment details */}
+                    {paymentRows.length > 0 && (
+                      <div>
+                        <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Payment Details</p>
+                        <dl className="divide-y divide-gray-100 rounded-xl border border-gray-100 overflow-hidden">
+                          {paymentRows.map(row => (
+                            <div key={row.label} className="grid grid-cols-1 gap-1 px-4 py-3 text-sm sm:grid-cols-5 sm:gap-4 bg-gray-50">
+                              <dt className="font-medium text-gray-500 sm:col-span-2">{row.label}</dt>
+                              <dd className="font-semibold text-gray-900 break-all sm:col-span-3">{row.value}</dd>
+                            </div>
+                          ))}
+                        </dl>
                       </div>
                     )}
 

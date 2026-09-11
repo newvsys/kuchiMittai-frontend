@@ -151,7 +151,7 @@ const OrderStatusPage = () => {
 
   const orderStatus: string = order.status || order.orderStatus || "P";
   const cancelled = isCancelledOrFailed(orderStatus);
-  const paymentPaid = order.paymentStatus === "PAID";
+  const paymentPaid = String(order.paymentStatus || "").toUpperCase() === "PAID";
   const trackHistory: any[] = shipment?.trackingHistory ?? [];
 
   // Use API-provided fields directly

@@ -18,6 +18,7 @@ import { useSession } from "next-auth/react";
 const BuyNowSingleProductBtn = ({
   product,
   quantityCount,
+  disabled,
 }: SingleProductBtnProps) => {
   const router = useRouter();
   const { addToCart, calculateTotals } = useProductStore();
@@ -35,17 +36,19 @@ const BuyNowSingleProductBtn = ({
 
   const handleAddToCart = () => {
     if (isLoading) return;
-    // Always add the product to the cart first
-    addToCart({
-      id: product?.id.toString(),
-      title: product?.title,
-      price: product?.price,
-      mrp: product?.mrp,
-      image: product?.mainImage,
-      amount: quantityCount,
-    });
-    calculateTotals();
-    toast.success("Product added to the cart");
+
+    if (!disabled) {
+      addToCart({
+        id: product?.id.toString(),
+        title: product?.title,
+        price: product?.price,
+        mrp: product?.mrp,
+        image: product?.mainImage,
+        amount: quantityCount,
+      });
+      calculateTotals();
+      toast.success("Product added to the cart");
+    }
 
     setIsLoading(true);
 
