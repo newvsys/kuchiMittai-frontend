@@ -900,33 +900,35 @@ const AdminShippingManagementPage = () => {
                 </div>
               )}
 
-              {showShippingDetails && retriggerModalOrder.shippingDetails && (
+              {showShippingDetails && retriggerModalOrder.shippingDetails && (() => {
+                const shippingDetails = retriggerModalOrder.shippingDetails;
+                return (
                 <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
                   <h3 className="text-sm font-bold text-gray-800 mb-3">Current Shipping Details</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                    <div><span className="text-xs text-gray-500">Shipment ID</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.shipmentId}</p></div>
-                    <div><span className="text-xs text-gray-500">Tracking Number</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.trackingNumber || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Shipment Status</span><p className="font-semibold text-gray-800">{retriggerModalOrder.shippingDetails.shipmentStatus || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Shipment Type</span><p className="font-semibold text-gray-800">{retriggerModalOrder.shippingDetails.shipmentType || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">AWB</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.awb || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Courier Name</span><p className="text-gray-800">{retriggerModalOrder.shippingDetails.courierName || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Courier Company ID</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.courierCompanyId || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Shipping Price</span><p className="font-semibold text-gray-800">₹{retriggerModalOrder.shippingDetails.shippingPrice?.toFixed(2) || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Carton ID</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.cartonId || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Length (cm)</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.length || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Breadth (cm)</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.breadth || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Height (cm)</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.height || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Weight (kg)</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.weight || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Shiprocket Order ID</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.shipOrderId || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Shiprocket Shipment ID</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.shipShipmentId || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Pickup ID</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.pickupId || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Pickup Token</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.pickupToken || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Estimated Delivery Date</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.estimatedDeliveryDate || "—"}</p></div>
-                    <div><span className="text-xs text-gray-500">Expected Delivery Date</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.expectedDeliveryDate || "—"}</p></div>
-                    <div className="md:col-span-2"><span className="text-xs text-gray-500">Shipment Created At</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.shipmentCreatedAt || "—"}</p></div>
-                    <div className="md:col-span-2"><span className="text-xs text-gray-500">Shipment Updated At</span><p className="font-mono text-gray-800">{retriggerModalOrder.shippingDetails.shipmentUpdatedAt || "—"}</p></div>
-                    <div className="md:col-span-2"><span className="text-xs text-gray-500">Label URL</span><p className="font-mono text-blue-600 break-all">{retriggerModalOrder.shippingDetails.labelUrl ? <a href={retriggerModalOrder.shippingDetails.labelUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">{retriggerModalOrder.shippingDetails.labelUrl}</a> : "—"}</p></div>
-                    <div className="md:col-span-2"><span className="text-xs text-gray-500">Track URL</span><p className="font-mono text-blue-600 break-all">{retriggerModalOrder.shippingDetails.trackUrl ? <a href={retriggerModalOrder.shippingDetails.trackUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">{retriggerModalOrder.shippingDetails.trackUrl}</a> : "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Shipment ID</span><p className="font-mono text-gray-800">{shippingDetails.shipmentId}</p></div>
+                    <div><span className="text-xs text-gray-500">Tracking Number</span><p className="font-mono text-gray-800">{shippingDetails.trackingNumber || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Shipment Status</span><p className="font-semibold text-gray-800">{shippingDetails.shipmentStatus || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Shipment Type</span><p className="font-semibold text-gray-800">{shippingDetails.shipmentType || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">AWB</span><p className="font-mono text-gray-800">{shippingDetails.awb || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Courier Name</span><p className="text-gray-800">{shippingDetails.courierName || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Courier Company ID</span><p className="font-mono text-gray-800">{shippingDetails.courierCompanyId || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Shipping Price</span><p className="font-semibold text-gray-800">₹{shippingDetails.shippingPrice?.toFixed(2) || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Carton ID</span><p className="font-mono text-gray-800">{shippingDetails.cartonId || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Length (cm)</span><p className="font-mono text-gray-800">{shippingDetails.length || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Breadth (cm)</span><p className="font-mono text-gray-800">{shippingDetails.breadth || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Height (cm)</span><p className="font-mono text-gray-800">{shippingDetails.height || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Weight (kg)</span><p className="font-mono text-gray-800">{shippingDetails.weight || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Shiprocket Order ID</span><p className="font-mono text-gray-800">{shippingDetails.shipOrderId || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Shiprocket Shipment ID</span><p className="font-mono text-gray-800">{shippingDetails.shipShipmentId || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Pickup ID</span><p className="font-mono text-gray-800">{shippingDetails.pickupId || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Pickup Token</span><p className="font-mono text-gray-800">{shippingDetails.pickupToken || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Estimated Delivery Date</span><p className="font-mono text-gray-800">{shippingDetails.estimatedDeliveryDate || "—"}</p></div>
+                    <div><span className="text-xs text-gray-500">Expected Delivery Date</span><p className="font-mono text-gray-800">{shippingDetails.expectedDeliveryDate || "—"}</p></div>
+                    <div className="md:col-span-2"><span className="text-xs text-gray-500">Shipment Created At</span><p className="font-mono text-gray-800">{shippingDetails.shipmentCreatedAt || "—"}</p></div>
+                    <div className="md:col-span-2"><span className="text-xs text-gray-500">Shipment Updated At</span><p className="font-mono text-gray-800">{shippingDetails.shipmentUpdatedAt || "—"}</p></div>
+                    <div className="md:col-span-2"><span className="text-xs text-gray-500">Label URL</span><p className="font-mono text-blue-600 break-all">{shippingDetails.labelUrl ? <a href={shippingDetails.labelUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">{shippingDetails.labelUrl}</a> : "—"}</p></div>
+                    <div className="md:col-span-2"><span className="text-xs text-gray-500">Track URL</span><p className="font-mono text-blue-600 break-all">{shippingDetails.trackUrl ? <a href={shippingDetails.trackUrl} target="_blank" rel="noopener noreferrer" className="hover:underline">{shippingDetails.trackUrl}</a> : "—"}</p></div>
                   </div>
                   <div className="mt-3 pt-3 border-t border-blue-200">
                     <p className="text-xs font-semibold text-gray-600 mb-2">Pipeline Step Status</p>
@@ -939,14 +941,14 @@ const AdminShippingManagementPage = () => {
                         { key: "trackShipmentStatus", label: "Track Shipment", logKey: "trackShipmentStatuslog" },
                         { key: "estimateStatus", label: "Estimate", logKey: "estimateStatuslog" }
                       ].map(({ key, label, logKey }) => {
-                        const status = retriggerModalOrder.shippingDetails[key as keyof ShippingDetails] as string | null;
-                        const logs = (retriggerModalOrder.shippingDetails[logKey as keyof ShippingDetails] as StepLog[] | undefined) || [];
+                        const status = shippingDetails[key as keyof ShippingDetails] as string | null;
+                        const logs = (shippingDetails[logKey as keyof ShippingDetails] as StepLog[] | undefined) || [];
                         return (
                           <button
                             key={key}
                             onClick={() => {
                               if (logs.length > 0) {
-                                setStepLogModal({ shippingDetails: retriggerModalOrder.shippingDetails, stepKey: key, stepLabel: label, logs });
+                                setStepLogModal({ shippingDetails, stepKey: key, stepLabel: label, logs });
                               }
                             }}
                             disabled={logs.length === 0}
@@ -966,7 +968,8 @@ const AdminShippingManagementPage = () => {
                     </div>
                   </div>
                 </div>
-              )}
+                );
+              })()}
 
               {retriggerModalOrder.shippingDetails && (
                 <button
