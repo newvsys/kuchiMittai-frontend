@@ -391,7 +391,8 @@ const AdminShippingManagementPage = () => {
   }, []);
 
   // An INITIALIZED shipment record means Shiprocket processing never really started — treat it as no shipment yet
-  const hasShipment = (o: FailedStepOrder) => !!o.shippingDetails && o.shippingDetails.shipmentStatus !== "INITIALIZED";
+  const hasShipment = (o: FailedStepOrder): o is FailedStepOrder & { shippingDetails: ShippingDetails } =>
+    !!o.shippingDetails && o.shippingDetails.shipmentStatus !== "INITIALIZED";
 
   const fetchFailedStepOrders = async () => {
     setLoading(true);
