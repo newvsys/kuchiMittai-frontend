@@ -6,12 +6,12 @@ const PrivacyPolicyPage = () => {
       <div className="space-y-10 text-gray-700 text-base leading-8">
 
         <p>
-          At trtnat, we value your privacy and are committed to protecting your personal
+          At trynat, we value your privacy and are committed to protecting your personal
           information. This Privacy Policy explains how we collect, use, store, and safeguard the
           information you provide while using our website and services.
         </p>
         <p>
-          By accessing or using the trtnat website, you agree to the terms outlined in this
+          By accessing or using the trynat website, you agree to the terms outlined in this
           Privacy Policy.
         </p>
 
@@ -53,7 +53,7 @@ const PrivacyPolicyPage = () => {
 
         <section>
           <h2 className="text-xl font-bold text-blue-600 mb-3">How We Use Your Information</h2>
-          <p>trtnat may use your information to:</p>
+          <p>trynat may use your information to:</p>
           <ul className="list-disc list-outside pl-6 mt-4 space-y-2">
             <li>Process and deliver your orders</li>
             <li>Communicate order updates and customer support</li>
@@ -71,7 +71,7 @@ const PrivacyPolicyPage = () => {
 
         <section>
           <h2 className="text-xl font-bold text-blue-600 mb-3">Sharing of Information</h2>
-          <p>trtnat does not sell, rent, or trade your personal information to third parties.</p>
+          <p>trynat does not sell, rent, or trade your personal information to third parties.</p>
           <p className="mt-4">Your information may be shared only with:</p>
           <ul className="list-disc list-outside pl-6 mt-4 space-y-2">
             <li>Delivery and logistics partners</li>
@@ -130,7 +130,7 @@ const PrivacyPolicyPage = () => {
         <section>
           <h2 className="text-xl font-bold text-blue-600 mb-3">Third-Party Links</h2>
           <p>
-            Our website may contain links to third-party websites. trtnat is not responsible for
+            Our website may contain links to third-party websites. trynat is not responsible for
             the privacy practices, policies, or content of external websites.
           </p>
           <p className="mt-4">
@@ -141,7 +141,7 @@ const PrivacyPolicyPage = () => {
         <section>
           <h2 className="text-xl font-bold text-blue-600 mb-3">Policy Updates</h2>
           <p>
-            trtnat reserves the right to update or modify this Privacy Policy at any time. Any
+            trynat reserves the right to update or modify this Privacy Policy at any time. Any
             changes will become effective immediately upon posting on this page.
           </p>
           <p className="mt-4">
@@ -153,7 +153,7 @@ const PrivacyPolicyPage = () => {
           <h2 className="text-xl font-bold text-blue-600 mb-3">Contact Us</h2>
           <p>
             If you have any questions or concerns regarding this Privacy Policy or how your information
-            is handled, please contact trtnat customer support at{" "}
+            is handled, please contact trynat customer support at{" "}
             <a
               href="mailto:customercare@trynat.com"
               className="text-blue-600 hover:underline"

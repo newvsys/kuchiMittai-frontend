@@ -9,13 +9,13 @@ const QualityAssurancePage = () => {
 
   return (
     <main className="max-w-screen-lg mx-auto px-6 py-16">
-      <h1 className="text-3xl font-bold text-blue-600 mb-2">trtnat Quality Policy</h1>
+      <h1 className="text-3xl font-bold text-blue-600 mb-2">trynat Quality Policy</h1>
       <h2 className="text-xl font-semibold text-gray-600 mb-8">Our Promise</h2>
 
       <div className="space-y-10 text-gray-700 text-base leading-8">
 
         <p>
-          At trtnat, quality is more than a standard — it is our commitment to every customer.
+          At trynat, quality is more than a standard — it is our commitment to every customer.
           From carefully selected ingredients to the final pack that reaches your hands, we ensure every
           product reflects freshness, authenticity, hygiene, and great taste. We believe that only the
           best ingredients and processes can create snacks that bring true joy in every bite.
@@ -23,7 +23,7 @@ const QualityAssurancePage = () => {
 
         <section>
           <h2 className="text-xl font-bold text-blue-600 mb-6">
-            Curious about how your favorite trtnat treats are made?
+            Curious about how your favorite trynat treats are made?
           </h2>
           <ol className="space-y-6 list-none pl-0">
             {steps.map((step, index) => (
@@ -40,7 +40,7 @@ const QualityAssurancePage = () => {
         <section>
           <h2 className="text-xl font-bold text-blue-600 mb-3">Continuous Improvement</h2>
           <p>
-            trtnat is committed to continuous innovation and improvement. Through ongoing research
+            trynat is committed to continuous innovation and improvement. Through ongoing research
             and product development, we constantly refine our recipes, enhance nutritional value, and
             improve product quality while preserving the traditional taste that defines our brand.
           </p>
@@ -49,7 +49,7 @@ const QualityAssurancePage = () => {
         <section className="bg-blue-50 border-l-4 border-blue-600 p-6 rounded-r-lg">
           <h2 className="text-xl font-bold text-blue-600 mb-3">Our Commitment to You</h2>
           <p>
-            Every trtnat product is created with care, responsibility, and passion — ensuring that
+            Every trynat product is created with care, responsibility, and passion — ensuring that
             every bite delivers the quality and trust our customers deserve.
           </p>
         </section>

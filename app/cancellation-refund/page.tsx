@@ -5,14 +5,14 @@ const CancellationRefundPage = () => {
 
       <ol className="space-y-6 text-gray-700 text-base leading-8 list-decimal list-outside pl-5">
         <li>
-          At trtnat, we strive to deliver fresh and high-quality products with every order.
+          At trynat, we strive to deliver fresh and high-quality products with every order.
         </li>
         <li>
           Once an order is placed, it is processed immediately to ensure timely dispatch, and hence,
           order cannot be <strong>CANCELED</strong>.
         </li>
         <li>
-          trtnat will not be liable for any delays in delivery after the order has been shipped
+          trynat will not be liable for any delays in delivery after the order has been shipped
           from our facility.
         </li>
         <li>
@@ -20,8 +20,8 @@ const CancellationRefundPage = () => {
           refunded.
         </li>
         <li>
-          If trtnat suspects any fraudulent transaction or transactions violating the terms of
-          website use, trtnat is at sole discretion to cancel such orders. Further such
+          If trynat suspects any fraudulent transaction or transactions violating the terms of
+          website use, trynat is at sole discretion to cancel such orders. Further such
           accounts / customers will be denied access to the use or purchase of products from the website.
         </li>
         <li>
