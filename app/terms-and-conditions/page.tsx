@@ -8,8 +8,8 @@ const TermsAndConditionsPage = () => {
         <section>
           <h2 className="text-xl font-bold text-blue-600 mb-3">Services Overview</h2>
           <p>
-            Welcome to Kuchi Mittai. By accessing or using our website and services, you agree to comply
-            with and be bound by the following Terms &amp; Conditions. Kuchi Mittai specializes in
+            Welcome to trtnat. By accessing or using our website and services, you agree to comply
+            with and be bound by the following Terms &amp; Conditions. trtnat specializes in
             delivering traditional sweets, snacks, cooking oils, and other food delicacies across select
             locations in India.
           </p>
@@ -38,7 +38,7 @@ const TermsAndConditionsPage = () => {
         <section>
           <h2 className="text-xl font-bold text-blue-600 mb-3">Website Access &amp; Usage</h2>
           <p>
-            Kuchi Mittai grants users a limited, non-transferable license to access and use this website
+            trtnat grants users a limited, non-transferable license to access and use this website
             for personal shopping purposes only. Users may not:
           </p>
           <ul className="list-disc list-outside pl-6 mt-4 space-y-2">
@@ -57,7 +57,7 @@ const TermsAndConditionsPage = () => {
             login credentials and all activities under your account.
           </p>
           <p className="mt-4">
-            Kuchi Mittai reserves the right to suspend or terminate accounts containing false or
+            trtnat reserves the right to suspend or terminate accounts containing false or
             misleading information.
           </p>
         </section>
@@ -104,7 +104,7 @@ const TermsAndConditionsPage = () => {
         <section>
           <h2 className="text-xl font-bold text-blue-600 mb-3">Modification of Terms</h2>
           <p>
-            Kuchi Mittai reserves the right to update or modify these Terms &amp; Conditions at any time
+            trtnat reserves the right to update or modify these Terms &amp; Conditions at any time
             without prior notice. Continued use of the website after changes are posted constitutes
             acceptance of the revised terms.
           </p>
@@ -115,7 +115,7 @@ const TermsAndConditionsPage = () => {
           <h2 className="text-xl font-bold text-blue-600 mb-3">Intellectual Property</h2>
           <p>
             All content on this website, including text, images, logos, graphics, product descriptions,
-            and website design, is the property of Kuchi Mittai or its licensors and is protected under
+            and website design, is the property of trtnat or its licensors and is protected under
             applicable intellectual property laws.
           </p>
           <p className="mt-4">
@@ -127,7 +127,7 @@ const TermsAndConditionsPage = () => {
         <section>
           <h2 className="text-xl font-bold text-blue-600 mb-3">Reviews &amp; Feedback</h2>
           <p>
-            Any feedback, suggestions, reviews, or comments submitted to Kuchi Mittai may be used by us
+            Any feedback, suggestions, reviews, or comments submitted to trtnat may be used by us
             for promotional, operational, or business purposes without compensation to the user.
           </p>
           <p className="mt-4">
@@ -137,7 +137,7 @@ const TermsAndConditionsPage = () => {
 
         <section>
           <h2 className="text-xl font-bold text-blue-600 mb-3">Limitation of Liability</h2>
-          <p>Kuchi Mittai shall not be held liable for:</p>
+          <p>trtnat shall not be held liable for:</p>
           <ul className="list-disc list-outside pl-6 mt-4 space-y-2">
             <li>Delays caused by unforeseen circumstances</li>
             <li>Temporary interruptions in website availability</li>
@@ -150,7 +150,7 @@ const TermsAndConditionsPage = () => {
         <section>
           <h2 className="text-xl font-bold text-blue-600 mb-3">Indemnification</h2>
           <p>
-            You agree to indemnify and hold harmless Kuchi Mittai, its owners, employees, and affiliates
+            You agree to indemnify and hold harmless trtnat, its owners, employees, and affiliates
             from any claims, damages, liabilities, or expenses arising from your misuse of the website,
             violation of these terms, or breach of applicable laws.
           </p>
@@ -159,7 +159,7 @@ const TermsAndConditionsPage = () => {
         <section>
           <h2 className="text-xl font-bold text-blue-600 mb-3">Termination</h2>
           <p>
-            Kuchi Mittai reserves the right to suspend or terminate user access to the website at its
+            trtnat reserves the right to suspend or terminate user access to the website at its
             sole discretion, without prior notice, if any violation of these Terms &amp; Conditions is
             identified.
           </p>
@@ -178,7 +178,7 @@ const TermsAndConditionsPage = () => {
         <section>
           <h2 className="text-xl font-bold text-blue-600 mb-3">Contact Us</h2>
           <p>
-            For any questions regarding these Terms &amp; Conditions, please contact Kuchi Mittai customer
+            For any questions regarding these Terms &amp; Conditions, please contact trtnat customer
             support through the contact information available on our website.
           </p>
         </section>

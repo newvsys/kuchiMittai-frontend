@@ -5,7 +5,7 @@ const AboutPage = () => {
 
       <section className="space-y-6 text-gray-700 text-base leading-8">
         <p>
-          At <strong>Kuchi Mittai</strong>, we bring the authentic taste of tradition right to your doorstep.
+          At <strong>trtnat</strong>, we bring the authentic taste of tradition right to your doorstep.
           We specialize in delivering a wide range of premium delicacies, including traditional sweets,
           crispy snacks, quality cooking oils, and many more.
         </p>
@@ -21,7 +21,7 @@ const AboutPage = () => {
         </p>
         <p>
           Whether it is a festive celebration, a family gathering, or simply a craving for something
-          delicious, Kuchi Mittai is here to make every moment sweeter.
+          delicious, trtnat is here to make every moment sweeter.
         </p>
 
         <div className="mt-8 border-t pt-6">

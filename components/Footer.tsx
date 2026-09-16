@@ -32,7 +32,7 @@ const Footer = () => {
               About Us
             </h3>
             <p className="text-sm leading-7 text-gray-400">
-              At Kuchi Mittai, we bring the authentic taste of tradition right to your doorstep. We specialize in delivering a wide range of premium delicacies, including traditional sweets, crispy snacks, quality cooking oils, and many more.
+              At trtnat, we bring the authentic taste of tradition right to your doorstep. We specialize in delivering a wide range of premium delicacies, including traditional sweets, crispy snacks, quality cooking oils, and many more.
             </p>
             <Link href="/about" className="inline-flex items-center gap-1 mt-4 text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors">
               Read more &raquo;
@@ -156,7 +156,7 @@ const Footer = () => {
       {/* ── Bottom bar ── */}
       <div className="border-t border-gray-700">
         <div className="max-w-screen-2xl mx-auto px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-gray-500">
-          <span>&copy; 2026 Kuchi Mittai India Pvt Ltd. All rights reserved.</span>
+          <span>&copy; 2026 trtnat India Pvt Ltd. All rights reserved.</span>
           <span>
             Powered by{" "}
             <a href="https://www.newvsys.com/" target="_blank" rel="noopener noreferrer"

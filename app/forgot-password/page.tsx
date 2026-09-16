@@ -211,7 +211,7 @@ const ForgotPasswordPage = () => {
           </div>
           <div>
             <h2 className="text-base font-bold leading-tight">Forgot Password</h2>
-            <p className="text-blue-100 text-xs">Reset your KuchiMittai account password</p>
+            <p className="text-blue-100 text-xs">Reset your trtnat account password</p>
           </div>
         </div>
 
