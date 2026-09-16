@@ -93,8 +93,8 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-gray-400">
               <li className="flex items-start gap-2.5">
                 <FaEnvelope className="text-blue-400 mt-0.5 flex-shrink-0" />
-                <a href="mailto:customercare@kuchimittai.com" className="hover:text-white transition-colors break-all">
-                  customercare@kuchimittai.com
+                <a href="mailto:customercare@trynat.com" className="hover:text-white transition-colors break-all">
+                  customercare@trynat.com
                 </a>
               </li>
               <li className="flex items-center gap-2.5">

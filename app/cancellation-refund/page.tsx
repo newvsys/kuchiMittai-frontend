@@ -27,10 +27,10 @@ const CancellationRefundPage = () => {
         <li>
           Please reach out to our customer care for any further information or queries at{" "}
           <a
-            href="mailto:customercare@kuchimittai.com"
+            href="mailto:customercare@trynat.com"
             className="text-blue-600 hover:underline"
           >
-            customercare@kuchimittai.com
+            customercare@trynat.com
           </a>{" "}
           or call us on{" "}
             <a href="tel:+919943355568" className="text-blue-600 hover:underline">

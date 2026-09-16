@@ -155,10 +155,10 @@ const PrivacyPolicyPage = () => {
             If you have any questions or concerns regarding this Privacy Policy or how your information
             is handled, please contact Kuchi Mittai customer support at{" "}
             <a
-              href="mailto:customercare@kuchimittai.com"
+              href="mailto:customercare@trynat.com"
               className="text-blue-600 hover:underline"
             >
-              customercare@kuchimittai.com
+              customercare@trynat.com
             </a>{" "}
             or call us on{" "}
               <a href="tel:+919943355568" className="text-blue-600 hover:underline">

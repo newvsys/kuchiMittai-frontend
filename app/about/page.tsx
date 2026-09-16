@@ -36,7 +36,7 @@ const AboutPage = () => {
 
         <div className="mt-8 border-t pt-6">
           <h2 className="text-xl font-bold text-blue-600 mb-3">Contact Us</h2>
-          <p>Email: <a href="mailto:customercare@kuchimittai.com" className="text-blue-600 hover:underline">customercare@kuchimittai.com</a></p>
+          <p>Email: <a href="mailto:customercare@trynat.com" className="text-blue-600 hover:underline">customercare@trynat.com</a></p>
             <p>Call: +91 9943355568</p>
           <p>Customer Care Timings: 10:00 AM To 6:00 PM</p>
         </div>
