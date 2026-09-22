@@ -23,6 +23,7 @@ interface InputCategory {
 }
 
 const DEFAULT_MAX_PRICE = 10000;
+const DEFAULT_SORT = "defaultSort";
 
 const Filters = () => {
   const pathname = usePathname();
@@ -119,7 +120,7 @@ const Filters = () => {
     const curInStock  = searchParams.get("inStock")  ?? "true";
     const curMinPrice = searchParams.get("minPrice") ?? "0";
     const curPrice    = searchParams.get("price")    ?? String(DEFAULT_MAX_PRICE);
-    const curSort     = searchParams.get("sort")     ?? "lowPrice";
+    const curSort     = searchParams.get("sort")     ?? DEFAULT_SORT;
     const curPage     = searchParams.get("page")     ?? "1";
     const curCats     = [...searchParams.getAll("categoryId")].sort().join(",");
 

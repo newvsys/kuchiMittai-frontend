@@ -32,7 +32,7 @@ const SearchPage = async ({ searchParams }: Props) => {
     const inStock = typeof sp?.inStock === "string" ? sp.inStock : "true";
     const minPrice = typeof sp?.minPrice === "string" ? sp.minPrice : "0";
     const price = typeof sp?.price === "string" ? sp.price : "10000";
-    const sort = typeof sp?.sort === "string" ? sp.sort : "lowPrice";
+    const sort = typeof sp?.sort === "string" ? sp.sort : "defaultSort";
     const page = typeof sp?.page === "string" ? sp.page : "1";
 
     const categoryIds = Array.isArray(sp?.categoryId)

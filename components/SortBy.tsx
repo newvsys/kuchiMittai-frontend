@@ -27,6 +27,7 @@ const SortBy = () => {
           style={{ backgroundImage: "none" }}
           name="sort"
         >
+          <option value="defaultSort">Popularity</option>
           <option value="lowPrice">Price: Low to High</option>
           <option value="highPrice">Price: High to Low</option>
         </select>

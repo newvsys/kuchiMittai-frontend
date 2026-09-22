@@ -56,7 +56,7 @@ const OrderStatusPage = () => {
 
   const continueShopping = () => {
     const filterQuery = sessionStorage.getItem("lastProductSearch");
-    const defaultSearch = "price=10000&minPrice=0&inStock=false&sort=lowPrice&page=1";
+    const defaultSearch = "price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1";
     router.push(`/search?${filterQuery || defaultSearch}`);
   };
 

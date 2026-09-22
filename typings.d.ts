@@ -32,6 +32,8 @@ interface Product {
   categoryId: string;
   category: {name: string}?;
   inStock: number;
+  priority?: number | null;
+  topFlag?: string | null;
   attributes?: { id?: string; attributeName: string; attributeValue?: string; [key: string]: any }[];
 }
 

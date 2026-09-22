@@ -41,7 +41,7 @@ const SearchInput = () => {
     if (!params.has("inStock"))  params.set("inStock",  "true");
     if (!params.has("minPrice")) params.set("minPrice", "0");
     if (!params.has("price"))    params.set("price",    "10000");
-    if (!params.has("sort"))     params.set("sort",     "lowPrice");
+    if (!params.has("sort"))     params.set("sort",     "defaultSort");
 
     router.push(`/search?${params.toString()}`);
   };

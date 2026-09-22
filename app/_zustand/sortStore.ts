@@ -9,7 +9,7 @@ export type Actions = {
 };
 
 export const useSortStore = create<State & Actions>((set) => ({
-  sortBy: "lowPrice",
+  sortBy: "defaultSort",
   changeSortBy: (mode: string) => {
     set((state) => {
       return { sortBy: mode };

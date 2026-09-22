@@ -37,7 +37,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
   const filterQuery = searchParams.toString();
   const productsHref = filterQuery
     ? `/search?${filterQuery}`
-    : "/search?categoryId=0&price=10000&minPrice=0&inStock=false&sort=lowPrice&page=1";
+    : "/search?categoryId=0&price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1";
   const [baseProduct, setBaseProduct] = useState<any>(null); // always the original product
   const [product, setProduct] = useState<any>(null); // currently selected product/variant
   const [isLoading, setIsLoading] = useState(true);

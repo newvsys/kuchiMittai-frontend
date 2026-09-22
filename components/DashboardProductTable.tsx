@@ -18,12 +18,19 @@ interface Product {
   slug: string;
   inStock: number;
   stock: number;
+  priority: number | null;
+  topFlag: string | null;
 }
 
 interface Category {
   id: number;
   title: string;
 }
+
+const parsePriority = (value: string): number | null => {
+  const parsed = parseInt(value, 10);
+  return Number.isNaN(parsed) ? null : parsed;
+};
 
 const DashboardProductTable = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -35,13 +42,13 @@ const DashboardProductTable = () => {
   // Add product dialog
   const [addDialog, setAddDialog] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [form, setForm] = useState({ name: "", description: "", categoryId: "", slug: "" });
+  const [form, setForm] = useState({ name: "", description: "", categoryId: "", slug: "", priority: "", topFlag: "N" });
   const [submitting, setSubmitting] = useState(false);
 
   // View/Edit product dialog
   const [editDialog, setEditDialog] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
-  const [editForm, setEditForm] = useState({ name: "", description: "", categoryId: "", slug: "" });
+  const [editForm, setEditForm] = useState({ name: "", description: "", categoryId: "", slug: "", priority: "", topFlag: "N" });
   const [editProductId, setEditProductId] = useState<number | null>(null);
   const editProductIdRef = useRef<number | null>(null);
   const [editSubmitting, setEditSubmitting] = useState(false);
@@ -210,7 +217,7 @@ const DashboardProductTable = () => {
   };
 
   const openAddDialog = () => {
-    setForm({ name: "", description: "", categoryId: "", slug: "" });
+    setForm({ name: "", description: "", categoryId: "", slug: "", priority: "", topFlag: "N" });
     fetch(`${API_BASE}/products/categories`)
       .then((res) => res.json())
       .then((data) => setCategories(Array.isArray(data) ? data : []))
@@ -233,6 +240,8 @@ const DashboardProductTable = () => {
           description: form.description.trim(),
           categoryId: Number(form.categoryId),
           slug: form.slug.trim(),
+          priority: parsePriority(form.priority),
+          topFlag: form.topFlag,
         }),
       });
       if (!res.ok) throw new Error("Failed to create product");
@@ -270,6 +279,8 @@ const DashboardProductTable = () => {
         description: data.description || "",
         categoryId: matched ? String(matched.id) : "",
         slug: data.slug || "",
+        priority: data.priority != null ? String(data.priority) : "",
+        topFlag: data.topFlag === "Y" ? "Y" : "N",
       });
     } catch (err: any) {
       toast.error(err.message || "Failed to fetch product details");
@@ -349,6 +360,8 @@ const DashboardProductTable = () => {
             description: editForm.description.trim(),
             categoryId: Number(editForm.categoryId),
             slug: editForm.slug.trim(),
+            priority: parsePriority(editForm.priority),
+            topFlag: editForm.topFlag,
           }),
         });
         let putData: any = null;
@@ -374,6 +387,8 @@ const DashboardProductTable = () => {
           description: editForm.description.trim(),
           categoryId: Number(editForm.categoryId),
           slug: editForm.slug.trim(),
+          priority: parsePriority(editForm.priority),
+          topFlag: editForm.topFlag,
         }),
       });
       let resData: any = null;
@@ -421,6 +436,8 @@ const DashboardProductTable = () => {
                   <th className="text-left px-4 py-3 font-semibold">Title</th>
                   <th className="text-left px-4 py-3 font-semibold">Description</th>
                   <th className="text-left px-4 py-3 font-semibold">Category</th>
+                  <th className="text-left px-4 py-3 font-semibold">Priority</th>
+                  <th className="text-left px-4 py-3 font-semibold">Top</th>
                   <th className="text-left px-4 py-3 font-semibold">Actions</th>
                   <th className="text-left px-4 py-3 font-semibold">Variants</th>
                   <th className="text-left px-4 py-3 font-semibold">Delete</th>
@@ -436,6 +453,14 @@ const DashboardProductTable = () => {
                       <p className="line-clamp-2">{product.description || "—"}</p>
                     </td>
                     <td className="px-4 py-3 text-gray-600">{product.category || "—"}</td>
+                    <td className="px-4 py-3 text-gray-600">{product.priority ?? "—"}</td>
+                    <td className="px-4 py-3">
+                      {product.topFlag === "Y" ? (
+                        <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-green-100 text-green-700">Yes</span>
+                      ) : (
+                        <span className="text-xs text-gray-400">No</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <button
                         type="button"
@@ -555,6 +580,27 @@ const DashboardProductTable = () => {
                   onChange={e => setForm(f => ({ ...f, slug: e.target.value }))}
                 />
               </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Priority</label>
+                <input
+                  type="number"
+                  className="border rounded px-3 py-2 text-sm w-full"
+                  placeholder="e.g. 10 (higher = more featured)"
+                  value={form.priority}
+                  onChange={e => setForm(f => ({ ...f, priority: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Top Featured</label>
+                <select
+                  className="border rounded px-3 py-2 text-sm w-full"
+                  value={form.topFlag}
+                  onChange={e => setForm(f => ({ ...f, topFlag: e.target.value }))}
+                >
+                  <option value="N">No</option>
+                  <option value="Y">Yes</option>
+                </select>
+              </div>
               <div className="flex justify-center mt-2">
                 <button
                   type="submit"
@@ -620,6 +666,27 @@ const DashboardProductTable = () => {
                     value={editForm.slug}
                     onChange={e => setEditForm(f => ({ ...f, slug: e.target.value }))}
                   />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Priority</label>
+                  <input
+                    type="number"
+                    className="border rounded px-3 py-2 text-sm w-full"
+                    placeholder="e.g. 10 (higher = more featured)"
+                    value={editForm.priority}
+                    onChange={e => setEditForm(f => ({ ...f, priority: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Top Featured</label>
+                  <select
+                    className="border rounded px-3 py-2 text-sm w-full"
+                    value={editForm.topFlag}
+                    onChange={e => setEditForm(f => ({ ...f, topFlag: e.target.value }))}
+                  >
+                    <option value="N">No</option>
+                    <option value="Y">Yes</option>
+                  </select>
                 </div>
                 <div className="flex justify-center mt-2">
                   <button

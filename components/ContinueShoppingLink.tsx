@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 
 const DEFAULT_SEARCH_HREF =
-  "/search?categoryId=0&price=10000&minPrice=0&inStock=false&sort=lowPrice&page=1";
+  "/search?categoryId=0&price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1";
 
 // Restores the shopper's last search filters instead of resetting to defaults
 const ContinueShoppingLink = ({ className }: { className?: string }) => {

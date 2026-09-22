@@ -38,7 +38,7 @@ const Products = ({ params, searchParams }: { params: { slug?: string[] }, searc
           `&rating=${searchParams?.rating || 0}` +
           `&minPrice=${searchParams?.minPrice || 0}` +
           `&price=${searchParams?.price || 10000}` +
-          `&sort=${searchParams?.sort || "lowPrice"}` +
+          `&sort=${searchParams?.sort || "defaultSort"}` +
           `&page=${searchParams?.page || 1}` +
           (searchParams?.categoryId
             ? (Array.isArray(searchParams.categoryId)
