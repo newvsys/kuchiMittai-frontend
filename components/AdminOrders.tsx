@@ -3,6 +3,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import apiClient from "@/lib/api";
 import { API_BASE } from "@/lib/env";
+import OrderDetailsView, {
+  printOrderDetailsDocument,
+  useOrderDetails,
+} from "./OrderDetailsView";
 
 interface ShipmentHistory {
   status: string;
@@ -143,6 +147,13 @@ const AdminOrders = () => {
   const [modalOrder, setModalOrder] = useState<Order | null>(null);
   const [trackingModal, setTrackingModal] = useState<{ orderNumber: string; history: ShipmentHistory[] } | null>(null);
   const [paymentModalOrder, setPaymentModalOrder] = useState<Order | null>(null);
+
+  const [orderDetailsNumber, setOrderDetailsNumber] = useState<string | null>(null);
+  const {
+    data: orderDetails,
+    loading: orderDetailsLoading,
+    error: orderDetailsError,
+  } = useOrderDetails(orderDetailsNumber);
 
   const [shiprocketModalOrder, setShiprocketModalOrder] = useState<Order | null>(null);
   const [shiprocketForm, setShiprocketForm] = useState<ShiprocketFormState | null>(null);
@@ -302,6 +313,19 @@ const AdminOrders = () => {
 
   const closePaymentModal = () => setPaymentModalOrder(null);
   const closeTrackingModal = () => setTrackingModal(null);
+
+  const closeOrderDetailsModal = () => setOrderDetailsNumber(null);
+
+  const handlePrintOrderDetails = () => {
+    if (orderDetails) printOrderDetailsDocument(orderDetails);
+  };
+
+  // Uses the print dialog's "Save as PDF" destination; the document title
+  // becomes the suggested file name.
+  const handleDownloadOrderDetails = () => {
+    if (orderDetails)
+      printOrderDetailsDocument(orderDetails, `order-${orderDetails.orderNumber}`);
+  };
 
   const openShiprocketModal = (order: Order) => {
     setShiprocketError(null);
@@ -481,6 +505,62 @@ const AdminOrders = () => {
                   ))}
                 </ol>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Order Details Modal */}
+      {orderDetailsNumber && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={closeOrderDetailsModal}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col mx-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <div>
+                <h2 className="text-lg font-bold">Order Details</h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="btn btn-sm bg-blue-500 hover:bg-blue-600 text-white border-none"
+                  disabled={!orderDetails}
+                  onClick={handlePrintOrderDetails}
+                >
+                  Print
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline"
+                  disabled={!orderDetails}
+                  onClick={handleDownloadOrderDetails}
+                >
+                  Download PDF
+                </button>
+                <button
+                  className="btn btn-sm btn-ghost btn-circle text-lg"
+                  onClick={closeOrderDetailsModal}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            <div className="overflow-y-auto px-6 py-4">
+              {orderDetailsLoading ? (
+                <div className="flex justify-center py-10">
+                  <span className="loading loading-spinner loading-lg"></span>
+                </div>
+              ) : orderDetailsError ? (
+                <div className="alert alert-error">
+                  <span>{orderDetailsError}</span>
+                </div>
+              ) : orderDetails ? (
+                <OrderDetailsView details={orderDetails} />
+              ) : null}
             </div>
           </div>
         </div>
@@ -1221,6 +1301,7 @@ const AdminOrders = () => {
                 <th>Payment</th>
                 <th>Total</th>
                 <th>Created At</th>
+                <th>Order Details</th>
                 <th>Shipments</th>
                 <th>Payment Details</th>
                 <th>Labels</th>
@@ -1230,7 +1311,7 @@ const AdminOrders = () => {
             <tbody>
               {displayedOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="text-center py-10 text-gray-400">
+                  <td colSpan={11} className="text-center py-10 text-gray-400">
                     No orders found.
                   </td>
                 </tr>
@@ -1273,6 +1354,15 @@ const AdminOrders = () => {
                     </td>
                     <td className="text-sm whitespace-nowrap">
                       {formatDate(order.orderCreatedAt)}
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        onClick={() => setOrderDetailsNumber(order.orderNumber)}
+                        className="text-blue-600 hover:underline text-sm font-medium whitespace-nowrap"
+                      >
+                        View Order Details
+                      </button>
                     </td>
                     <td>
                       {order.shipments.length === 0 ? (

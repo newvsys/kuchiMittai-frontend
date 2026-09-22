@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { Notification, NotificationType, NotificationPriority } from '@/types/notification';
 // Simple date formatter function
 const formatTimeAgo = (date: string) => {
@@ -19,8 +20,17 @@ import {
   FaExclamationTriangle,
   FaCheck,
   FaTrash,
-  FaCircle 
+  FaCircle,
+  FaExternalLinkAlt
 } from 'react-icons/fa';
+
+// Order number lives in metadata when available, otherwise it is embedded in the notification text.
+const getOrderNumber = (notification: Notification): string | null => {
+  const fromMeta = notification.metadata?.orderNumber;
+  if (typeof fromMeta === 'string' && fromMeta.trim()) return fromMeta.trim();
+  const match = `${notification.title} ${notification.message}`.match(/ORD-[A-Za-z0-9-]+/);
+  return match ? match[0] : null;
+};
 
 interface NotificationCardProps {
   notification: Notification;
@@ -90,6 +100,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   onDelete
 }) => {
     const timeAgo = formatTimeAgo(notification.createdAt);
+    const orderNumber = getOrderNumber(notification);
 
   return (
     <div className={`
@@ -154,6 +165,18 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
             {/* Actions */}
             <div className="flex items-center space-x-2">
+              {orderNumber && (
+                <Link
+                  href={`/admin/order-details/${encodeURIComponent(orderNumber)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1 transition-colors"
+                  aria-label={`Open order details for ${orderNumber}`}
+                >
+                  <FaExternalLinkAlt className="w-3 h-3 mr-1" />
+                  Order {orderNumber}
+                </Link>
+              )}
               {!notification.isRead && (
                 <button
                   onClick={() => onMarkAsRead(notification.id)}

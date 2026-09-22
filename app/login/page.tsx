@@ -2,7 +2,7 @@
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 const LoginPage = () => {
   const router = useRouter();
@@ -14,8 +14,25 @@ const LoginPage = () => {
   const [emailVal, setEmailVal] = useState("");
   const [passwordVal, setPasswordVal] = useState("");
   const { data: session, status: sessionStatus } = useSession();
-  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  const callbackUrlParam = searchParams.get("callbackUrl") || "/";
+  // next-auth passes an absolute URL; reduce it to a same-origin relative path
+  // so the /admin check works and cross-origin redirects are rejected.
+  const callbackUrl = useMemo(() => {
+    if (callbackUrlParam.startsWith("/")) return callbackUrlParam;
+    if (typeof window === "undefined") return "/";
+    try {
+      const url = new URL(callbackUrlParam, window.location.origin);
+      if (url.origin !== window.location.origin) return "/";
+      return `${url.pathname}${url.search}${url.hash}`;
+    } catch {
+      return "/";
+    }
+  }, [callbackUrlParam]);
   const isAdminLogin = callbackUrl.startsWith("/admin");
+
+  // Admins land on the requested admin page when one was given, otherwise the default dashboard.
+  const resolvePostLoginRoute = (role: string) =>
+    role === "admin" ? (isAdminLogin ? callbackUrl : "/admin/categories") : callbackUrl;
 
   // OTP login state
   const [loginMode, setLoginMode] = useState<"password" | "otp">("password");
@@ -42,7 +59,7 @@ const LoginPage = () => {
     if (sessionStatus === "authenticated") {
       const isAdmin = (session as any)?.user?.role === "admin";
       if (isAdmin) {
-        router.replace("/admin/categories");
+        router.replace(isAdminLogin ? callbackUrl : "/admin/categories");
       } else {
         router.replace(callbackUrl);
       }
@@ -119,7 +136,7 @@ const LoginPage = () => {
       setIsLoading(false);
     } else {
       setError("");
-      const nextRoute = role === "admin" ? "/admin/categories" : callbackUrl;
+      const nextRoute = resolvePostLoginRoute(role);
       router.push(nextRoute);
     }
   };
@@ -191,7 +208,7 @@ const LoginPage = () => {
         setError("Login failed. Please try again.");
         setIsLoading(false);
       } else {
-        const nextRoute = role === "admin" ? "/admin/categories" : callbackUrl;
+        const nextRoute = resolvePostLoginRoute(role);
         router.push(nextRoute);
       }
     } catch {
