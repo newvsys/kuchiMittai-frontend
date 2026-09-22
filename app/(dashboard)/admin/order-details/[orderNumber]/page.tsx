@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { use } from "react";
 import Link from "next/link";
 import { DashboardSidebar } from "@/components";
 import OrderDetailsView, {
@@ -11,9 +11,9 @@ import OrderDetailsView, {
 const AdminOrderDetailsPage = ({
   params,
 }: {
-  params: { orderNumber: string };
+  params: Promise<{ orderNumber: string }>;
 }) => {
-  const orderNumber = decodeURIComponent(params.orderNumber);
+  const orderNumber = decodeURIComponent(use(params).orderNumber);
   const { data, loading, error } = useOrderDetails(orderNumber);
 
   return (
