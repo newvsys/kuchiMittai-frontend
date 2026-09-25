@@ -66,6 +66,15 @@ const nextConfig = {
     async headers() {
       return [
         {
+          source: '/promo/promo-config.json',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            },
+          ],
+        },
+        {
           source: '/(.*)',
           headers: [
             {

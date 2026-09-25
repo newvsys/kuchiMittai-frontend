@@ -1,0 +1,56 @@
+[
+  {
+    "src": "/promo/oilpromo1.png",
+    "alt": "Oil product promotion",
+    "searchUrl": "/search?keyword=oil&price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1&categoryId=1",
+    "active": true
+  },
+  {
+    "src": "/promo/oilpromo2.png",
+    "alt": "Oil product offer",
+    "searchUrl": "/product/oil-ghee-trial-combo-pack?price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1",
+    "active": true
+  },
+  {
+    "src": "/promo/oilpromo3.png",
+    "alt": "ghee  promotion",
+    "searchUrl": "/product/Cow%20Ghee?price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1&search=ghee",
+    "active": true
+  },
+  {
+    "src": "/promo/murukupromo1.png",
+    "alt": "Murukku product offer",
+    "searchUrl": "/search?price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1&search=murukku",
+    "active": true
+  },
+  {
+    "src": "/promo/halwa.png",
+    "alt": "Halwa promotion",
+    "searchUrl": "/search?price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1&categoryId=2&search=Halwa",
+    "active": true
+  },
+  {
+    "src": "/promo/sweets1.png",
+    "alt": "Sweets  offer",
+    "searchUrl": "/search?price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1&search=sweet&categoryId=2",
+    "active": true
+  },
+   {
+    "src": "/promo/Jaggery.png",
+    "alt": "Jaggery product offer",
+    "searchUrl": "/search?price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1&search=Jaggery&categoryId=3",
+    "active": true
+  },
+  {
+    "src": "/promo/pepper.png",
+    "alt": "Pepper promotion",
+    "searchUrl": "/product/Black%20Pepper?price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1&search=&categoryId=3",
+    "active": true
+  },
+  {
+    "src": "/promo/powder.png",
+    "alt": "Turmeric Powder   offer",
+    "searchUrl": "/search?price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1&search=Powder&categoryId=3",
+    "active": true
+  }
+]

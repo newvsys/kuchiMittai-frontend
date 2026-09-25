@@ -152,7 +152,7 @@ const Filters = () => {
 
   return (
     <div className="rounded-2xl border border-gray-200 overflow-hidden">
-      <div className="bg-blue-500 border-b border-blue-600 px-4 py-2.5">
+      <div className="sticky top-0 z-20 bg-blue-500 border-b border-blue-600 px-4 py-2.5">
         <button
           type="button"
           onClick={() => setIsFiltersOpen((isOpen) => !isOpen)}

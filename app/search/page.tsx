@@ -3,6 +3,7 @@ import ProductItem from "@/components/ProductItem";
 import SortBy from "@/components/SortBy";
 import SearchMaxPriceInitializer from "@/components/SearchMaxPriceInitializer";
 import SearchPagination from "@/components/SearchPagination";
+import ProductAdvertisementFlashBar from "@/components/ProductAdvertisementFlashBar";
 import React from "react";
 import { sanitize } from "@/lib/sanitize";
 import { API_BASE } from "@/lib/env";
@@ -26,6 +27,20 @@ const SearchPage = async ({ searchParams }: Props) => {
   let maxPrice: number | null = null;
   let totalPages = 1;
   let ratingMap: Record<string | number, RatingSummary> = {};
+  const initialCategoryIds = Array.isArray(sp?.categoryId)
+    ? sp.categoryId
+    : sp?.categoryId
+    ? [sp.categoryId]
+    : [];
+  const showPromoBar =
+    !sp?.search &&
+    (!sp?.inStock || sp.inStock === "false") &&
+    (!sp?.minPrice || sp.minPrice === "0") &&
+    (!sp?.price || sp.price === "10000") &&
+    (!sp?.sort || sp.sort === "defaultSort") &&
+    (!sp?.page || sp.page === "1") &&
+    (initialCategoryIds.length === 0 ||
+      (initialCategoryIds.length === 1 && initialCategoryIds[0] === "0"));
 
   try {
     const search = typeof sp?.search === "string" ? sp.search : "";
@@ -243,24 +258,28 @@ const SearchPage = async ({ searchParams }: Props) => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="w-full px-4 sm:px-6 lg:px-10 py-6">
+      <div className="w-full px-4 pb-6 pt-0 sm:px-6 lg:px-10">
 
-        <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-x-4 gap-y-0">
 
-          <>
-            <SearchMaxPriceInitializer
-              maxPrice={maxPrice}
-            />
+          <SearchMaxPriceInitializer
+            maxPrice={maxPrice}
+          />
 
-            <aside className="self-start md:sticky md:top-4">
-              <Filters />
-            </aside>
-          </>
+          {showPromoBar && (
+            <div className="mb-2 md:col-span-2">
+              <ProductAdvertisementFlashBar />
+            </div>
+          )}
+
+          <aside className={`self-start md:sticky md:top-[var(--search-sticky-top)] ${showPromoBar ? "md:row-start-2" : ""}`}>
+            <Filters />
+          </aside>
 
 
-          <div className="rounded-2xl border border-gray-200 overflow-hidden max-md:flex max-md:h-[70dvh] max-md:flex-col">
+          <div className={`overflow-hidden rounded-2xl border border-gray-200 md:overflow-visible ${showPromoBar ? "md:col-start-2 md:row-start-2" : ""}`}>
 
-            <div className="shrink-0 bg-gray-100 border-b border-gray-200 px-6 py-3 flex justify-between items-center gap-3 max-lg:flex-col max-lg:items-start">
+            <div className="sticky top-0 z-40 shrink-0 rounded-t-2xl border-b border-gray-200 bg-gray-100 px-6 py-3 shadow-sm md:top-[var(--search-sticky-top)] flex justify-between items-center gap-3 max-lg:flex-col max-lg:items-start">
 
               <div>
                 <h1 className="text-base font-bold text-gray-900">
@@ -285,7 +304,7 @@ const SearchPage = async ({ searchParams }: Props) => {
             </div>
 
 
-            <div className="min-h-0 p-4 bg-white max-md:flex-1 max-md:overflow-y-auto">
+            <div className="min-h-0 p-4 bg-white">
 
               <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
 

@@ -45,7 +45,7 @@ const HeaderTop = () => {
 
   return (
     <div className="text-black bg-white max-[573px]:px-0">
-      <div className="flex items-center justify-between max-lg:flex-wrap gap-x-4 gap-y-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 py-2">
+      <div className="flex items-center justify-between max-lg:flex-wrap gap-x-4 gap-y-2 max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 pt-0 pb-0">
 
         <ul className="flex items-center gap-x-3 max-[370px]:gap-x-2">
           <li>

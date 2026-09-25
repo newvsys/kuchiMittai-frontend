@@ -12,7 +12,7 @@ const CategoryNavBar = () => {
 
   return (
     <nav className="hidden w-full bg-blue-500 shadow-md md:block">
-      <div className="max-w-screen-2xl mx-auto px-16 max-md:px-6 flex items-center gap-x-1 overflow-x-auto scrollbar-hide py-1.5">
+      <div className="max-w-screen-2xl mx-auto px-16 max-md:px-6 flex items-center gap-x-1 overflow-x-auto scrollbar-hide py-0.5">
         <Link
           href="/search?price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1"
           className="whitespace-nowrap text-sm font-medium px-3 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition-colors text-white flex-shrink-0 font-semibold"

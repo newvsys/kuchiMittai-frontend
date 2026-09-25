@@ -78,10 +78,10 @@ const FlashMessageBanner = () => {
         }
       `}</style>
 
-      <div className="w-full flex items-center text-lg border-b border-gray-100 overflow-hidden">
+      <div className="w-full flex items-center text-base overflow-hidden leading-none">
         {/* Ticker */}
         <div
-          className="flex-1 overflow-hidden py-2"
+          className="flex-1 overflow-hidden py-1.5"
           style={{ opacity: visible ? 1 : 0, transition: "opacity 0.4s ease" }}
         >
           {msg.linkUrl ? (
@@ -90,16 +90,16 @@ const FlashMessageBanner = () => {
               href={msg.linkUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flash-ticker font-bold text-blue-600 hover:underline"
-              style={{ animationDuration: animDuration }}
+              className="flash-ticker font-bold hover:underline tracking-tight italic"
+              style={{ color: "#2563eb", animationDuration: animDuration }}
             >
               {msg.message}
             </a>
           ) : (
             <span
               key={msg.id}
-              className="flash-ticker font-bold text-blue-600"
-              style={{ animationDuration: animDuration }}
+              className="flash-ticker font-bold tracking-tight italic"
+              style={{ color: "#2563eb", animationDuration: animDuration }}
             >
               {msg.message}
             </span>
