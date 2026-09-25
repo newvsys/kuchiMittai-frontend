@@ -69,12 +69,12 @@ const ProductAdvertisementFlashBar = () => {
             <MdChevronLeft className="h-6 w-6" aria-hidden="true" />
           </button>
 
-          <div className="grid grid-cols-3 gap-1">
+          <div className="grid grid-cols-1 gap-1 sm:grid-cols-3">
             {visibleImages.map((image, index) => (
               <Link
                 key={`${image.src}-${index}`}
                 href={image.searchUrl}
-                className="block overflow-hidden"
+                className={`${index > 0 ? "hidden sm:block" : "block"} overflow-hidden`}
               >
                 <img
                   src={image.src}
