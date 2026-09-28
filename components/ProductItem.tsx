@@ -70,7 +70,7 @@ const ProductItem = ({
       <div className="flex flex-col flex-1 px-3 pt-2 pb-3 items-center text-center">
         <Link href={productHref} onClick={handleClick}>
           <h3 className="text-xs font-semibold text-gray-800 line-clamp-2 hover:text-blue-600 transition-colors leading-snug">
-            {sanitize(product.title)}
+            {sanitize(product.sku ? `${product.title}-${product.sku.replace(/.*-/, "")}` : product.title)}
           </h3>
         </Link>
 
@@ -83,6 +83,15 @@ const ProductItem = ({
         {/* Price + button pinned to bottom */}
         <div className="mt-auto pt-1.5 flex flex-col gap-1.5 w-full items-center">
           <p className="text-sm font-bold text-gray-900">₹{product.price}</p>
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+              product.inStock === 1
+                ? "bg-green-50 text-green-700"
+                : "bg-red-50 text-red-600"
+            }`}
+          >
+            {product.inStock === 1 ? "✔ In stock" : "✖ Out of stock"}
+          </span>
           <Link
             href={productHref}
             onClick={handleClick}

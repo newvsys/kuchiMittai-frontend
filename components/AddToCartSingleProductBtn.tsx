@@ -17,7 +17,7 @@ import toast from "react-hot-toast";
 
 
 
-const AddToCartSingleProductBtn = ({ product, quantityCount, disabled } : SingleProductBtnProps) => {
+const AddToCartSingleProductBtn = ({ product, quantityCount, disabled, onAdded } : SingleProductBtnProps) => {
   const { addToCart, calculateTotals } = useProductStore();
 
   const handleAddToCart = () => {
@@ -28,10 +28,12 @@ const AddToCartSingleProductBtn = ({ product, quantityCount, disabled } : Single
       price: product?.price,
       mrp: product?.mrp,
       image: product?.mainImage,
-      amount: quantityCount
+      amount: quantityCount,
+      variant: product?.sku ? product.sku.replace(/.*-/, "") : undefined
     });
     calculateTotals();
     toast.success("Product added to the cart");
+    onAdded?.();
   };
   return (
     <button

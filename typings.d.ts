@@ -23,6 +23,7 @@ interface Product {
   productId?: string;
   slug: string;
   title: string;
+  sku?: string;
   price: number;
   mrp?: number;
   rating: number;
@@ -105,6 +106,7 @@ interface SingleProductBtnProps {
   product: Product;
   quantityCount: number;
   disabled?: boolean;
+  onAdded?: () => void;
 }
 
 

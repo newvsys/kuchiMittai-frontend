@@ -8,7 +8,7 @@ import { FaCheck, FaCircleQuestion, FaClock, FaXmark } from "react-icons/fa6";
 import QuantityInputCart from "@/components/QuantityInputCart";
 import { sanitize } from "@/lib/sanitize";
 import { useSession } from "next-auth/react";
-import { API_BASE } from "@/lib/env";
+import { API_BASE, API_BASE_PLAIN } from "@/lib/env";
 import { useRouter } from "next/navigation";
 
 const showToast = async (msg: string, type: "success" | "error" = "success") => {
@@ -27,6 +27,27 @@ export const CartModule = () => {
   const [freeDelivery, setFreeDelivery] = React.useState<boolean>(true);
   const [matchedRule, setMatchedRule] = React.useState<any>(null);
   const [showDeliveryInfo, setShowDeliveryInfo] = React.useState(false);
+  const [stockMap, setStockMap] = React.useState<Record<string, number | null>>({});
+
+  const cartItemIds = products.map((p) => p.id).join(",");
+
+  React.useEffect(() => {
+    if (!hydrated || !cartItemIds) return;
+    const controller = new AbortController();
+    Promise.all(
+      cartItemIds.split(",").map((id) =>
+        fetch(`${API_BASE_PLAIN}/api/inventory/variant/${id}`, { signal: controller.signal })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((data) => [id, data?.availableQty ?? null] as [string, number | null])
+          .catch(() => [id, null] as [string, number | null])
+      )
+    )
+      .then((entries) => setStockMap(Object.fromEntries(entries)))
+      .catch(() => {});
+    return () => controller.abort();
+  }, [hydrated, cartItemIds]);
+
+  const hasOutOfStockItem = products.some((p) => stockMap[p.id] === 0);
 
   React.useEffect(() => {
     if (hydrated) return;
@@ -71,6 +92,10 @@ export const CartModule = () => {
   };
 
   const handleCheckout = () => {
+    if (hasOutOfStockItem) {
+      showToast("Please remove out of stock items before checkout", "error");
+      return;
+    }
     if (!session) {
       const callbackUrl = encodeURIComponent("/checkout");
       router.push(`/login?callbackUrl=${callbackUrl}`);
@@ -133,7 +158,10 @@ export const CartModule = () => {
             role="list"
             className="divide-y divide-gray-100"
           >
-          {products.map((product) => (
+          {products.map((product) => {
+            const availableQty = stockMap[product.id] ?? undefined;
+            const soldOut = availableQty === 0;
+            return (
             <li key={product.id} className="flex gap-4 p-4 sm:p-5 hover:bg-gray-50 transition-colors">
               <div className="flex-shrink-0">
                 <Image
@@ -154,7 +182,7 @@ export const CartModule = () => {
                           href={`#`}
                           className="font-medium text-gray-700 hover:text-gray-800"
                         >
-                          {sanitize(product.title)}
+                          {sanitize(product.variant ? `${product.title}-${product.variant}` : product.title)}
                         </Link>
                       </h3>
                     </div>
@@ -170,7 +198,7 @@ export const CartModule = () => {
                   </div>
 
                   <div className="mt-4 sm:mt-0 sm:pr-9">
-                    <QuantityInputCart product={product} />
+                    <QuantityInputCart product={product} maxQty={availableQty} />
                     <div className="absolute right-0 top-0">
                       <button
                         onClick={() => handleRemoveItem(product.id)}
@@ -185,7 +213,7 @@ export const CartModule = () => {
                 </div>
 
                 <p className="mt-4 flex space-x-2 text-sm text-gray-700">
-                  {1 ? (
+                  {!soldOut ? (
                     <FaCheck
                       className="h-5 w-5 flex-shrink-0 text-green-500"
                       aria-hidden="true"
@@ -197,11 +225,14 @@ export const CartModule = () => {
                     />
                   )}
 
-                  <span>{1 ? "In stock" : `Ships in 3 days`}</span>
+                  <span className={soldOut ? "text-red-600 font-medium" : undefined}>
+                    {soldOut ? "Out of stock" : "In stock"}
+                  </span>
                 </p>
               </div>
             </li>
-          ))}
+            );
+          })}
           </ul>
           )}
         </div>
@@ -267,11 +298,17 @@ export const CartModule = () => {
           })()}
         </dl>
         {products.length > 0 && (
-          <div className="mt-6 flex justify-end">
+          <div className="mt-6 flex flex-col items-end gap-2">
+            {hasOutOfStockItem && (
+              <p className="text-xs font-medium text-red-600">
+                ⚠ Remove out of stock items to continue
+              </p>
+            )}
             <button
               type="button"
               onClick={handleCheckout}
-              className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+              disabled={hasOutOfStockItem}
+              className="rounded-lg px-6 py-2.5 text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
             >
               Checkout
             </button>

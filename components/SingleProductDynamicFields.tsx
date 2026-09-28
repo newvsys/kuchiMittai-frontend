@@ -9,7 +9,7 @@
 // *********************
 
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import QuantityInput from "./QuantityInput";
 import AddToCartSingleProductBtn from "./AddToCartSingleProductBtn";
 import BuyNowSingleProductBtn from "./BuyNowSingleProductBtn";
@@ -23,6 +23,12 @@ const SingleProductDynamicFields = ({ product, maxQty }: { product: Product; max
   const remainingQty = maxQty !== undefined ? Math.max(0, maxQty - inCartQty) : undefined;
   const atMaxQty = remainingQty !== undefined && quantityCount >= remainingQty;
   const soldOut = remainingQty === 0;
+
+  // Reset to 1 when switching to another variant
+  useEffect(() => {
+    setQuantityCount(1);
+  }, [product.id]);
+
   return (
     <>
       <QuantityInput
@@ -43,6 +49,7 @@ const SingleProductDynamicFields = ({ product, maxQty }: { product: Product; max
             quantityCount={quantityCount}
             product={product}
             disabled={soldOut}
+            onAdded={() => setQuantityCount(1)}
           />
           <BuyNowSingleProductBtn
             quantityCount={quantityCount}

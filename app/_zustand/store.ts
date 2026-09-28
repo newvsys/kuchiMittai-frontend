@@ -8,6 +8,7 @@ export type ProductInCart = {
   mrp?: number;
   image: string;
   amount: number;
+  variant?: string;
 };
 
 export type State = {

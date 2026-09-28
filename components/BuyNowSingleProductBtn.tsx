@@ -45,6 +45,7 @@ const BuyNowSingleProductBtn = ({
         mrp: product?.mrp,
         image: product?.mainImage,
         amount: quantityCount,
+        variant: product?.sku ? product.sku.replace(/.*-/, "") : undefined,
       });
       calculateTotals();
       toast.success("Product added to the cart");
