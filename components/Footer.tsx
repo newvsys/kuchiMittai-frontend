@@ -125,23 +125,23 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-gray-400">
               <li className="flex items-center gap-2.5">
                 <FaInstagram className="text-pink-400 flex-shrink-0" />
-                <a href="https://www.instagram.com/kuchi_mittai26/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Instagram</a>
+                <a href="https://www.instagram.com/trynat26/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Instagram</a>
               </li>
               <li className="flex items-center gap-2.5">
                 <FaXTwitter className="text-gray-300 flex-shrink-0" />
-                <a href="https://x.com/KuchiMittai26" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Twitter</a>
+                <a href="https://x.com/trynat26" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Twitter</a>
               </li>
               <li className="flex items-center gap-2.5">
                 <FaYoutube className="text-red-500 flex-shrink-0" />
-                <a href="https://www.youtube.com/@kuchiMittai-d6n" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">YouTube</a>
+                <a href="https://www.youtube.com/@trynat26" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">YouTube</a>
               </li>
               <li className="flex items-center gap-2.5">
                 <FaPinterest className="text-red-400 flex-shrink-0" />
-                <a href="https://www.pinterest.com/kuchimittai26/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Pinterest</a>
+                <a href="https://www.pinterest.com/newvsys" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Pinterest</a>
               </li>
               <li className="flex items-center gap-2.5">
                 <FaFacebook className="text-blue-400 flex-shrink-0" />
-                <a href="https://www.facebook.com/profile.php?id=61591524509489" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Facebook</a>
+                <a href="https://www.facebook.com/profile.php?id=61594813264941" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Facebook</a>
               </li>
               <li className="flex items-center gap-2.5">
                 <FaWhatsapp className="text-green-400 flex-shrink-0" />
