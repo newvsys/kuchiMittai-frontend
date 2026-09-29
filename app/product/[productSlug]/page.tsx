@@ -80,7 +80,9 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
         // If main variant is out of stock, auto-select first in-stock variant
         let activeProduct = data;
         if (data?.inStock !== 1 && Array.isArray(data?.productvarlist)) {
-          const firstInStock = data.productvarlist.find((v: any) => v.inStock === 1);
+          const firstInStock = data.productvarlist.find(
+            (v: any) => v.Status !== "I" && v.inStock === 1
+          );
           if (firstInStock) {
             activeProduct = { ...data, ...firstInStock, productvarlist: data.productvarlist };
           }
@@ -428,7 +430,9 @@ const ZOOM_PANEL_SIZE = 380;
                 // Build unique list: main product + variants (avoid duplicate SKUs)
                 const allVariants = [
                   { ...baseProduct, isMain: true },
-                  ...baseProduct.productvarlist.map((v: any) => ({ ...v, isMain: false })),
+                  ...baseProduct.productvarlist
+                    .filter((v: any) => v.Status !== "I")
+                    .map((v: any) => ({ ...v, isMain: false })),
                 ];
                 const uniqueVariants = allVariants.filter((v, idx, arr) => arr.findIndex(x => x.sku === v.sku) === idx);
                 return (
