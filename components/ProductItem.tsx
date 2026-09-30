@@ -18,6 +18,7 @@ import { useSearchParams } from "next/navigation";
 import { sanitize } from "@/lib/sanitize";
 import { StarRatingWidget } from "@/components/StarRatingWidget";
 import AddToCartSingleProductBtn from "@/components/AddToCartSingleProductBtn";
+import { useProductStore } from "@/app/_zustand/store";
 
 const ProductItem = ({
   product,
@@ -33,6 +34,14 @@ const ProductItem = ({
   ratingDistribution?: Record<string, number>;
 }) => {
   const [navigating, setNavigating] = React.useState(false);
+  const availableQty = product.stock == null || product.stock === ""
+    ? null
+    : Number.isFinite(Number(product.stock))
+      ? Math.max(0, Number(product.stock))
+      : null;
+  const cartQuantity = useProductStore((state) =>
+    state.products.find((item) => item.id === String(product.id))?.amount ?? 0
+  );
   const searchParams = useSearchParams();
   const filterQuery = searchParams.toString();
   const productHref = `/product/${product.slug}${filterQuery ? `?${filterQuery}` : ""}`;
@@ -44,6 +53,18 @@ const ProductItem = ({
     }
     setNavigating(true);
   };
+
+  const validateInventory = () => {
+    if (availableQty === null) return false;
+    const currentCartQuantity = useProductStore.getState().products.find(
+      (item) => item.id === String(product.id)
+    )?.amount ?? 0;
+    return currentCartQuantity + 1 <= availableQty;
+  };
+
+  const remainingQty = availableQty === null
+    ? null
+    : Math.max(0, availableQty - cartQuantity);
 
   return (
     <div className="group flex flex-col w-full h-full rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
@@ -93,10 +114,18 @@ const ProductItem = ({
           >
             {product.inStock === 1 ? "✔ In stock" : "✖ Out of stock"}
           </span>
+          {product.inStock === 1 && remainingQty !== null && remainingQty < 5 && (
+            <p className="text-xs font-semibold text-orange-600">
+              {remainingQty === 0
+                ? "No additional stock available"
+                : `Only ${remainingQty} left in stock`}
+            </p>
+          )}
           <AddToCartSingleProductBtn
             product={product}
             quantityCount={1}
-            disabled={product.inStock !== 1}
+            disabled={product.inStock !== 1 || (remainingQty !== null && remainingQty === 0)}
+            validateStock={validateInventory}
             className="btn w-full max-w-[200px] border border-gray-300 font-normal bg-white text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-colors ease-in disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-blue-500"
           />
         </div>

@@ -14,19 +14,12 @@ interface Props {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-interface RatingSummary {
-  avgRating: number;
-  totalReviews: number;
-  distribution: Record<string, number>;
-}
-
 const SearchPage = async ({ searchParams }: Props) => {
   const sp = await searchParams;
 
   let products: any[] = [];
   let maxPrice: number | null = null;
   let totalPages = 1;
-  let ratingMap: Record<string | number, RatingSummary> = {};
   const initialCategoryIds = Array.isArray(sp?.categoryId)
     ? sp.categoryId
     : sp?.categoryId
@@ -141,121 +134,6 @@ const SearchPage = async ({ searchParams }: Props) => {
   }
 
 
-  /*
-    Fetch ratings
-    API_BASE already contains /api
-    Example:
-    http://app:8080/api/reviews/product/1
-  */
-
-  if (products.length > 0) {
-
-    const productsWithId = products.filter(
-      (p: any) => p?.id != null
-    );
-
-    const reviewIdMap = new Map<
-      number | string,
-      number | string
-    >();
-
-    productsWithId.forEach((p: any) => {
-      reviewIdMap.set(
-        p.id,
-        p.productId ??
-        p.baseProductId ??
-        p.id
-      );
-    });
-
-
-    const uniqueReviewIds = [
-      ...new Set(reviewIdMap.values())
-    ];
-
-
-    const summaries = await Promise.allSettled(
-
-      uniqueReviewIds.map((reviewId) => {
-
-        const url =
-          `${API_BASE}/reviews/product/${reviewId}`;
-
-        console.log("[REVIEW] Calling:", url);
-
-        return fetch(url, {
-          cache: "no-store",
-        })
-          .then((r) =>
-            r.ok ? r.json() : null
-          )
-          .catch(() => null);
-      })
-    );
-
-
-    const reviewDataMap =
-      new Map<number | string, RatingSummary>();
-
-
-    uniqueReviewIds.forEach((reviewId, i) => {
-
-      const result = summaries[i];
-
-      if (
-        result.status === "fulfilled" &&
-        result.value
-      ) {
-
-        const {
-          averageRating,
-          totalReviews,
-          ratingDistribution,
-        } = result.value;
-
-
-        if (
-          typeof averageRating === "number" &&
-          typeof totalReviews === "number" &&
-          totalReviews > 0
-        ) {
-
-          reviewDataMap.set(
-            reviewId,
-            {
-              avgRating: averageRating,
-              totalReviews,
-              distribution:
-                ratingDistribution ?? {},
-            }
-          );
-
-        }
-      }
-
-    });
-
-
-    productsWithId.forEach((p: any) => {
-
-      const reviewId =
-        reviewIdMap.get(p.id);
-
-      if (
-        reviewId !== undefined &&
-        reviewDataMap.has(reviewId)
-      ) {
-
-        ratingMap[p.id] =
-          reviewDataMap.get(reviewId)!;
-
-      }
-
-    });
-
-  }
-
-
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="w-full px-4 pb-6 pt-0 sm:px-6 lg:px-10">
@@ -316,15 +194,9 @@ const SearchPage = async ({ searchParams }: Props) => {
                       key={product.id}
                       product={product}
                       color="black"
-                      avgRating={
-                        ratingMap[product.id]?.avgRating
-                      }
-                      totalReviews={
-                        ratingMap[product.id]?.totalReviews
-                      }
-                      ratingDistribution={
-                        ratingMap[product.id]?.distribution
-                      }
+                      avgRating={product.averageRating}
+                      totalReviews={product.totalReviews}
+                      ratingDistribution={product.ratingDistribution}
                     />
 
                   ))

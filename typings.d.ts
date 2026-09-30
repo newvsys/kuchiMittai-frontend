@@ -29,6 +29,7 @@ interface Product {
   rating: number;
   description: string;
   mainImage: string;
+  stock?: number | string | null;
   manufacturer: string;
   categoryId: string;
   category: {name: string}?;
@@ -108,6 +109,7 @@ interface SingleProductBtnProps {
   disabled?: boolean;
   onAdded?: () => void;
   className?: string;
+  validateStock?: () => boolean | Promise<boolean>;
 }
 
 
