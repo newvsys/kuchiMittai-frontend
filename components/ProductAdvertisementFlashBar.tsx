@@ -74,12 +74,12 @@ const ProductAdvertisementFlashBar = () => {
               <Link
                 key={`${image.src}-${index}`}
                 href={image.searchUrl}
-                className={`${index > 0 ? "hidden sm:block" : "block"} overflow-hidden`}
+                className={`${index > 0 ? "hidden sm:block" : "block"} relative aspect-[1300/830] overflow-hidden`}
               >
                 <img
                   src={image.src}
                   alt={image.alt}
-                  className="block h-auto w-full object-contain"
+                  className="promo-slide-in absolute inset-0 block h-full w-full object-contain"
                 />
               </Link>
             ))}
