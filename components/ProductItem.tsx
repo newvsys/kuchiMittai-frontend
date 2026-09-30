@@ -17,6 +17,7 @@ import { useSearchParams } from "next/navigation";
 
 import { sanitize } from "@/lib/sanitize";
 import { StarRatingWidget } from "@/components/StarRatingWidget";
+import AddToCartSingleProductBtn from "@/components/AddToCartSingleProductBtn";
 
 const ProductItem = ({
   product,
@@ -92,21 +93,12 @@ const ProductItem = ({
           >
             {product.inStock === 1 ? "✔ In stock" : "✖ Out of stock"}
           </span>
-          <Link
-            href={productHref}
-            onClick={handleClick}
-            className="w-3/4 text-center py-1.5 px-3 rounded-lg border border-blue-500 text-blue-600 text-xs font-medium hover:bg-blue-600 hover:text-white transition-colors flex items-center justify-center gap-1.5"
-          >
-            {navigating ? (
-              <>
-                <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                </svg>
-                Loading…
-              </>
-            ) : "View Product"}
-          </Link>
+          <AddToCartSingleProductBtn
+            product={product}
+            quantityCount={1}
+            disabled={product.inStock !== 1}
+            className="btn w-full max-w-[200px] border border-gray-300 font-normal bg-white text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-colors ease-in disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-blue-500"
+          />
         </div>
       </div>
     </div>

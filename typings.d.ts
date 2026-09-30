@@ -107,6 +107,7 @@ interface SingleProductBtnProps {
   quantityCount: number;
   disabled?: boolean;
   onAdded?: () => void;
+  className?: string;
 }
 
 

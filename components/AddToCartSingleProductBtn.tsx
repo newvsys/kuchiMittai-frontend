@@ -17,7 +17,7 @@ import toast from "react-hot-toast";
 
 
 
-const AddToCartSingleProductBtn = ({ product, quantityCount, disabled, onAdded } : SingleProductBtnProps) => {
+const AddToCartSingleProductBtn = ({ product, quantityCount, disabled, onAdded, className } : SingleProductBtnProps) => {
   const { addToCart, calculateTotals } = useProductStore();
 
   const handleAddToCart = () => {
@@ -39,7 +39,7 @@ const AddToCartSingleProductBtn = ({ product, quantityCount, disabled, onAdded }
     <button
       onClick={handleAddToCart}
       disabled={disabled}
-      className="btn w-[200px] text-lg border border-gray-300 border-1 font-normal bg-white text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:scale-110 transition-all uppercase ease-in max-[500px]:w-full disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:bg-white disabled:hover:text-blue-500"
+      className={className ?? "btn w-[200px] text-lg border border-gray-300 border-1 font-normal bg-white text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 hover:scale-110 transition-all uppercase ease-in max-[500px]:w-full disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:hover:bg-white disabled:hover:text-blue-500"}
     >
       Add to cart
     </button>
