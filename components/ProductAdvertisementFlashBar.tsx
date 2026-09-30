@@ -40,18 +40,18 @@ const ProductAdvertisementFlashBar = () => {
     if (promoImages.length === 0) return;
 
     const timer = window.setTimeout(() => {
-      setStartIndex((current) => (current + 3) % promoImages.length);
+      setStartIndex((current) => (current + 1) % promoImages.length);
     }, 10000);
 
     return () => window.clearTimeout(timer);
   }, [startIndex, promoImages.length]);
 
   const showPreviousSet = () => {
-    setStartIndex((current) => (current - 3 + promoImages.length) % promoImages.length);
+    setStartIndex((current) => (current - 1 + promoImages.length) % promoImages.length);
   };
 
   const showNextSet = () => {
-    setStartIndex((current) => (current + 3) % promoImages.length);
+    setStartIndex((current) => (current + 1) % promoImages.length);
   };
 
   if (promoImages.length === 0) return null;
@@ -72,7 +72,7 @@ const ProductAdvertisementFlashBar = () => {
           <div className="grid grid-cols-1 gap-1 sm:grid-cols-3">
             {visibleImages.map((image, index) => (
               <Link
-                key={`${image.src}-${index}`}
+                key={`${image.src}-${image.searchUrl}`}
                 href={image.searchUrl}
                 className={`${index > 0 ? "hidden sm:block" : "block"} relative aspect-[1300/830] overflow-hidden`}
               >
