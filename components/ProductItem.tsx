@@ -18,6 +18,8 @@ import { useSearchParams } from "next/navigation";
 import { sanitize } from "@/lib/sanitize";
 import { StarRatingWidget } from "@/components/StarRatingWidget";
 import AddToCartSingleProductBtn from "@/components/AddToCartSingleProductBtn";
+import { useProductStore } from "@/app/_zustand/store";
+import { API_BASE_PLAIN } from "@/lib/env";
 
 const ProductItem = ({
   product,
@@ -33,9 +35,33 @@ const ProductItem = ({
   ratingDistribution?: Record<string, number>;
 }) => {
   const [navigating, setNavigating] = React.useState(false);
+  const [availableQty, setAvailableQty] = React.useState<number | null>(null);
+  const cartQuantity = useProductStore((state) =>
+    state.products.find((item) => item.id === String(product.id))?.amount ?? 0
+  );
   const searchParams = useSearchParams();
   const filterQuery = searchParams.toString();
   const productHref = `/product/${product.slug}${filterQuery ? `?${filterQuery}` : ""}`;
+  const atMaxQty = availableQty !== null && cartQuantity >= availableQty;
+
+  React.useEffect(() => {
+    const controller = new AbortController();
+    setAvailableQty(null);
+
+    fetch(`${API_BASE_PLAIN}/api/inventory/variant/${product.id}`, {
+      signal: controller.signal,
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        const quantity = Number(data?.availableQty);
+        setAvailableQty(Number.isFinite(quantity) ? quantity : null);
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") setAvailableQty(null);
+      });
+
+    return () => controller.abort();
+  }, [product.id]);
 
   const handleClick = (e: React.MouseEvent) => {
     if (navigating) {
@@ -93,10 +119,15 @@ const ProductItem = ({
           >
             {product.inStock === 1 ? "✔ In stock" : "✖ Out of stock"}
           </span>
+          {product.inStock === 1 && atMaxQty && (
+            <p className="text-xs font-semibold text-amber-600">
+              ⚠ You already have the maximum available quantity in your cart.
+            </p>
+          )}
           <AddToCartSingleProductBtn
             product={product}
             quantityCount={1}
-            disabled={product.inStock !== 1}
+            disabled={product.inStock !== 1 || atMaxQty}
             className="btn w-full max-w-[200px] border border-gray-300 font-normal bg-white text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-colors ease-in disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-blue-500"
           />
         </div>
