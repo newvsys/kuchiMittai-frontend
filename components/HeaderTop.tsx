@@ -50,7 +50,7 @@ const HeaderTop = () => {
         <ul className="flex items-center gap-x-3 max-[370px]:gap-x-2">
           <li>
             <Link href={isAdmin ? "/admin/categories" : "/"}>
-              <img src="/logo.png" width={360} height={125} alt="logo" className="object-contain h-10 sm:h-12 w-auto max-w-[130px] sm:max-w-[180px]" />
+              <img src="/logo.png" width={360} height={125} alt="Try Natural" className="object-contain h-11 sm:h-14 w-auto max-w-[145px] sm:max-w-[200px] shrink-0" />
             </Link>
           </li>
           <li>
