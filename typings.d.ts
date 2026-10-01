@@ -109,7 +109,6 @@ interface SingleProductBtnProps {
   disabled?: boolean;
   onAdded?: () => void;
   className?: string;
-  validateStock?: () => boolean | Promise<boolean>;
 }
 
 
