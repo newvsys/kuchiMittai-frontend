@@ -76,7 +76,7 @@ const ProductItem = ({
 
       {/* Fixed-height image area */}
       <Link href={productHref} onClick={handleClick} className="flex justify-center flex-shrink-0 px-3 pt-3">
-        <div className="relative h-40 w-full bg-gray-50 overflow-hidden rounded-xl">
+        <div className="relative aspect-square w-full bg-gray-50 overflow-hidden rounded-xl">
           <Image
             src={
               product.mainImage
@@ -87,7 +87,7 @@ const ProductItem = ({
             }
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-contain p-3 group-hover:scale-105 transition-transform duration-300"
+            className="object-contain p-1 group-hover:scale-105 transition-transform duration-300"
             alt={sanitize(product?.title) || "Product image"}
           />
         </div>
@@ -96,7 +96,7 @@ const ProductItem = ({
       {/* Content area grows to fill card height */}
       <div className="flex flex-col flex-1 px-3 pt-2 pb-3 items-center text-center">
         <Link href={productHref} onClick={handleClick}>
-          <h3 className="text-xs font-semibold text-gray-800 line-clamp-2 hover:text-blue-600 transition-colors leading-snug">
+          <h3 className="text-base font-semibold text-gray-800 line-clamp-2 hover:text-blue-600 transition-colors leading-snug">
             {sanitize(product.sku ? `${product.title}-${product.sku.replace(/.*-/, "")}` : product.title)}
           </h3>
         </Link>
@@ -109,9 +109,9 @@ const ProductItem = ({
 
         {/* Price + button pinned to bottom */}
         <div className="mt-auto pt-1.5 flex flex-col gap-1.5 w-full items-center">
-          <p className="text-sm font-bold text-gray-900">₹{product.price}</p>
+          <p className="text-xl font-bold text-gray-900">₹{product.price}</p>
           <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
               product.inStock === 1
                 ? "bg-green-50 text-green-700"
                 : "bg-red-50 text-red-600"
