@@ -96,8 +96,16 @@ const ProductItem = ({
       {/* Content area grows to fill card height */}
       <div className="flex flex-col flex-1 px-3 pt-2 pb-3 items-center text-center">
         <Link href={productHref} onClick={handleClick}>
-          <h3 className="text-base font-semibold text-gray-800 line-clamp-2 hover:text-blue-600 transition-colors leading-snug">
-            {sanitize(product.sku ? `${product.title}-${product.sku.replace(/.*-/, "")}` : product.title)}
+          <h3 className="text-base font-semibold text-gray-800 sm:line-clamp-2 hover:text-blue-600 transition-colors leading-snug">
+            {product.sku ? (
+              <>
+                {sanitize(product.title)}
+                <span className="hidden sm:inline">-</span>
+                <span className="block sm:inline">{sanitize(product.sku.replace(/.*-/, ""))}</span>
+              </>
+            ) : (
+              sanitize(product.title)
+            )}
           </h3>
         </Link>
 
