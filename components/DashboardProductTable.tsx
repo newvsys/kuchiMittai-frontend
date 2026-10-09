@@ -269,8 +269,8 @@ const DashboardProductTable = () => {
       const catsData = catsRes.ok ? await catsRes.json() : [];
       const cats = Array.isArray(catsData) ? catsData : [];
       setCategories(cats);
-      editProductIdRef.current = data.id ?? null;
-      setEditProductId(data.id ?? null);
+      editProductIdRef.current = data.productId ?? data.id ?? null;
+      setEditProductId(data.productId ?? data.id ?? null);
       // Use category from the list (categoryName) since slug endpoint returns null
       const resolvedCategory = data.category || categoryName || "";
       const matched = cats.find((c: Category) => c.title === resolvedCategory);
@@ -348,11 +348,12 @@ const DashboardProductTable = () => {
         const res = await fetch(`${API_BASE}/products/productSlug/${encodeURIComponent(editForm.slug.trim())}`);
         if (!res.ok) throw new Error("Could not resolve product ID");
         const data = await res.json();
-        if (!data.id) throw new Error("Product ID not found — this product may not be fully set up in the backend.");
-        editProductIdRef.current = data.id;
-        setEditProductId(data.id);
+        const parentId = data.productId ?? data.id;
+        if (!parentId) throw new Error("Product ID not found — this product may not be fully set up in the backend.");
+        editProductIdRef.current = parentId;
+        setEditProductId(parentId);
         setEditSubmitting(true);
-        const putRes = await fetch(`${API_BASE}/products/${data.id}`, {
+        const putRes = await fetch(`${API_BASE}/products/${parentId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
