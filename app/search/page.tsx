@@ -184,7 +184,7 @@ const SearchPage = async ({ searchParams }: Props) => {
 
             <div className="min-h-0 p-4 bg-white">
 
-              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-stretch">
 
                 {products.length > 0 ? (
 

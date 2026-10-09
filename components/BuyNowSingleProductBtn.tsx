@@ -19,6 +19,7 @@ const BuyNowSingleProductBtn = ({
   product,
   quantityCount,
   disabled,
+  className,
 }: SingleProductBtnProps) => {
   const router = useRouter();
   const { addToCart, calculateTotals } = useProductStore();
@@ -74,7 +75,7 @@ const BuyNowSingleProductBtn = ({
       <button
         onClick={handleAddToCart}
         disabled={isLoading}
-        className="btn w-[200px] text-lg border border-blue-500 hover:border-blue-500 border-1 font-normal bg-blue-500 text-white hover:bg-white hover:scale-110 hover:text-blue-500 transition-all uppercase ease-in max-[500px]:w-full disabled:opacity-70 disabled:cursor-not-allowed"
+        className={className ?? "btn w-[160px] min-h-10 h-10 text-sm border border-blue-500 hover:border-blue-500 border-1 font-normal bg-blue-500 text-white hover:bg-white hover:text-blue-500 transition-all uppercase ease-in disabled:opacity-70 disabled:cursor-not-allowed"}
       >
         {isLoading ? (
           <span className="flex items-center gap-2">

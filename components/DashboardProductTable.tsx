@@ -20,6 +20,7 @@ interface Product {
   stock: number;
   priority: number | null;
   topFlag: string | null;
+  shortName?: string | null;
 }
 
 interface Category {
@@ -42,13 +43,13 @@ const DashboardProductTable = () => {
   // Add product dialog
   const [addDialog, setAddDialog] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [form, setForm] = useState({ name: "", description: "", categoryId: "", slug: "", priority: "", topFlag: "N" });
+  const [form, setForm] = useState({ name: "", shortName: "", description: "", categoryId: "", slug: "", priority: "", topFlag: "N" });
   const [submitting, setSubmitting] = useState(false);
 
   // View/Edit product dialog
   const [editDialog, setEditDialog] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
-  const [editForm, setEditForm] = useState({ name: "", description: "", categoryId: "", slug: "", priority: "", topFlag: "N" });
+  const [editForm, setEditForm] = useState({ name: "", shortName: "", description: "", categoryId: "", slug: "", priority: "", topFlag: "N" });
   const [editProductId, setEditProductId] = useState<number | null>(null);
   const editProductIdRef = useRef<number | null>(null);
   const [editSubmitting, setEditSubmitting] = useState(false);
@@ -217,7 +218,7 @@ const DashboardProductTable = () => {
   };
 
   const openAddDialog = () => {
-    setForm({ name: "", description: "", categoryId: "", slug: "", priority: "", topFlag: "N" });
+    setForm({ name: "", shortName: "", description: "", categoryId: "", slug: "", priority: "", topFlag: "N" });
     fetch(`${API_BASE}/products/categories`)
       .then((res) => res.json())
       .then((data) => setCategories(Array.isArray(data) ? data : []))
@@ -237,6 +238,7 @@ const DashboardProductTable = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name.trim(),
+          shortName: form.shortName.trim() || null,
           description: form.description.trim(),
           categoryId: Number(form.categoryId),
           slug: form.slug.trim(),
@@ -276,6 +278,7 @@ const DashboardProductTable = () => {
       const matched = cats.find((c: Category) => c.title === resolvedCategory);
       setEditForm({
         name: data.title || "",
+        shortName: data.shortName || "",
         description: data.description || "",
         categoryId: matched ? String(matched.id) : "",
         slug: data.slug || "",
@@ -358,6 +361,7 @@ const DashboardProductTable = () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: editForm.name.trim(),
+            shortName: editForm.shortName.trim(),
             description: editForm.description.trim(),
             categoryId: Number(editForm.categoryId),
             slug: editForm.slug.trim(),
@@ -385,6 +389,7 @@ const DashboardProductTable = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editForm.name.trim(),
+          shortName: editForm.shortName.trim(),
           description: editForm.description.trim(),
           categoryId: Number(editForm.categoryId),
           slug: editForm.slug.trim(),
@@ -435,6 +440,7 @@ const DashboardProductTable = () => {
               <thead className="bg-gray-50 text-gray-700">
                 <tr>
                   <th className="text-left px-4 py-3 font-semibold">Title</th>
+                  <th className="text-left px-4 py-3 font-semibold">Short Name</th>
                   <th className="text-left px-4 py-3 font-semibold">Description</th>
                   <th className="text-left px-4 py-3 font-semibold">Category</th>
                   <th className="text-left px-4 py-3 font-semibold">Priority</th>
@@ -449,6 +455,9 @@ const DashboardProductTable = () => {
                   <tr key={product.slug || product.id} className="border-t hover:bg-gray-50">
                     <td className="px-4 py-3 font-medium text-gray-900 max-w-[180px]">
                       <p className="line-clamp-2">{product.title}</p>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 max-w-[160px]">
+                      <p className="line-clamp-2">{product.shortName || "—"}</p>
                     </td>
                     <td className="px-4 py-3 text-gray-600 max-w-[280px]">
                       <p className="line-clamp-2">{product.description || "—"}</p>
@@ -545,6 +554,17 @@ const DashboardProductTable = () => {
                 />
               </div>
               <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Short Name</label>
+                <input
+                  type="text"
+                  maxLength={255}
+                  className="border rounded px-3 py-2 text-sm w-full"
+                  placeholder="e.g. Walnuts"
+                  value={form.shortName}
+                  onChange={e => setForm(f => ({ ...f, shortName: e.target.value }))}
+                />
+              </div>
+              <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
                 <textarea
                   className="border rounded px-3 py-2 text-sm w-full resize-y"
@@ -635,6 +655,16 @@ const DashboardProductTable = () => {
                     className="border rounded px-3 py-2 text-sm w-full"
                     value={editForm.name}
                     onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Short Name</label>
+                  <input
+                    type="text"
+                    maxLength={255}
+                    className="border rounded px-3 py-2 text-sm w-full"
+                    value={editForm.shortName}
+                    onChange={e => setEditForm(f => ({ ...f, shortName: e.target.value }))}
                   />
                 </div>
                 <div>

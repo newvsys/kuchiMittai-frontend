@@ -23,6 +23,7 @@ interface Product {
   productId?: string;
   slug: string;
   title: string;
+  shortName?: string | null;
   sku?: string;
   price: number;
   mrp?: number;

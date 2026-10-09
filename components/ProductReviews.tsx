@@ -521,7 +521,7 @@ const ProductReviews = ({ productId }: { productId: number }) => {
         </div>
       ) : previewReviews.length > 0 ? (
         <div className="space-y-5">
-          <h3 className="text-base font-semibold text-gray-700">Latest Reviews</h3>
+          <h3 className="text-base font-semibold text-gray-700">Top 5 Reviews</h3>
           {previewReviews.map((review) => (
             <ReviewCard key={review.id} review={review} />
           ))}
@@ -535,7 +535,7 @@ const ProductReviews = ({ productId }: { productId: number }) => {
                 }}
                 className="text-blue-600 hover:underline text-sm font-medium"
               >
-                Show all reviews ({allReviews.length}) →
+                More reviews ({allReviews.length}) →
               </button>
             </div>
           )}

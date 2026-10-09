@@ -75,8 +75,8 @@ const ProductItem = ({
     <div className="group flex flex-col w-full h-full rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
 
       {/* Fixed-height image area */}
-      <Link href={productHref} onClick={handleClick} className="flex justify-center flex-shrink-0 px-3 pt-3">
-        <div className="relative aspect-square w-full bg-gray-50 overflow-hidden rounded-xl">
+      <Link href={productHref} onClick={handleClick} className="block flex-shrink-0">
+        <div className="relative aspect-square w-full bg-white overflow-hidden">
           <Image
             src={
               product.mainImage
@@ -87,15 +87,16 @@ const ProductItem = ({
             }
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-contain p-1 group-hover:scale-105 transition-transform duration-300"
+            className="object-contain group-hover:scale-105 transition-transform duration-300"
             alt={sanitize(product?.title) || "Product image"}
           />
         </div>
       </Link>
 
       {/* Content area grows to fill card height */}
-      <div className="flex flex-col flex-1 px-3 pt-2 pb-3 items-center text-center">
-        <Link href={productHref} onClick={handleClick}>
+      <div className="flex flex-col flex-1 px-3 pt-3 pb-3 gap-2 text-center">
+        <div className="flex flex-col gap-1">
+        <Link href={productHref} onClick={handleClick} className="min-w-0">
           <h3 className="text-base font-semibold text-gray-800 sm:line-clamp-2 hover:text-blue-600 transition-colors leading-snug">
             {product.sku ? (
               <>
@@ -108,16 +109,17 @@ const ProductItem = ({
             )}
           </h3>
         </Link>
+        <p className="text-xl font-bold text-gray-900 whitespace-nowrap">₹{product.price}</p>
+        </div>
 
         {typeof avgRating === "number" && typeof totalReviews === "number" && totalReviews > 0 && (
-          <div className="flex justify-center">
+          <div className="flex justify-start">
             <StarRatingWidget rating={avgRating} total={totalReviews} distribution={ratingDistribution} />
           </div>
         )}
 
         {/* Price + button pinned to bottom */}
-        <div className="mt-auto pt-1.5 flex flex-col gap-1.5 w-full items-center">
-          <p className="text-xl font-bold text-gray-900">₹{product.price}</p>
+        <div className="mt-auto pt-1.5 flex flex-col gap-2 w-full items-center">
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
               product.inStock === 1
@@ -136,7 +138,7 @@ const ProductItem = ({
             product={product}
             quantityCount={1}
             disabled={product.inStock !== 1 || atMaxQty}
-            className="btn w-full max-w-[200px] border border-gray-300 font-normal bg-white text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-colors ease-in disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-blue-500"
+            className="btn w-full border border-gray-300 font-normal bg-white text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-colors ease-in disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-blue-500"
           />
         </div>
       </div>

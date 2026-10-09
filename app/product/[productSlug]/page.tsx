@@ -49,6 +49,7 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
     lensY: number;
     containerW: number;
     containerH: number;
+    panelSize: number;
   } | null>(null);
   const [fullViewOpen, setFullViewOpen] = useState(false);
   const [fullViewIndex, setFullViewIndex] = useState(0);
@@ -199,8 +200,8 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
     return () => window.removeEventListener("keydown", handleKey);
   }, [fullViewOpen]);
 
-const LENS_SIZE = 120;
-const ZOOM_PANEL_SIZE = 380;
+const LENS_SIZE = 150;
+const ZOOM_PANEL_SIZE = 750;
 
   const handleMainImageMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -208,7 +209,10 @@ const ZOOM_PANEL_SIZE = 380;
     const cy = e.clientY - rect.top;
     const lensX = Math.max(0, Math.min(cx - LENS_SIZE / 2, rect.width - LENS_SIZE));
     const lensY = Math.max(0, Math.min(cy - LENS_SIZE / 2, rect.height - LENS_SIZE));
-    setZoomLens({ lensX, lensY, containerW: rect.width, containerH: rect.height });
+    // Keep the zoom panel inside the product card's right edge
+    const boundaryRight = e.currentTarget.closest("[data-zoom-boundary]")?.getBoundingClientRect().right ?? window.innerWidth;
+    const panelSize = Math.min(ZOOM_PANEL_SIZE, boundaryRight - rect.right - 40);
+    setZoomLens({ lensX, lensY, containerW: rect.width, containerH: rect.height, panelSize });
   };
 
   if (isLoading) {
@@ -237,8 +241,28 @@ const ZOOM_PANEL_SIZE = 380;
           <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
           <span className="min-w-0 max-w-full truncate font-semibold text-gray-800 sm:max-w-sm">{sanitize(product?.title)}</span>
         </nav>
-        <div className="flex flex-col items-center gap-4 rounded-2xl border border-gray-200 bg-white p-3 sm:p-4 lg:flex-row lg:items-center lg:justify-center lg:gap-x-0 lg:p-0">
-          <div className="relative w-full max-w-[200px] self-center mx-auto lg:mx-0 lg:flex-shrink-0">
+        <div data-zoom-boundary className="flex flex-col gap-6 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 lg:grid lg:grid-cols-[minmax(0,700px)_minmax(0,1fr)] lg:items-start lg:gap-12 lg:p-10 max-w-[1400px] mx-auto">
+          <div className="relative w-full max-w-[700px] mx-auto lg:mx-0">
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:gap-4">
+              {images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto sm:w-12 sm:flex-shrink-0 sm:flex-col sm:overflow-y-auto sm:overflow-x-hidden sm:max-h-[600px]">
+                  {images.map((imageItem: ImageItem, key: number) => {
+                    const thumbUrl = getMediaUrl(imageItem.image) || "/product_placeholder.jpg";
+                    return (
+                      <button
+                        key={imageItem.imageID + key}
+                        type="button"
+                        onClick={() => setSelectedImage(thumbUrl)}
+                        aria-label={`View image ${key + 1}`}
+                        className={`relative h-10 w-10 flex-shrink-0 overflow-hidden rounded-md border-2 bg-white sm:h-12 sm:w-12 ${selectedImage === thumbUrl ? "border-blue-500" : "border-gray-200 hover:border-gray-400"}`}
+                      >
+                        <Image src={thumbUrl} fill sizes="48px" alt="product thumbnail" className="object-contain" />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
             <div className="relative aspect-square w-full">
               {/* Prev arrow */}
               {slideImages.length > 1 && (
@@ -254,16 +278,16 @@ const ZOOM_PANEL_SIZE = 380;
 
               {/* Main image with lens overlay */}
               <div
-                className="w-full h-full rounded-lg border border-gray-100 bg-gray-50 relative select-none cursor-crosshair overflow-hidden"
+                className="w-full h-full rounded-lg border border-gray-100 bg-white relative select-none cursor-crosshair overflow-hidden"
                 onMouseMove={handleMainImageMouseMove}
                 onMouseLeave={() => setZoomLens(null)}
               >
                 <Image
                   src={selectedImage || "/product_placeholder.jpg"}
                   fill
-                  sizes="(max-width: 640px) 200px, (max-width: 1024px) 200px, 200px"
+                  sizes="(max-width: 1024px) 100vw, 600px"
                   alt="main image"
-                  className="object-contain p-2"
+                  className="object-contain p-1"
                 />
                 {/* Lens box */}
                 {zoomLens && (
@@ -280,17 +304,17 @@ const ZOOM_PANEL_SIZE = 380;
               </div>
 
               {/* Zoom panel — floats to the left of the image column */}
-              {zoomLens && (
+              {zoomLens && zoomLens.panelSize >= 250 && (
                 <div
                   className="hidden lg:block absolute top-0 z-50 rounded-lg border border-gray-200 shadow-2xl"
                   style={{
-                    right: "calc(100% + 16px)",
-                    width: ZOOM_PANEL_SIZE,
-                    height: ZOOM_PANEL_SIZE,
+                    left: "calc(100% + 16px)",
+                    width: zoomLens.panelSize,
+                    height: zoomLens.panelSize,
                     backgroundImage: `url(${selectedImage || "/product_placeholder.jpg"})`,
                     backgroundRepeat: "no-repeat",
-                    backgroundSize: `${zoomLens.containerW * (ZOOM_PANEL_SIZE / LENS_SIZE)}px ${zoomLens.containerH * (ZOOM_PANEL_SIZE / LENS_SIZE)}px`,
-                    backgroundPosition: `${-(zoomLens.lensX * (ZOOM_PANEL_SIZE / LENS_SIZE))}px ${-(zoomLens.lensY * (ZOOM_PANEL_SIZE / LENS_SIZE))}px`,
+                    backgroundSize: `${zoomLens.containerW * (zoomLens.panelSize / LENS_SIZE)}px ${zoomLens.containerH * (zoomLens.panelSize / LENS_SIZE)}px`,
+                    backgroundPosition: `${-(zoomLens.lensX * (zoomLens.panelSize / LENS_SIZE))}px ${-(zoomLens.lensY * (zoomLens.panelSize / LENS_SIZE))}px`,
                   }}
                 />
               )}
@@ -334,26 +358,14 @@ const ZOOM_PANEL_SIZE = 380;
                 Click to see full view
               </button>
             </div>
-            <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-around">
-              {images.map((imageItem: ImageItem, key: number) => (
-                <div
-                  key={imageItem.imageID + key}
-                  className={`w-14 h-14 relative overflow-hidden rounded border-2 cursor-pointer flex-shrink-0 ${selectedImage === getMediaUrl(imageItem.image) ? 'border-blue-500' : 'border-transparent'}`}
-                  onClick={() => setSelectedImage(getMediaUrl(imageItem.image))}
-                >
-                  <Image
-                    src={getMediaUrl(imageItem.image) || "/product_placeholder.jpg"}
-                    fill
-                    sizes="80px"
-                    alt="product thumbnail"
-                    className="object-cover"
-                  />
-                </div>
-              ))}
+              </div>
+            </div>
+            <div className="mt-6 w-full border-t border-gray-200 pt-6">
+              <ProductTabs product={product} baseProduct={baseProduct} sections="below" />
             </div>
           </div>
-          <div className="flex min-w-0 w-full lg:w-auto lg:max-w-md flex-col gap-y-3 text-black text-center items-center lg:ml-0 lg:px-5">
-            <h1 className="text-base font-bold leading-snug text-gray-900 sm:text-lg">{sanitize(product?.title)}</h1>
+          <div className="flex min-w-0 w-full flex-col gap-y-4 text-black text-left items-start">
+            <h1 className="text-2xl font-bold leading-snug text-gray-900 sm:text-3xl">{sanitize(product?.title)}</h1>
             {product?.inStock !== 1 ? (
               <p className="text-sm font-semibold text-red-500">Currently out of stock</p>
             ) : (
@@ -361,9 +373,9 @@ const ZOOM_PANEL_SIZE = 380;
                 <div className="flex flex-col gap-y-1">
                   {product?.mrp && product.mrp > product.price ? (
                     <>
-                        <div className="flex flex-wrap items-center justify-center gap-3">
-                        <p className="text-base font-bold text-gray-900 sm:text-lg">₹{product.price}</p>
-                        <p className="text-xs text-gray-400 line-through">MRP ₹{product.mrp}</p>
+                        <div className="flex flex-wrap items-center justify-start gap-3">
+                        <p className="text-2xl font-bold text-gray-900 sm:text-3xl">₹{product.price}</p>
+                        <p className="text-sm text-gray-400 line-through">MRP ₹{product.mrp}</p>
                         <span className="bg-green-100 text-green-700 text-sm font-semibold px-2 py-0.5 rounded">
                           {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% off
                         </span>
@@ -373,10 +385,9 @@ const ZOOM_PANEL_SIZE = 380;
                       </p>
                     </>
                   ) : (
-                    <p className="text-base font-bold text-gray-900 sm:text-lg">₹{product?.price}</p>
+                    <p className="text-2xl font-bold text-gray-900 sm:text-3xl">₹{product?.price}</p>
                   )}
                 </div>
-                <StockAvailabillity stock={product?.stock || 0} inStock={product?.inStock} />
                 {availableQty !== null && availableQty < 5 && availableQty > 0 && (
                   <p className="text-sm font-semibold text-orange-600">
                     Only {availableQty} left in stock
@@ -384,47 +395,48 @@ const ZOOM_PANEL_SIZE = 380;
                 )}
               </>
             )}
-            <SingleProductDynamicFields product={product} maxQty={availableQty ?? undefined} />
-            {ratingSummary && ratingSummary.totalReviews > 0 && (
-              <StarRatingWidget
-                rating={ratingSummary.avgRating}
-                total={ratingSummary.totalReviews}
-                distribution={ratingSummary.distribution}
-                size="lg"
-              />
-            )}
-            {(product?.isReturnable === "Y" || product?.isReturnable === "N") && (
-              <div className="flex items-center justify-between gap-2 text-sm">
-                {product.isReturnable === "Y" ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-green-600">✔</span>
-                    <button
-                      type="button"
-                      className="text-blue-600 font-semibold hover:underline text-sm"
-                      onClick={() => setReturnPolicyDialog(true)}
-                    >
-                      Easy doorstep return
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-800">✖</span>
-                    <button
-                      type="button"
-                      className="text-gray-800 font-semibold hover:underline text-sm"
-                      onClick={() => setReturnPolicyDialog(true)}
-                    >
-                      No Returns
-                    </button>
-                  </div>
-                )}
-                <a href={productsHref} className="flex items-center gap-1 text-blue-600 font-medium hover:underline text-sm">
-                  Continue Shopping
-                  <span aria-hidden="true">→</span>
-                </a>
-              </div>
-            )}
-            <div className="flex flex-col gap-y-2 max-[500px]:items-center">
+            <SingleProductDynamicFields
+              product={product}
+              maxQty={availableQty ?? undefined}
+              ratingStatus={ratingSummary && ratingSummary.totalReviews > 0 ? (
+                <StarRatingWidget
+                  rating={ratingSummary.avgRating}
+                  total={ratingSummary.totalReviews}
+                  distribution={ratingSummary.distribution}
+                  size="lg"
+                  reviewHref="#product-reviews"
+                />
+              ) : null}
+              stockStatus={product?.inStock === 1 ? <StockAvailabillity stock={product?.stock || 0} inStock={product?.inStock} /> : null}
+            >
+              {(product?.isReturnable === "Y" || product?.isReturnable === "N") && (
+                <div className="flex items-center gap-6 text-sm">
+                  {product.isReturnable === "Y" ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-600">✔</span>
+                      <button
+                        type="button"
+                        className="text-blue-600 font-semibold hover:underline text-sm"
+                        onClick={() => setReturnPolicyDialog(true)}
+                      >
+                        Easy doorstep return
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-800">✖</span>
+                      <button
+                        type="button"
+                        className="text-gray-800 font-semibold hover:underline text-sm"
+                        onClick={() => setReturnPolicyDialog(true)}
+                      >
+                        No Returns
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            <div className="flex flex-col gap-y-2 w-full">
               {/* Size Option Buttons - Always show all sizes from baseProduct */}
               {Array.isArray(baseProduct?.productvarlist) && baseProduct.productvarlist.length > 0 && (() => {
                 // Build unique list: main product + variants (avoid duplicate SKUs)
@@ -436,7 +448,7 @@ const ZOOM_PANEL_SIZE = 380;
                 ];
                 const uniqueVariants = allVariants.filter((v, idx, arr) => arr.findIndex(x => x.sku === v.sku) === idx);
                 return (
-                  <div className="mb-2 flex flex-wrap items-center justify-center gap-2">
+                  <div className="mb-2 flex flex-wrap items-center justify-start gap-2">
                     <span className="mr-2 font-semibold">Size:</span>
                     {uniqueVariants.map((variant: any) => (
                       <button
@@ -486,15 +498,20 @@ const ZOOM_PANEL_SIZE = 380;
                   </div>
                 );
               })()}
-              <p className="text-sm text-gray-500">
+              <p className="flex items-center gap-1 whitespace-nowrap text-sm text-gray-500">
                 SKU: <span className="ml-1 font-mono text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded text-xs">{product?.sku || "N/A"}</span>
               </p>
+              <a href={productsHref} className="flex items-center gap-1 text-blue-600 font-medium hover:underline text-sm">
+                Continue Shopping
+                <span aria-hidden="true">→</span>
+              </a>
               {/* Share and card details removed as requested */}
             </div>
+            </SingleProductDynamicFields>
+            <div className="w-full border-t border-gray-200 pt-6 mt-2">
+              <ProductTabs product={product} baseProduct={baseProduct} sections="info" />
+            </div>
           </div>
-        </div>
-        <div className="mt-6 rounded-2xl border border-gray-200 bg-white overflow-hidden">
-          <ProductTabs product={product} baseProduct={baseProduct} />
         </div>
       </div>
       {returnPolicyDialog && (
@@ -577,11 +594,11 @@ const ZOOM_PANEL_SIZE = 380;
       {/* Full View Popup */}
       {fullViewOpen && (
         <div
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50"
           onClick={() => setFullViewOpen(false)}
         >
           <div
-            className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden w-[95vw] h-[95vh] sm:w-[85vw] sm:h-[85vh] md:w-[80vw] md:h-[80vh]"
+            className="bg-white shadow-2xl flex flex-col overflow-hidden w-screen h-screen"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header: tabs + close */}
@@ -639,7 +656,7 @@ const ZOOM_PANEL_SIZE = 380;
                     <Image
                       src={slideImages[fullViewIndex] || "/product_placeholder.jpg"}
                       fill
-                      sizes="(max-width: 896px) 100vw, 896px"
+                      sizes="100vw"
                       alt="full view"
                       className="object-contain"
                       priority
