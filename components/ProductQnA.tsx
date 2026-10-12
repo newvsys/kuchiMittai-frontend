@@ -206,7 +206,7 @@ const ProductQnA = ({ productId }: { productId: number }) => {
       ) : null}
 
       {/* Ask a Question Form */}
-      <div className="border rounded-xl p-6 bg-white shadow-sm">
+      <div className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Ask a Question</h3>
         {submitSuccess ? (
           <div className="bg-green-50 border border-green-200 text-green-700 rounded-lg px-4 py-3 text-sm">

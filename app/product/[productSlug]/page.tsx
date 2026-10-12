@@ -167,6 +167,15 @@ const SingleProductPage = ({ params }: SingleProductPageProps) => {
 
   const currentSlideIndex = slideImages.indexOf(selectedImage || "");
   const effectiveIndex = currentSlideIndex >= 0 ? currentSlideIndex : 0;
+  const ratingStatus = ratingSummary && ratingSummary.totalReviews > 0 ? (
+    <StarRatingWidget
+      rating={ratingSummary.avgRating}
+      total={ratingSummary.totalReviews}
+      distribution={ratingSummary.distribution}
+      size="lg"
+      reviewHref="#product-reviews"
+    />
+  ) : null;
 
   const goToPrev = () => {
     const newIndex = (effectiveIndex - 1 + slideImages.length) % slideImages.length;
@@ -226,6 +235,64 @@ const ZOOM_PANEL_SIZE = 750;
   if (!product) {
     return <div className="text-center py-10 text-xl">Product not found.</div>;
   }
+
+  const sizeOptions = Array.isArray(baseProduct?.productvarlist) && baseProduct.productvarlist.length > 0 ? (() => {
+    const allVariants = [
+      { ...baseProduct, isMain: true },
+      ...baseProduct.productvarlist
+        .filter((variant: any) => variant.Status !== "I")
+        .map((variant: any) => ({ ...variant, isMain: false })),
+    ];
+    const uniqueVariants = allVariants.filter((variant, index, variants) => variants.findIndex((item) => item.sku === variant.sku) === index);
+
+    return (
+      <div className="flex w-full flex-nowrap items-center justify-end gap-2 overflow-x-auto text-sm">
+        <span className="mr-2 shrink-0 whitespace-nowrap font-semibold">Size:</span>
+        {uniqueVariants.map((variant: any) => (
+          <button
+            key={variant.sku}
+            className={`shrink-0 whitespace-nowrap border rounded px-3 py-1 text-sm font-medium transition-colors
+              ${product.sku === variant.sku ? 'bg-blue-500 text-white' : 'bg-white text-black hover:bg-blue-100'}
+              ${variant.inStock !== 1 ? 'opacity-40' : 'cursor-pointer'}
+            `}
+            onClick={async () => {
+              if (product.sku === variant.sku) return;
+              setProduct({ ...baseProduct, ...variant, productvarlist: baseProduct.productvarlist });
+              if (imagesCacheRef.current.has(variant.id)) {
+                const cached = imagesCacheRef.current.get(variant.id)!;
+                setImages(cached);
+                setSelectedImage(cached.length > 0 ? getMediaUrl(cached[0].image) : variant.mainImage ? getMediaUrl(variant.mainImage) : "/product_placeholder.jpg");
+                return;
+              }
+              try {
+                const imagesRes = await fetch(`${API_BASE}/products/productImage/${variant.id}`);
+                let imagesData = await imagesRes.json();
+                if (!Array.isArray(imagesData)) imagesData = [];
+                const mainIdx = imagesData.findIndex((image: any) => image.isMainImage === "Y");
+                if (mainIdx > 0) imagesData = [imagesData[mainIdx], ...imagesData.filter((_: any, imageIndex: number) => imageIndex !== mainIdx)];
+                imagesCacheRef.current.set(variant.id, imagesData);
+                setImages(imagesData);
+                if (imagesData.length > 0) {
+                  setSelectedImage(getMediaUrl(imagesData[0].image));
+                } else if (variant.mainImage) {
+                  setSelectedImage(getMediaUrl(variant.mainImage));
+                } else {
+                  setSelectedImage("/product_placeholder.jpg");
+                }
+              } catch {
+                if (variant.mainImage) setSelectedImage(getMediaUrl(variant.mainImage));
+                else setSelectedImage("/product_placeholder.jpg");
+                setImages([]);
+              }
+            }}
+            title={variant.inStock !== 1 ? "Currently out of stock" : ""}
+          >
+            {variant.sku.replace(/.*-/, "")}
+          </button>
+        ))}
+      </div>
+    );
+  })() : null;
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -366,49 +433,44 @@ const ZOOM_PANEL_SIZE = 750;
           </div>
           <div className="flex min-w-0 w-full flex-col gap-y-4 text-black text-left items-start">
             <h1 className="text-2xl font-bold leading-snug text-gray-900 sm:text-3xl">{sanitize(product?.title)}</h1>
-            {product?.inStock !== 1 ? (
-              <p className="text-sm font-semibold text-red-500">Currently out of stock</p>
-            ) : (
-              <>
-                <div className="flex flex-col gap-y-1">
+            <div className="flex flex-col gap-y-1">
                   {product?.mrp && product.mrp > product.price ? (
                     <>
-                        <div className="flex flex-wrap items-center justify-start gap-3">
-                        <p className="text-2xl font-bold text-gray-900 sm:text-3xl">₹{product.price}</p>
-                        <p className="text-sm text-gray-400 line-through">MRP ₹{product.mrp}</p>
-                        <span className="bg-green-100 text-green-700 text-sm font-semibold px-2 py-0.5 rounded">
-                          {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% off
-                        </span>
+                      <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <p className="text-2xl font-bold text-gray-900 sm:text-3xl">₹{product.price}</p>
+                          <p className="text-sm text-gray-400 line-through">MRP ₹{product.mrp}</p>
+                          <span className="bg-green-100 text-green-700 text-sm font-semibold px-2 py-0.5 rounded">
+                            {Math.round(((product.mrp - product.price) / product.mrp) * 100)}% off
+                          </span>
+                        </div>
                       </div>
                       <p className="text-sm text-green-600 font-medium">
                         You save ₹{Math.round(product.mrp - product.price)}
                       </p>
                     </>
                   ) : (
-                    <p className="text-2xl font-bold text-gray-900 sm:text-3xl">₹{product?.price}</p>
+                    <div className="grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+                      <p className="text-2xl font-bold text-gray-900 sm:text-3xl">₹{product?.price}</p>
+                    </div>
                   )}
                 </div>
-                {availableQty !== null && availableQty < 5 && availableQty > 0 && (
+                {product?.inStock === 1 && availableQty !== null && availableQty < 5 && availableQty > 0 && (
                   <p className="text-sm font-semibold text-orange-600">
                     Only {availableQty} left in stock
                   </p>
                 )}
-              </>
-            )}
             <SingleProductDynamicFields
               product={product}
               maxQty={availableQty ?? undefined}
-              ratingStatus={ratingSummary && ratingSummary.totalReviews > 0 ? (
-                <StarRatingWidget
-                  rating={ratingSummary.avgRating}
-                  total={ratingSummary.totalReviews}
-                  distribution={ratingSummary.distribution}
-                  size="lg"
-                  reviewHref="#product-reviews"
-                />
-              ) : null}
-              stockStatus={product?.inStock === 1 ? <StockAvailabillity stock={product?.stock || 0} inStock={product?.inStock} /> : null}
+              sizeOptions={sizeOptions}
+              stockStatus={product?.inStock === 1 ? <StockAvailabillity stock={product?.stock || 0} inStock={product?.inStock} /> : <p className="text-sm font-semibold text-red-500">Currently out of stock</p>}
             >
+              <div className="flex flex-col items-start gap-y-2">
+                {ratingStatus}
+                <p className="flex items-center gap-1 whitespace-nowrap text-sm text-gray-500">
+                  SKU: <span className="ml-1 font-mono text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded text-xs">{product?.sku || "N/A"}</span>
+                </p>
               {(product?.isReturnable === "Y" || product?.isReturnable === "N") && (
                 <div className="flex items-center gap-6 text-sm">
                   {product.isReturnable === "Y" ? (
@@ -436,71 +498,8 @@ const ZOOM_PANEL_SIZE = 750;
                   )}
                 </div>
               )}
+              </div>
             <div className="flex flex-col gap-y-2 w-full">
-              {/* Size Option Buttons - Always show all sizes from baseProduct */}
-              {Array.isArray(baseProduct?.productvarlist) && baseProduct.productvarlist.length > 0 && (() => {
-                // Build unique list: main product + variants (avoid duplicate SKUs)
-                const allVariants = [
-                  { ...baseProduct, isMain: true },
-                  ...baseProduct.productvarlist
-                    .filter((v: any) => v.Status !== "I")
-                    .map((v: any) => ({ ...v, isMain: false })),
-                ];
-                const uniqueVariants = allVariants.filter((v, idx, arr) => arr.findIndex(x => x.sku === v.sku) === idx);
-                return (
-                  <div className="mb-2 flex flex-wrap items-center justify-start gap-2">
-                    <span className="mr-2 font-semibold">Size:</span>
-                    {uniqueVariants.map((variant: any) => (
-                      <button
-                        key={variant.sku}
-                        className={`border rounded px-3 py-1 font-medium transition-colors
-                          ${product.sku === variant.sku ? 'bg-blue-500 text-white' : 'bg-white text-black hover:bg-blue-100'}
-                          ${variant.inStock !== 1 ? 'opacity-40' : 'cursor-pointer'}
-                        `}
-                        onClick={async () => {
-                          if (product.sku === variant.sku) return;
-                          setProduct({ ...baseProduct, ...variant, productvarlist: baseProduct.productvarlist });
-                          // Use cached images if available — no API call needed
-                          if (imagesCacheRef.current.has(variant.id)) {
-                            const cached = imagesCacheRef.current.get(variant.id)!;
-                            setImages(cached);
-                            setSelectedImage(cached.length > 0 ? getMediaUrl(cached[0].image) : variant.mainImage ? getMediaUrl(variant.mainImage) : "/product_placeholder.jpg");
-                            return;
-                          }
-                          // Fetch images for the selected variant
-                          try {
-                            const imagesRes = await fetch(`${API_BASE}/products/productImage/${variant.id}`);
-                            let imagesData = await imagesRes.json();
-                            if (!Array.isArray(imagesData)) imagesData = [];
-                            // Sort so main image (isMainImage === "Y") comes first
-                            const mainIdx = imagesData.findIndex((i: any) => i.isMainImage === "Y");
-                            if (mainIdx > 0) imagesData = [imagesData[mainIdx], ...imagesData.filter((_: any, i: number) => i !== mainIdx)];
-                            imagesCacheRef.current.set(variant.id, imagesData);
-                            setImages(imagesData);
-                            if (imagesData.length > 0) {
-                              setSelectedImage(getMediaUrl(imagesData[0].image));
-                            } else if (variant.mainImage) {
-                              setSelectedImage(getMediaUrl(variant.mainImage));
-                            } else {
-                              setSelectedImage("/product_placeholder.jpg");
-                            }
-                          } catch {
-                            if (variant.mainImage) setSelectedImage(getMediaUrl(variant.mainImage));
-                            else setSelectedImage("/product_placeholder.jpg");
-                            setImages([]);
-                          }
-                        }}
-                        title={variant.inStock !== 1 ? 'Currently out of stock' : ''}
-                      >
-                        {variant.sku.replace(/.*-/, '')}
-                      </button>
-                    ))}
-                  </div>
-                );
-              })()}
-              <p className="flex items-center gap-1 whitespace-nowrap text-sm text-gray-500">
-                SKU: <span className="ml-1 font-mono text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded text-xs">{product?.sku || "N/A"}</span>
-              </p>
               <a href={productsHref} className="flex items-center gap-1 text-blue-600 font-medium hover:underline text-sm">
                 Continue Shopping
                 <span aria-hidden="true">→</span>
@@ -508,7 +507,7 @@ const ZOOM_PANEL_SIZE = 750;
               {/* Share and card details removed as requested */}
             </div>
             </SingleProductDynamicFields>
-            <div className="w-full border-t border-gray-200 pt-6 mt-2">
+            <div className="w-full pt-6 mt-2">
               <ProductTabs product={product} baseProduct={baseProduct} sections="info" />
             </div>
           </div>

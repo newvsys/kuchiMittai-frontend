@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { MdKeyboardArrowDown } from "react-icons/md";
 
 const BAR_COLORS = [
   "bg-green-500",  // 5★
@@ -79,7 +78,6 @@ export function StarRatingWidget({
   reviewHref,
 }: StarRatingProps) {
   const [hovered, setHovered] = useState(false);
-  const [expanded, setExpanded] = useState(false);
 
   const starSize = size === "lg" ? "text-2xl" : "text-base";
   const labelSize = size === "lg" ? "text-sm" : "text-xs";
@@ -121,18 +119,7 @@ export function StarRatingWidget({
           `(${total})`
         )}
       </span>
-      {distribution && Object.keys(distribution).length > 0 && (
-        <button
-          type="button"
-          onClick={() => setExpanded((value) => !value)}
-          className="ml-0.5 inline-flex items-center text-gray-500 hover:text-gray-800"
-          aria-label={expanded ? "Hide review summary" : "Show review summary"}
-          aria-expanded={expanded}
-        >
-          <MdKeyboardArrowDown className={`text-xl transition-transform ${expanded ? "rotate-180" : ""}`} />
-        </button>
-      )}
-      {(hovered || expanded) && distribution && Object.keys(distribution).length > 0 && (
+      {hovered && distribution && Object.keys(distribution).length > 0 && (
         <RatingPopup rating={rating} total={total} distribution={distribution} />
       )}
     </div>

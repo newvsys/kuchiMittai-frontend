@@ -26,8 +26,20 @@ const ProductTabs = ({ product, baseProduct, sections = "all" }: { product: Prod
   const reviewsRef = useRef<HTMLElement>(null);
   const [showReviews, setShowReviews] = useState(false);
   const [showMoreInfo, setShowMoreInfo] = useState(false);
+  const getAttributeDisplayOrder = (attribute: any) => {
+    const rawOrder = attribute.displayOrder;
+    if (rawOrder === null || rawOrder === undefined || String(rawOrder).trim() === "") {
+      return Number.POSITIVE_INFINITY;
+    }
+    const order = Number(rawOrder);
+    return Number.isFinite(order) ? order : Number.POSITIVE_INFINITY;
+  };
   const sortedAttributes: any[] = Array.isArray(product?.attributes)
-    ? [...product.attributes].sort((a: any, b: any) => (a.displayOrder ?? Number.MAX_SAFE_INTEGER) - (b.displayOrder ?? Number.MAX_SAFE_INTEGER))
+    ? [...product.attributes].sort((a: any, b: any) => {
+        const orderA = getAttributeDisplayOrder(a);
+        const orderB = getAttributeDisplayOrder(b);
+        return orderA === orderB ? 0 : orderA < orderB ? -1 : 1;
+      })
     : [];
   const topAttributes = sortedAttributes.slice(0, 6);
   const moreAttributes = sortedAttributes.slice(6);
@@ -78,7 +90,7 @@ const ProductTabs = ({ product, baseProduct, sections = "all" }: { product: Prod
 
       {showInfo && (
       <section>
-        <h2 className={headingClass}>Top Highlights</h2>
+        <h2 className={headingClass}>Product Highlights</h2>
         {sortedAttributes.length > 0 ? (
           <>
             {renderAttributeRows(topAttributes)}

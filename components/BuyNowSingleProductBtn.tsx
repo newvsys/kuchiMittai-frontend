@@ -36,21 +36,19 @@ const BuyNowSingleProductBtn = ({
   }, [status, router]);
 
   const handleAddToCart = () => {
-    if (isLoading) return;
+    if (disabled || isLoading) return;
 
-    if (!disabled) {
-      addToCart({
-        id: product?.id.toString(),
-        title: product?.title,
-        price: product?.price,
-        mrp: product?.mrp,
-        image: product?.mainImage,
-        amount: quantityCount,
-        variant: product?.sku ? product.sku.replace(/.*-/, "") : undefined,
-      });
-      calculateTotals();
-      toast.success("Product added to the cart");
-    }
+    addToCart({
+      id: product?.id.toString(),
+      title: product?.title,
+      price: product?.price,
+      mrp: product?.mrp,
+      image: product?.mainImage,
+      amount: quantityCount,
+      variant: product?.sku ? product.sku.replace(/.*-/, "") : undefined,
+    });
+    calculateTotals();
+    toast.success("Product added to the cart");
 
     setIsLoading(true);
 
@@ -74,7 +72,7 @@ const BuyNowSingleProductBtn = ({
       )}
       <button
         onClick={handleAddToCart}
-        disabled={isLoading}
+        disabled={disabled || isLoading}
         className={className ?? "btn w-[160px] min-h-10 h-10 text-sm border border-blue-500 hover:border-blue-500 border-1 font-normal bg-blue-500 text-white hover:bg-white hover:text-blue-500 transition-all uppercase ease-in disabled:opacity-70 disabled:cursor-not-allowed"}
       >
         {isLoading ? (

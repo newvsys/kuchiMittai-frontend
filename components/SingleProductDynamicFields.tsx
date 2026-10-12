@@ -15,7 +15,7 @@ import AddToCartSingleProductBtn from "./AddToCartSingleProductBtn";
 import BuyNowSingleProductBtn from "./BuyNowSingleProductBtn";
 import { useProductStore } from "@/app/_zustand/store";
 
-const SingleProductDynamicFields = ({ product, maxQty, ratingStatus, stockStatus, children }: { product: Product; maxQty?: number; ratingStatus?: React.ReactNode; stockStatus?: React.ReactNode; children?: React.ReactNode }) => {
+const SingleProductDynamicFields = ({ product, maxQty, sizeOptions, stockStatus, children }: { product: Product; maxQty?: number; sizeOptions?: React.ReactNode; stockStatus?: React.ReactNode; children?: React.ReactNode }) => {
   const [quantityCount, setQuantityCount] = useState<number>(1);
   const cartItems = useProductStore((state) => state.products);
   const inCartQty = cartItems.find((item) => item.id === product.id.toString())?.amount ?? 0;
@@ -30,11 +30,11 @@ const SingleProductDynamicFields = ({ product, maxQty, ratingStatus, stockStatus
   }, [product.id]);
 
   return (
-    <div className="grid w-full gap-x-6 gap-y-4 sm:grid-cols-[minmax(0,1fr)_auto]">
-      <div className="order-1 flex flex-col gap-y-3 sm:order-none sm:col-start-2 sm:row-start-1 sm:min-w-[11rem] sm:self-end [&>*]:w-full">
-        <div className="flex justify-end">{ratingStatus}</div>
+    <div className="grid w-full grid-cols-[minmax(0,1fr)] gap-x-6 gap-y-4 sm:grid-cols-[minmax(0,1fr)_13rem]">
+      <div className="order-1 flex min-w-0 flex-col gap-y-3 sm:order-none sm:col-start-2 sm:row-start-1 sm:self-end [&>*]:w-full">
         <div className="flex flex-col gap-y-1">
           <div className="flex justify-end">{stockStatus}</div>
+          {sizeOptions}
           <div className="flex justify-end">
             <QuantityInput
               quantityCount={quantityCount}
@@ -43,33 +43,29 @@ const SingleProductDynamicFields = ({ product, maxQty, ratingStatus, stockStatus
             />
           </div>
         </div>
+        <AddToCartSingleProductBtn
+          quantityCount={quantityCount}
+          product={product}
+          disabled={product.inStock !== 1 || soldOut}
+          onAdded={() => setQuantityCount(1)}
+          className="btn w-full min-h-9 h-9 text-xs border border-gray-300 font-normal bg-white text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-colors uppercase disabled:cursor-not-allowed disabled:opacity-50"
+        />
+        <BuyNowSingleProductBtn
+          quantityCount={quantityCount}
+          product={product}
+          disabled={product.inStock !== 1 || soldOut}
+          className="btn w-full min-h-9 h-9 text-xs border border-blue-500 font-normal bg-blue-500 text-white hover:bg-white hover:text-blue-500 transition-colors uppercase disabled:opacity-70 disabled:cursor-not-allowed"
+        />
+      </div>
+      <div className="order-2 flex min-w-0 flex-col items-start gap-y-4 sm:order-none sm:col-start-1 sm:row-start-1">
+        {children}
         {atMaxQty && (
-          <p className="text-sm text-amber-600 font-medium">
+          <p className="min-w-0 break-words text-sm text-amber-600 font-medium">
             {soldOut
               ? "⚠ You already have the maximum available quantity in your cart."
               : `⚠ Only ${remainingQty} unit${remainingQty === 1 ? "" : "s"} available — you've reached the maximum quantity.`}
           </p>
         )}
-        {Boolean(product.inStock) && (
-          <>
-            <AddToCartSingleProductBtn
-              quantityCount={quantityCount}
-              product={product}
-              disabled={soldOut}
-              onAdded={() => setQuantityCount(1)}
-              className="btn w-full min-h-9 h-9 text-xs border border-gray-300 font-normal bg-white text-blue-500 hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-colors uppercase disabled:cursor-not-allowed disabled:opacity-50"
-            />
-            <BuyNowSingleProductBtn
-              quantityCount={quantityCount}
-              product={product}
-              disabled={soldOut}
-              className="btn w-full min-h-9 h-9 text-xs border border-blue-500 font-normal bg-blue-500 text-white hover:bg-white hover:text-blue-500 transition-colors uppercase disabled:opacity-70 disabled:cursor-not-allowed"
-            />
-          </>
-        )}
-      </div>
-      <div className="order-2 flex min-w-0 flex-col items-start gap-y-4 sm:order-none sm:col-start-1 sm:row-start-1">
-        {children}
       </div>
     </div>
   );

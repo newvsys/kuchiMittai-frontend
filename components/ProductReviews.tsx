@@ -62,7 +62,7 @@ const StarDisplay = ({ rating }: { rating: number }) => (
 );
 
 const ReviewCard = ({ review }: { review: Review }) => (
-  <div className="border rounded-xl p-5 bg-white shadow-sm">
+  <div className="rounded-xl p-5 bg-white">
     <div className="flex items-start gap-4 flex-wrap">
       <div>
         <div className="flex items-center gap-2">
@@ -520,25 +520,27 @@ const ProductReviews = ({ productId }: { productId: number }) => {
           <span className="loading loading-spinner loading-md text-gray-400" />
         </div>
       ) : previewReviews.length > 0 ? (
-        <div className="space-y-5">
+        <div>
           <h3 className="text-base font-semibold text-gray-700">Top 5 Reviews</h3>
-          {previewReviews.map((review) => (
-            <ReviewCard key={review.id} review={review} />
-          ))}
-          {allReviews.length > PREVIEW_COUNT && (
-            <div className="pt-2 text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setModalPage(1);
-                  setShowAllModal(true);
-                }}
-                className="text-blue-600 hover:underline text-sm font-medium"
-              >
-                More reviews ({allReviews.length}) →
-              </button>
-            </div>
-          )}
+          <div className="space-y-5">
+            {previewReviews.map((review) => (
+              <ReviewCard key={review.id} review={review} />
+            ))}
+            {allReviews.length > PREVIEW_COUNT && (
+              <div className="pt-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModalPage(1);
+                    setShowAllModal(true);
+                  }}
+                  className="text-blue-600 hover:underline text-sm font-medium"
+                >
+                  More reviews ({allReviews.length}) →
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       ) : !loading ? (
         <p className="text-gray-400 text-sm text-center py-4">
