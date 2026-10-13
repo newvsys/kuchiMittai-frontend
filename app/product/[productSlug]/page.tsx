@@ -427,9 +427,6 @@ const ZOOM_PANEL_SIZE = 750;
             </div>
               </div>
             </div>
-            <div className="mt-6 w-full border-t border-gray-200 pt-6">
-              <ProductTabs product={product} baseProduct={baseProduct} sections="below" />
-            </div>
           </div>
           <div className="flex min-w-0 w-full flex-col gap-y-4 text-black text-left items-start">
             <h1 className="text-2xl font-bold leading-snug text-gray-900 sm:text-3xl">{sanitize(product?.title)}</h1>
@@ -510,6 +507,9 @@ const ZOOM_PANEL_SIZE = 750;
             <div className="w-full pt-6 mt-2">
               <ProductTabs product={product} baseProduct={baseProduct} sections="info" />
             </div>
+          </div>
+          <div className="w-full mt-6">
+            <ProductTabs product={product} baseProduct={baseProduct} sections="below" />
           </div>
         </div>
       </div>
