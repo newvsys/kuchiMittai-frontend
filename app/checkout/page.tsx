@@ -181,17 +181,19 @@ const CheckoutPage = () => {
   const router = useRouter();
   const [deliveryCharge, setDeliveryCharge] = useState<number>(0);
   const [freeDelivery, setFreeDelivery] = useState<boolean>(true);
+  const [matchedRule, setMatchedRule] = useState<any>(null);
   const [pincodeServiceable, setPincodeServiceable] = useState<boolean | null>(null);
   const [pincodeChecking, setPincodeChecking] = useState(false);
 
   useEffect(() => {
-    if (total <= 0) { setDeliveryCharge(0); setFreeDelivery(true); return; }
+    if (total <= 0) { setDeliveryCharge(0); setFreeDelivery(true); setMatchedRule(null); return; }
     fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || ""}/api/delivery-charges/calculate?orderAmount=${total}`)
       .then(r => r.json())
       .then(data => {
         if (data?.responseStatus === "SUCCESS") {
           setDeliveryCharge(data.applicableDeliveryCharge ?? 0);
           setFreeDelivery(data.isFreeDelivery ?? false);
+          setMatchedRule(data.matchedRule ?? null);
         }
       })
       .catch(() => {});
@@ -857,6 +859,11 @@ const CheckoutPage = () => {
                       <dt className="text-gray-500">Delivery</dt>
                       <dd className="font-medium">{deliveryCharge === 0 ? <span className="text-green-600 font-semibold">Free</span> : `₹ ${deliveryCharge}`}</dd>
                     </div>
+                    {!freeDelivery && matchedRule && (
+                      <div className="text-xs font-medium text-blue-600">
+                        Add ₹{Math.max(0, (matchedRule.maxOrderAmount ?? matchedRule.minOrderAmount) - total + 1)} more for a lower delivery charge.
+                      </div>
+                    )}
                     {freeDelivery && (
                       <div className="flex items-center text-green-600 text-xs font-medium">
                         <span>✓ Eligible for free delivery</span>
