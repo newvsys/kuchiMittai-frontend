@@ -27,6 +27,7 @@ const DEFAULT_SORT = "defaultSort";
 
 const Filters = () => {
   const pathname = usePathname();
+  const defaultInStock = pathname === "/" ? "false" : "true";
   const { replace } = useRouter();
   const searchParams = useSearchParams();
   const { maxPrice } = useShopMetaStore();
@@ -44,7 +45,7 @@ const Filters = () => {
     return {
       inStock: {
         text: "instock",
-        isChecked: inStockParam ? inStockParam === "true" : true,
+        isChecked: inStockParam ? inStockParam === "true" : defaultInStock === "true",
       },
       priceFilter: {
         text: "price",
@@ -97,7 +98,7 @@ const Filters = () => {
     if (!maxPrice) return;
     setSliderMax(Math.max(DEFAULT_MAX_PRICE, maxPrice));
     const priceParam = searchParams.get("price");
-    if (!priceParam && inputCategory.priceFilter.value === DEFAULT_MAX_PRICE) {
+    if (!priceParam && pathname !== "/" && inputCategory.priceFilter.value === DEFAULT_MAX_PRICE) {
       setInputCategory((prev) => ({
         ...prev,
         priceFilter: { text: "price", value: maxPrice },
@@ -105,7 +106,7 @@ const Filters = () => {
       setTempPrice(maxPrice);
       setMinInput("0");
     }
-  }, [maxPrice]);
+  }, [maxPrice, pathname]);
 
   useEffect(() => {
     // Build the new param values
@@ -117,7 +118,7 @@ const Filters = () => {
     const newCats     = [...selectedCategories].sort().join(",");
 
     // Compare against current URL (treating missing params as their defaults)
-    const curInStock  = searchParams.get("inStock")  ?? "true";
+    const curInStock  = searchParams.get("inStock")  ?? defaultInStock;
     const curMinPrice = searchParams.get("minPrice") ?? "0";
     const curPrice    = searchParams.get("price")    ?? String(DEFAULT_MAX_PRICE);
     const curSort     = searchParams.get("sort")     ?? DEFAULT_SORT;
@@ -144,7 +145,7 @@ const Filters = () => {
     startTransition(() => {
       replace(`${pathname}?${params.toString()}`);
     });
-  }, [inputCategory, sortBy, page, selectedCategories]);
+  }, [inputCategory, sortBy, page, selectedCategories, pathname, searchParams]);
 
   useEffect(() => {
     sessionStorage.setItem("lastProductSearch", searchParams.toString());
