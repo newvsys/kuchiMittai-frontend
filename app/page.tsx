@@ -36,6 +36,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Sea
   const params = await searchParams;
   return (
     <SearchResultsPage
+      preserveProductFiltersInLinks={false}
       searchParams={{
         price: params.price ?? "10000",
         minPrice: params.minPrice ?? "0",

@@ -27,12 +27,14 @@ const ProductItem = ({
   avgRating,
   totalReviews,
   ratingDistribution,
+  preserveSearchParams = true,
 }: {
   product: Product;
   color: string;
   avgRating?: number;
   totalReviews?: number;
   ratingDistribution?: Record<string, number>;
+  preserveSearchParams?: boolean;
 }) => {
   const [navigating, setNavigating] = React.useState(false);
   const [availableQty, setAvailableQty] = React.useState<number | null>(null);
@@ -40,7 +42,7 @@ const ProductItem = ({
     state.products.find((item) => item.id === String(product.id))?.amount ?? 0
   );
   const searchParams = useSearchParams();
-  const filterQuery = searchParams.toString();
+  const filterQuery = preserveSearchParams ? searchParams.toString() : "";
   const productHref = `/product/${product.slug}${filterQuery ? `?${filterQuery}` : ""}`;
   const atMaxQty = availableQty !== null && cartQuantity >= availableQty;
 

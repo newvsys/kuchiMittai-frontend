@@ -11,8 +11,10 @@ type SearchParams = { [key: string]: string | string[] | undefined };
 
 export default async function SearchResultsPage({
   searchParams,
+  preserveProductFiltersInLinks = true,
 }: {
   searchParams: Promise<SearchParams> | SearchParams;
+  preserveProductFiltersInLinks?: boolean;
 }) {
   const params = await searchParams;
   let products: any[] = [];
@@ -121,6 +123,7 @@ export default async function SearchResultsPage({
                       avgRating={product.averageRating}
                       totalReviews={product.totalReviews}
                       ratingDistribution={product.ratingDistribution}
+                      preserveSearchParams={preserveProductFiltersInLinks}
                     />
                   ))
                 ) : (
