@@ -42,7 +42,23 @@ const ProductItem = ({
     state.products.find((item) => item.id === String(product.id))?.amount ?? 0
   );
   const searchParams = useSearchParams();
-  const filterQuery = preserveSearchParams ? searchParams.toString() : "";
+  const productSearchParams = new URLSearchParams(searchParams.toString());
+  const defaultParams: Record<string, string> = {
+    inStock: "false",
+    minPrice: "0",
+    price: "10000",
+    sort: "defaultSort",
+    page: "1",
+    outOfStock: "false",
+    rating: "0",
+  };
+  for (const [key, value] of Object.entries(defaultParams)) {
+    if (productSearchParams.get(key) === value) productSearchParams.delete(key);
+  }
+  const remainingCategories = productSearchParams.getAll("categoryId").filter((id) => id !== "0");
+  productSearchParams.delete("categoryId");
+  remainingCategories.forEach((id) => productSearchParams.append("categoryId", id));
+  const filterQuery = preserveSearchParams ? productSearchParams.toString() : "";
   const productHref = `/product/${product.slug}${filterQuery ? `?${filterQuery}` : ""}`;
   const atMaxQty = availableQty !== null && cartQuantity >= availableQty;
 
