@@ -70,9 +70,9 @@ const Footer = () => {
             <div className="flex items-start gap-2.5 text-sm text-gray-400 leading-6">
               <FaLocationDot className="text-blue-400 mt-0.5 flex-shrink-0 text-base" />
               <span>
-                Athanur Post, Nanakkal,<br />Tamil Nadu – 636301
+                Athanur Post, Namakkal,<br />Tamil Nadu – 636301
                 <a
-                  href="https://www.google.com/maps/search/?api=1&query=Athanur+Post+Nanakkal+Tamil+Nadu+636301"
+                  href="https://www.google.com/maps/search/?api=1&query=Athanur+Post+Namakkal+Tamil+Nadu+636301"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 mt-1.5 text-blue-400 hover:text-blue-300 transition-colors text-xs font-medium"
