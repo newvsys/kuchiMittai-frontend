@@ -5,6 +5,7 @@ import { DashboardSidebar } from "@/components";
 import { API_BASE } from "@/lib/env";
 
 const API = `${API_BASE}/products/labels/config`;
+const FSSAI_REGISTRATION_NUMBER = "22426136000214";
 
 interface LabelConfig {
   id: number;
@@ -50,7 +51,7 @@ const emptyForm = (): Omit<LabelConfig, "id" | "createdAt" | "updatedAt" | "crea
   showBatchNo: true,
   showMrp: true,
   showBarcode: true,
-  fssaiCode: "",
+  fssaiCode: FSSAI_REGISTRATION_NUMBER,
   showFssaiCode: true,
   columnsPerRow: 1,
   isDefault: false,
@@ -118,7 +119,7 @@ const LabelConfigPage = () => {
       showBatchNo: c.showBatchNo,
       showMrp: c.showMrp,
       showBarcode: c.showBarcode,
-      fssaiCode: c.fssaiCode || "",
+      fssaiCode: FSSAI_REGISTRATION_NUMBER,
       showFssaiCode: c.showFssaiCode ?? true,
       columnsPerRow: c.columnsPerRow ?? 1,
       isDefault: c.isDefault,

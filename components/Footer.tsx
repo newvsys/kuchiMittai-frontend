@@ -103,6 +103,10 @@ const Footer = () => {
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
+                <span className="text-blue-400 flex-shrink-0 font-semibold">FSSAI</span>
+                <span>Registration No. 22426136000214</span>
+              </li>
+              <li className="flex items-center gap-2.5">
                 <FaWhatsapp className="text-green-400 flex-shrink-0" />
                 <a href="https://wa.me/919943355568" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
                   WhatsApp Us
