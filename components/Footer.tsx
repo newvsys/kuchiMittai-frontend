@@ -9,6 +9,7 @@
 // *********************
 
 import Link from "next/link";
+import Image from "next/image";
 import React from "react";
 import {
   FaFacebook, FaInstagram, FaYoutube, FaWhatsapp, FaPhone, FaEnvelope,
@@ -103,7 +104,7 @@ const Footer = () => {
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
-                <span className="text-blue-400 flex-shrink-0 font-semibold">FSSAI</span>
+                <Image src="/fssai.png" alt="FSSAI" width={200} height={200} className="h-10 w-10 flex-shrink-0 object-contain" />
                 <span>Registration No. 22426136000214</span>
               </li>
               <li className="flex items-center gap-2.5">
