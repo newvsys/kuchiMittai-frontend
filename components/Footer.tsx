@@ -104,8 +104,8 @@ const Footer = () => {
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
-                <Image src="/fssai.png" alt="FSSAI" width={200} height={200} className="h-10 w-10 flex-shrink-0 object-contain" />
-                <span>Registration No. 22426136000214</span>
+                <Image src="/fssai.png" alt="FSSAI" width={200} height={200} className="h-16 w-16 flex-shrink-0 object-contain" />
+                <span className="min-w-0">Registration No. 22426136000214</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <FaWhatsapp className="text-green-400 flex-shrink-0" />

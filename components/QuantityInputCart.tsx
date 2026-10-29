@@ -14,7 +14,7 @@ import React, { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa6";
 import { FaMinus } from "react-icons/fa6";
 
-const QuantityInputCart = ({ product, maxQty } : { product: ProductInCart; maxQty?: number }) => {
+const QuantityInputCart = ({ product, maxQty, limitMessage } : { product: ProductInCart; maxQty?: number; limitMessage?: string }) => {
   const [quantityCount, setQuantityCount] = useState<number>(product.amount);
   const { updateCartAmount, calculateTotals } = useProductStore();
   const soldOut = maxQty === 0;
@@ -81,7 +81,7 @@ const QuantityInputCart = ({ product, maxQty } : { product: ProductInCart; maxQt
         <p className="mt-1 text-xs font-medium text-red-600">⚠ Out of stock</p>
       ) : atMaxQty ? (
         <p className="mt-1 text-xs font-medium text-amber-600">
-          ⚠ Only {maxQty} unit{maxQty === 1 ? "" : "s"} available
+          ⚠ {limitMessage ?? `Only ${maxQty} unit${maxQty === 1 ? "" : "s"} available`}
         </p>
       ) : null}
     </div>

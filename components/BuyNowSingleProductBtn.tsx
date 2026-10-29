@@ -14,6 +14,7 @@ import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { getOfferMaxQty, loadOffer, OFFER_MAX_QTY_MESSAGE } from "@/lib/offer";
 
 const BuyNowSingleProductBtn = ({
   product,
@@ -35,8 +36,16 @@ const BuyNowSingleProductBtn = ({
     }
   }, [status, router]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (disabled || isLoading) return;
+
+    const offerMax = getOfferMaxQty(await loadOffer(), product.id);
+    const inCart =
+      useProductStore.getState().products.find((item) => item.id === String(product.id))?.amount ?? 0;
+    if (offerMax !== undefined && inCart + quantityCount > offerMax) {
+      toast.error(OFFER_MAX_QTY_MESSAGE(offerMax));
+      return;
+    }
 
     addToCart({
       id: product?.id.toString(),

@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import apiClient from "@/lib/api";
+import { checkOfferEligibility } from "@/lib/offer";
 
 const CheckoutPage = () => {
 
@@ -177,7 +178,7 @@ const CheckoutPage = () => {
     state?: boolean;
     postalCode?: boolean;
   }>({});
-  const { products, total, clearCart } = useProductStore();
+  const { products, total, clearCart, removeFromCart, calculateTotals } = useProductStore();
   const router = useRouter();
   const [deliveryCharge, setDeliveryCharge] = useState<number>(0);
   const [freeDelivery, setFreeDelivery] = useState<boolean>(true);
@@ -555,6 +556,30 @@ const CheckoutPage = () => {
     return errors;
   };
 
+  // Returns false (and removes the offer product when needed) if the cart breaks the launching-offer rules
+  const validateOffer = async (): Promise<boolean> => {
+    const cart = useProductStore.getState().products;
+    const check = await checkOfferEligibility((session as any)?.user?.id, cart);
+    if (check.ok) return true;
+    if (check.removeProductId) {
+      removeFromCart(check.removeProductId);
+      calculateTotals();
+    }
+    toast.error(check.message ?? "Launching offer is not available");
+    if (check.redirectToCart) router.push("/cart");
+    return false;
+  };
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    const run = () => { validateOffer(); };
+    if (useProductStore.persist.hasHydrated()) {
+      run();
+    } else {
+      return useProductStore.persist.onFinishHydration(run);
+    }
+  }, [status]);
+
   const makePurchase = async () => {
     // Client-side validation — set inline field errors instead of toasts
     const phoneDigits = checkoutForm.phone.replace(/[^0-9]/g, '');
@@ -599,6 +624,8 @@ const CheckoutPage = () => {
     setIsSubmitting(true);
 
     try {
+      if (!(await validateOffer())) return;
+
       // Get user ID directly from authenticated session (used elsewhere in the app)
       const userId = (session as any)?.user?.id ?? null;
       

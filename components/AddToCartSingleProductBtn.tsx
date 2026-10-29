@@ -15,6 +15,7 @@ import React from "react";
 import { useProductStore } from "@/app/_zustand/store";
 import toast from "react-hot-toast";
 import { API_BASE_PLAIN } from "@/lib/env";
+import { getOfferMaxQty, loadOffer, OFFER_MAX_QTY_MESSAGE } from "@/lib/offer";
 
 
 
@@ -38,6 +39,11 @@ const AddToCartSingleProductBtn = ({ product, quantityCount, disabled, onAdded, 
       )?.amount ?? 0;
       if (currentCartQuantity + quantityCount > availableQty) {
         toast.error("Available stock limit reached");
+        return;
+      }
+      const offerMax = getOfferMaxQty(await loadOffer(), product.id);
+      if (offerMax !== undefined && currentCartQuantity + quantityCount > offerMax) {
+        toast.error(OFFER_MAX_QTY_MESSAGE(offerMax));
         return;
       }
       addToCart({

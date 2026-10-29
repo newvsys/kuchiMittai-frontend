@@ -14,13 +14,25 @@ import QuantityInput from "./QuantityInput";
 import AddToCartSingleProductBtn from "./AddToCartSingleProductBtn";
 import BuyNowSingleProductBtn from "./BuyNowSingleProductBtn";
 import { useProductStore } from "@/app/_zustand/store";
+import { getOfferMaxQty, loadOffer, OFFER_MAX_QTY_MESSAGE, OfferConfig } from "@/lib/offer";
 
 const SingleProductDynamicFields = ({ product, maxQty, sizeOptions, stockStatus, children }: { product: Product; maxQty?: number; sizeOptions?: React.ReactNode; stockStatus?: React.ReactNode; children?: React.ReactNode }) => {
   const [quantityCount, setQuantityCount] = useState<number>(1);
+  const [offer, setOffer] = useState<OfferConfig | null>(null);
+  useEffect(() => {
+    loadOffer().then(setOffer);
+  }, []);
+  const offerMax = getOfferMaxQty(offer, product.id);
   const cartItems = useProductStore((state) => state.products);
   const inCartQty = cartItems.find((item) => item.id === product.id.toString())?.amount ?? 0;
   // Stock still available to add, after accounting for what's already in the cart
-  const remainingQty = maxQty !== undefined ? Math.max(0, maxQty - inCartQty) : undefined;
+  const stockRemaining = maxQty !== undefined ? Math.max(0, maxQty - inCartQty) : undefined;
+  const offerRemaining = offerMax !== undefined ? Math.max(0, offerMax - inCartQty) : undefined;
+  const remainingQty =
+    stockRemaining !== undefined && offerRemaining !== undefined
+      ? Math.min(stockRemaining, offerRemaining)
+      : stockRemaining ?? offerRemaining;
+  const offerLimited = offerRemaining !== undefined && (stockRemaining === undefined || offerRemaining <= stockRemaining);
   const atMaxQty = remainingQty !== undefined && quantityCount >= remainingQty;
   const soldOut = remainingQty === 0;
 
@@ -59,7 +71,11 @@ const SingleProductDynamicFields = ({ product, maxQty, sizeOptions, stockStatus,
       </div>
       <div className="order-2 flex min-w-0 flex-col items-start gap-y-4 sm:order-none sm:col-start-1 sm:row-start-1">
         {children}
-        {atMaxQty && (
+        {atMaxQty && offerLimited && offerMax !== undefined ? (
+          <p className="min-w-0 break-words text-sm text-amber-600 font-medium">
+            ⚠ {OFFER_MAX_QTY_MESSAGE(offerMax)}
+          </p>
+        ) : atMaxQty && (
           <p className="min-w-0 break-words text-sm text-amber-600 font-medium">
             {soldOut
               ? "⚠ You already have the maximum available quantity in your cart."

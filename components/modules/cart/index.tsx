@@ -10,6 +10,7 @@ import { sanitize } from "@/lib/sanitize";
 import { useSession } from "next-auth/react";
 import { API_BASE, API_BASE_PLAIN } from "@/lib/env";
 import { useRouter } from "next/navigation";
+import { checkOfferEligibility, getOfferMaxQty, loadOffer, OFFER_MAX_QTY_MESSAGE, OfferConfig } from "@/lib/offer";
 
 const showToast = async (msg: string, type: "success" | "error" = "success") => {
   const { default: toast } = await import("react-hot-toast");
@@ -28,6 +29,11 @@ export const CartModule = () => {
   const [matchedRule, setMatchedRule] = React.useState<any>(null);
   const [showDeliveryInfo, setShowDeliveryInfo] = React.useState(false);
   const [stockMap, setStockMap] = React.useState<Record<string, number | null>>({});
+  const [offer, setOffer] = React.useState<OfferConfig | null>(null);
+
+  React.useEffect(() => {
+    loadOffer().then(setOffer);
+  }, []);
 
   const cartItemIds = products.map((p) => p.id).join(",");
 
@@ -91,7 +97,7 @@ export const CartModule = () => {
     showToast("Product removed from the cart");
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (hasOutOfStockItem) {
       showToast("Please remove out of stock items before checkout", "error");
       return;
@@ -99,6 +105,15 @@ export const CartModule = () => {
     if (!session) {
       const callbackUrl = encodeURIComponent("/checkout");
       router.push(`/login?callbackUrl=${callbackUrl}`);
+      return;
+    }
+    const check = await checkOfferEligibility((session as any)?.user?.id, products);
+    if (!check.ok) {
+      if (check.removeProductId) {
+        removeFromCart(check.removeProductId);
+        calculateTotals();
+      }
+      showToast(check.message ?? "Launching offer is not available", "error");
       return;
     }
     router.push("/checkout");
@@ -159,8 +174,11 @@ export const CartModule = () => {
             className="divide-y divide-gray-100"
           >
           {products.map((product) => {
-            const availableQty = stockMap[product.id] ?? undefined;
-            const soldOut = availableQty === 0;
+            const stockQty = stockMap[product.id] ?? undefined;
+            const offerMax = getOfferMaxQty(offer, product.id);
+            const offerLimited = offerMax !== undefined && (stockQty === undefined || offerMax < stockQty);
+            const availableQty = offerLimited ? offerMax : stockQty;
+            const soldOut = stockQty === 0;
             return (
             <li key={product.id} className="flex gap-4 p-4 sm:p-5 hover:bg-gray-50 transition-colors">
               <div className="flex-shrink-0">
@@ -198,7 +216,11 @@ export const CartModule = () => {
                   </div>
 
                   <div className="mt-4 sm:mt-0 sm:pr-9">
-                    <QuantityInputCart product={product} maxQty={availableQty} />
+                    <QuantityInputCart
+                      product={product}
+                      maxQty={availableQty}
+                      limitMessage={offerLimited && offerMax !== undefined ? OFFER_MAX_QTY_MESSAGE(offerMax) : undefined}
+                    />
                     <div className="absolute right-0 top-0">
                       <button
                         onClick={() => handleRemoveItem(product.id)}
