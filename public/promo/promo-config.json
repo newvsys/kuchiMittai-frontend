@@ -2,13 +2,13 @@
   {
     "src": "/promo/oilpromo1.png",
     "alt": "Oil product promotion",
-    "searchUrl": "/search?keyword=oil&price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1&categoryId=1",
+    "searchUrl": "/product/oil-trial-combo-pack",
     "active": true
   },
   {
     "src": "/promo/oilpromo2.png",
     "alt": "Oil product offer",
-    "searchUrl": "/product/oil-ghee-trial-combo-pack?price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1",
+    "searchUrl": "/search?keyword=oil&price=10000&minPrice=0&inStock=false&sort=defaultSort&page=1&categoryId=1",
     "active": true
   },
   {
