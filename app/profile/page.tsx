@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { hasAddressSpecialCharacters } from "@/utils/address-validation";
 
 const showToast = async (msg: string, type: "success" | "error" = "success") => {
   const { default: toast } = await import("react-hot-toast");
@@ -35,6 +36,7 @@ interface Customer {
 interface AddressErrors {
   recipientName?: string;
   addressLine1?: string;
+  addressLine2?: string;
   contactNumber?: string;
   postalCode?: string;
 }
@@ -113,13 +115,15 @@ const ProfilePage = () => {
 
     // If there were validation errors, clear the error for this specific field as user corrects it
     setAddressErrors(prev => {
-      if (!prev || !prev.length) return prev;
       const next = [...prev];
-      if (!next[idx]) return prev;
 
       const entry = { ...next[idx] };
       if (field === "recipientName") entry.recipientName = '';
-      if (field === "addressLine1") entry.addressLine1 = '';
+      if (field === "addressLine1" || field === "addressLine2") {
+        entry[field] = hasAddressSpecialCharacters(value)
+          ? "Address must contain only letters, numbers, and spaces"
+          : '';
+      }
       if (field === "contactNumber") entry.contactNumber = '';
       if (field === "postalCode") entry.postalCode = '';
 
@@ -211,6 +215,8 @@ const ProfilePage = () => {
 
     if (!recipient) entry.recipientName = "This field is mandatory";
     if (!line1) entry.addressLine1 = "This field is mandatory";
+    if (hasAddressSpecialCharacters(addr.addressLine1 || "")) entry.addressLine1 = "Address must contain only letters, numbers, and spaces";
+    if (hasAddressSpecialCharacters(addr.addressLine2 || "")) entry.addressLine2 = "Address must contain only letters, numbers, and spaces";
     if (!mobile) entry.contactNumber = "This field is mandatory";
     else if (!/^[6-9]\d{9}$/.test(mobile)) entry.contactNumber = "Enter a valid 10-digit mobile number";
     if (!postal) entry.postalCode = "This field is mandatory";
@@ -353,6 +359,8 @@ const ProfilePage = () => {
 
         if (!recipient) entry.recipientName = "This field is mandatory";
         if (!line1) entry.addressLine1 = "This field is mandatory";
+        if (hasAddressSpecialCharacters(addr.addressLine1 || "")) entry.addressLine1 = "Address must contain only letters, numbers, and spaces";
+        if (hasAddressSpecialCharacters(addr.addressLine2 || "")) entry.addressLine2 = "Address must contain only letters, numbers, and spaces";
         // Indian mobile: 10 digits starting from 6-9
         if (!mobile) entry.contactNumber = "This field is mandatory";
         else if (!/^[6-9]\d{9}$/.test(mobile)) entry.contactNumber = "Enter a valid 10-digit mobile number";
@@ -687,6 +695,8 @@ const ProfilePage = () => {
                           <div className="relative">
                             <input
                               id={`addressLine1-${idx}`}
+                              aria-invalid={!!addressErrors[idx]?.addressLine1}
+                              aria-describedby={addressErrors[idx]?.addressLine1 ? `addressLine1-error-${idx}` : undefined}
                               type="text"
                               placeholder=" "
                               className={`peer block w-full rounded-md border px-3 pt-5 pb-2 text-sm text-gray-900 focus:outline-none focus:ring-1 transition-colors bg-white ${addressErrors[idx]?.addressLine1 ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-600 focus:ring-blue-600"}`}
@@ -699,15 +709,17 @@ const ProfilePage = () => {
                             >
                               Address Line 1 <span className="text-red-500 ml-0.5">*</span>
                             </label>
-                            {addressErrors[idx]?.addressLine1 && <p className="mt-1 text-xs text-red-500">{addressErrors[idx].addressLine1}</p>}
+                            {addressErrors[idx]?.addressLine1 && <p id={`addressLine1-error-${idx}`} className="mt-1 text-xs text-red-500">{addressErrors[idx].addressLine1}</p>}
                           </div>
                           {/* Address Line 2 */}
                           <div className="relative">
                             <input
                               id={`addressLine2-${idx}`}
+                              aria-invalid={!!addressErrors[idx]?.addressLine2}
+                              aria-describedby={addressErrors[idx]?.addressLine2 ? `addressLine2-error-${idx}` : undefined}
                               type="text"
                               placeholder=" "
-                              className="peer block w-full rounded-md border border-gray-300 px-3 pt-5 pb-2 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:border-blue-600 focus:ring-blue-600 transition-colors bg-white"
+                              className={`peer block w-full rounded-md border px-3 pt-5 pb-2 text-sm text-gray-900 focus:outline-none focus:ring-1 transition-colors bg-white ${addressErrors[idx]?.addressLine2 ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-600 focus:ring-blue-600"}`}
                               value={addr.addressLine2}
                               onChange={e => handleAddressChange(idx, "addressLine2", e.target.value)}
                             />
@@ -717,6 +729,7 @@ const ProfilePage = () => {
                             >
                               Address Line 2
                             </label>
+                            {addressErrors[idx]?.addressLine2 && <p id={`addressLine2-error-${idx}`} className="mt-1 text-xs text-red-500">{addressErrors[idx].addressLine2}</p>}
                           </div>
                           {/* Landmark */}
                           <div className="relative">

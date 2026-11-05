@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import apiClient from "@/lib/api";
 import { checkOfferEligibility } from "@/lib/offer";
+import { hasAddressSpecialCharacters } from "@/utils/address-validation";
 
 const CheckoutPage = () => {
 
@@ -174,6 +175,7 @@ const CheckoutPage = () => {
     name?: boolean;
     phone?: boolean;
     address1?: boolean;
+    address2?: boolean;
     city?: boolean;
     state?: boolean;
     postalCode?: boolean;
@@ -449,6 +451,7 @@ const CheckoutPage = () => {
       name?: boolean;
       phone?: boolean;
       address1?: boolean;
+      address2?: boolean;
       city?: boolean;
       state?: boolean;
       postalCode?: boolean;
@@ -463,8 +466,12 @@ const CheckoutPage = () => {
       errors.phone = true;
     }
 
-    if (!checkoutForm.address1.trim() || checkoutForm.address1.trim().length < 5) {
+    if (!checkoutForm.address1.trim() || checkoutForm.address1.trim().length < 5 || hasAddressSpecialCharacters(checkoutForm.address1)) {
       errors.address1 = true;
+    }
+
+    if (hasAddressSpecialCharacters(checkoutForm.address2)) {
+      errors.address2 = true;
     }
 
     if (!checkoutForm.city.trim() || checkoutForm.city.trim().length < 2) {
@@ -537,6 +544,9 @@ const CheckoutPage = () => {
     if (!checkoutForm.address1.trim()) {
       errors.push("Address1 is required");
     }
+    if (hasAddressSpecialCharacters(checkoutForm.address1) || hasAddressSpecialCharacters(checkoutForm.address2)) {
+      errors.push("Address must contain only letters, numbers, and spaces");
+    }
    
     
     // City & State mandatory
@@ -588,7 +598,8 @@ const CheckoutPage = () => {
     const fieldErrors = {
       name: !checkoutForm.name.trim() || checkoutForm.name.trim().length < 2,
       phone: !checkoutForm.phone.trim() || !/^[6-9]\d{9}$/.test(phoneDigits),
-      address1: !checkoutForm.address1.trim() || checkoutForm.address1.trim().length < 5,
+      address1: !checkoutForm.address1.trim() || checkoutForm.address1.trim().length < 5 || hasAddressSpecialCharacters(checkoutForm.address1),
+      address2: hasAddressSpecialCharacters(checkoutForm.address2),
       city: !checkoutForm.city.trim(),
       state: !checkoutForm.state.trim(),
       postalCode: !postalDigits || !/^\d{6}$/.test(postalDigits),
@@ -1168,6 +1179,8 @@ const CheckoutPage = () => {
                       type="text"
                       id="address1"
                       name="address1"
+                      aria-invalid={!!addressPopupErrors.address1}
+                      aria-describedby={addressPopupErrors.address1 ? "address1-error" : undefined}
                       disabled={isSubmitting}
                       readOnly={isAddressReadOnly}
                       placeholder=" "
@@ -1176,7 +1189,7 @@ const CheckoutPage = () => {
                       onChange={(e) => {
                         const value = e.target.value;
                         setCheckoutForm({ ...checkoutForm, address1: value });
-                        setAddressPopupErrors(prev => ({ ...prev, address1: false }));
+                        setAddressPopupErrors(prev => ({ ...prev, address1: hasAddressSpecialCharacters(value) }));
                         if (customer && Array.isArray(customer.addresses) && customer.addresses[selectedAddressIndex]) {
                           setCustomer((prev: any) => {
                             if (!prev || !Array.isArray(prev.addresses) || !prev.addresses[selectedAddressIndex]) return prev;
@@ -1195,7 +1208,7 @@ const CheckoutPage = () => {
                       Address Line 1 <span className="text-red-500 ml-0.5">*</span>
                     </label>
                     {addressPopupErrors.address1 && (
-                      <p className="mt-1 text-xs text-red-500">Address must be at least 5 characters</p>
+                      <p id="address1-error" className="mt-1 text-xs text-red-500">{hasAddressSpecialCharacters(checkoutForm.address1) ? "Address must contain only letters, numbers, and spaces" : "Address must be at least 5 characters"}</p>
                     )}
                   </div>
                 </div>
@@ -1206,15 +1219,18 @@ const CheckoutPage = () => {
                       type="text"
                       id="address2"
                       name="address2"
+                      aria-invalid={!!addressPopupErrors.address2}
+                      aria-describedby={addressPopupErrors.address2 ? "address2-error" : undefined}
                       autoComplete="street-address"
                       disabled={isSubmitting}
                       readOnly={isAddressReadOnly}
                       placeholder=" "
-                      className={`peer block w-full rounded-md border px-3 pt-5 pb-2 text-sm text-gray-900 focus:outline-none focus:ring-1 transition-colors border-gray-300 focus:border-blue-600 focus:ring-blue-600 ${isSubmitting ? "bg-gray-50 text-gray-400 cursor-not-allowed" : "bg-white"}`}
+                      className={`peer block w-full rounded-md border px-3 pt-5 pb-2 text-sm text-gray-900 focus:outline-none focus:ring-1 transition-colors ${addressPopupErrors.address2 ? "border-red-500 focus:border-red-500 focus:ring-red-500" : "border-gray-300 focus:border-blue-600 focus:ring-blue-600"} ${isSubmitting ? "bg-gray-50 text-gray-400 cursor-not-allowed" : "bg-white"}`}
                       value={checkoutForm.address2}
                       onChange={(e) => {
                         const value = e.target.value;
                         setCheckoutForm({ ...checkoutForm, address2: value });
+                        setAddressPopupErrors(prev => ({ ...prev, address2: hasAddressSpecialCharacters(value) }));
                         if (customer && Array.isArray(customer.addresses) && customer.addresses[selectedAddressIndex]) {
                           setCustomer((prev: any) => {
                             if (!prev || !Array.isArray(prev.addresses) || !prev.addresses[selectedAddressIndex]) return prev;
@@ -1232,6 +1248,9 @@ const CheckoutPage = () => {
                     >
                       Address Line 2
                     </label>
+                    {addressPopupErrors.address2 && (
+                      <p id="address2-error" className="mt-1 text-xs text-red-500">Address must contain only letters, numbers, and spaces</p>
+                    )}
                   </div>
                 </div>
 
