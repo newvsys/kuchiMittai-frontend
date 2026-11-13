@@ -545,7 +545,7 @@ const CheckoutPage = () => {
       errors.push("Address1 is required");
     }
     if (hasAddressSpecialCharacters(checkoutForm.address1) || hasAddressSpecialCharacters(checkoutForm.address2)) {
-      errors.push("Address must contain only letters, numbers, and spaces");
+      errors.push("Address cannot contain @, #, $, %, ^, &, or *");
     }
    
     
@@ -1208,7 +1208,7 @@ const CheckoutPage = () => {
                       Address Line 1 <span className="text-red-500 ml-0.5">*</span>
                     </label>
                     {addressPopupErrors.address1 && (
-                      <p id="address1-error" className="mt-1 text-xs text-red-500">{hasAddressSpecialCharacters(checkoutForm.address1) ? "Address must contain only letters, numbers, and spaces" : "Address must be at least 5 characters"}</p>
+                      <p id="address1-error" className="mt-1 text-xs text-red-500">{hasAddressSpecialCharacters(checkoutForm.address1) ? "Address cannot contain @, #, $, %, ^, &, or *" : "Address must be at least 5 characters"}</p>
                     )}
                   </div>
                 </div>
@@ -1249,7 +1249,7 @@ const CheckoutPage = () => {
                       Address Line 2
                     </label>
                     {addressPopupErrors.address2 && (
-                      <p id="address2-error" className="mt-1 text-xs text-red-500">Address must contain only letters, numbers, and spaces</p>
+                      <p id="address2-error" className="mt-1 text-xs text-red-500">Address cannot contain @, #, $, %, ^, &, or *</p>
                     )}
                   </div>
                 </div>

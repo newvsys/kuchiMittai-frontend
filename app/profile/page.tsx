@@ -121,7 +121,7 @@ const ProfilePage = () => {
       if (field === "recipientName") entry.recipientName = '';
       if (field === "addressLine1" || field === "addressLine2") {
         entry[field] = hasAddressSpecialCharacters(value)
-          ? "Address must contain only letters, numbers, and spaces"
+          ? "Address cannot contain @, #, $, %, ^, &, or *"
           : '';
       }
       if (field === "contactNumber") entry.contactNumber = '';
@@ -215,8 +215,8 @@ const ProfilePage = () => {
 
     if (!recipient) entry.recipientName = "This field is mandatory";
     if (!line1) entry.addressLine1 = "This field is mandatory";
-    if (hasAddressSpecialCharacters(addr.addressLine1 || "")) entry.addressLine1 = "Address must contain only letters, numbers, and spaces";
-    if (hasAddressSpecialCharacters(addr.addressLine2 || "")) entry.addressLine2 = "Address must contain only letters, numbers, and spaces";
+    if (hasAddressSpecialCharacters(addr.addressLine1 || "")) entry.addressLine1 = "Address cannot contain @, #, $, %, ^, &, or *";
+    if (hasAddressSpecialCharacters(addr.addressLine2 || "")) entry.addressLine2 = "Address cannot contain @, #, $, %, ^, &, or *";
     if (!mobile) entry.contactNumber = "This field is mandatory";
     else if (!/^[6-9]\d{9}$/.test(mobile)) entry.contactNumber = "Enter a valid 10-digit mobile number";
     if (!postal) entry.postalCode = "This field is mandatory";
@@ -359,8 +359,8 @@ const ProfilePage = () => {
 
         if (!recipient) entry.recipientName = "This field is mandatory";
         if (!line1) entry.addressLine1 = "This field is mandatory";
-        if (hasAddressSpecialCharacters(addr.addressLine1 || "")) entry.addressLine1 = "Address must contain only letters, numbers, and spaces";
-        if (hasAddressSpecialCharacters(addr.addressLine2 || "")) entry.addressLine2 = "Address must contain only letters, numbers, and spaces";
+        if (hasAddressSpecialCharacters(addr.addressLine1 || "")) entry.addressLine1 = "Address cannot contain @, #, $, %, ^, &, or *";
+        if (hasAddressSpecialCharacters(addr.addressLine2 || "")) entry.addressLine2 = "Address cannot contain @, #, $, %, ^, &, or *";
         // Indian mobile: 10 digits starting from 6-9
         if (!mobile) entry.contactNumber = "This field is mandatory";
         else if (!/^[6-9]\d{9}$/.test(mobile)) entry.contactNumber = "Enter a valid 10-digit mobile number";
