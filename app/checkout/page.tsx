@@ -180,6 +180,7 @@ const CheckoutPage = () => {
     state?: boolean;
     postalCode?: boolean;
   }>({});
+  const [showPlaceOrderAddressError, setShowPlaceOrderAddressError] = useState(false);
   const { products, total, clearCart, removeFromCart, calculateTotals } = useProductStore();
   const router = useRouter();
   const [deliveryCharge, setDeliveryCharge] = useState<number>(0);
@@ -604,6 +605,10 @@ const CheckoutPage = () => {
       state: !checkoutForm.state.trim(),
       postalCode: !postalDigits || !/^\d{6}$/.test(postalDigits),
     };
+    const hasInvalidAddressCharacters =
+      hasAddressSpecialCharacters(checkoutForm.address1) ||
+      hasAddressSpecialCharacters(checkoutForm.address2);
+    setShowPlaceOrderAddressError(hasInvalidAddressCharacters);
 
     if (Object.values(fieldErrors).some(Boolean)) {
       setAddressPopupErrors(fieldErrors);
@@ -914,6 +919,13 @@ const CheckoutPage = () => {
                   </>
                 );
               })()}
+              {showPlaceOrderAddressError &&
+                (hasAddressSpecialCharacters(checkoutForm.address1) ||
+                  hasAddressSpecialCharacters(checkoutForm.address2)) && (
+                <p className="mt-3 text-sm text-red-600" role="alert">
+                  Address cannot contain @, #, $, %, ^, &, or *.
+                </p>
+              )}
               <div className="mt-6 flex justify-end">
               <button
                   type="button"
