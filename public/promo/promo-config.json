@@ -1,10 +1,5 @@
 [
-  {
-    "src": "/promo/oilpromo1.png",
-    "alt": "Oil product promotion",
-    "searchUrl": "/product/oil-trial-combo-pack",
-    "active": true
-  },
+  
   {
     "src": "/promo/oilpromo2.png",
     "alt": "Oil product offer",
